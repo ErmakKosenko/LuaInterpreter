@@ -56,7 +56,7 @@
 
 
 (([a-zA-Z_])([a-zA-Z0-9_]+))                         { return yy::parser::make_Name(yytext); }
-[0-9]+(\.)*[0-9]*((e-[0-9]+)|(E[0-9]+)|(x([a-f]+|[0-9]+))|([0-9]+)|([0-9]*))  { return yy::parser::make_Number(yytext); }
+[0-9]+(\.)*[0-9]*((e-[0-9]+)|(E[0-9]+)|(x[a-f0-9]+)|([0-9]+)|([0-9]*))  { return yy::parser::make_Number(yytext); }
 <<EOF>>                                                return yy::parser::make_END();
 
 %%
