@@ -1,19 +1,16 @@
-#ifndef NODE_H
-#define NODE_H
-
 class Node {
+	public:
+		std::string tag, value;
+		std::list<Node> children;
+		Node(std::string t, std::string v) : tag(t), value(v) {}
+		Node() { tag="uninitialised"; value="uninitialised";	}  // Bison needs this.
 
-  std::string info, value;
-public:
-  Node(std::string info, std::string value) {
-    this->info = info;
-    this->value = value;
-  }
-  Node() {
-    this->info = "uninitialised";
-    this->value = "uninitialised";
-  }
+		void dump(int depth=0) {
+            std::cout << children.size();
+			for(int i=0; i<depth; i++)
+				std::cout << "  ";
+			std::cout << tag << ":" << value << std::endl;
+			for(auto i=children.begin(); i!=children.end(); i++)
+				(*i).dump(depth+1);
+		}
 };
-
-
-#endif

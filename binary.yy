@@ -5,7 +5,7 @@
 %code requires {
 	#include <string>
 	#include <iostream>
-  #include <vector>
+  #include <list>
   #include "Node.h"
 }
 %code{
@@ -64,70 +64,80 @@
 %token <std::string> DOTDOT
 %token <std::string> DOTDOTDOT
 
+
+%token <std::string> INTEGER
+%token <std::string> DECIMAL
+%token <std::string> POWEROF
+%token <std::string> HEXADECIMAL
+
+%token <std::string> String
 %token <std::string> Name
-%token <std::string> Number
+
+
 
 %type <Node> S
 %type <Node> block
-%type <std::string> chunk
-%type <std::string> chunk_layer
-%type <std::string> laststat_layer
-%type <std::string> stat
-%type <std::string> elseif_layer
-%type <std::string> laststat
-%type <std::string> funcname
-%type <std::string> funcname_layer
-%type <std::string> varlist
-%type <std::string> varlist_layer
-%type <std::string> namelist
-%type <std::string> namelist_layer
-%type <std::string> explist
-%type <std::string> explist_layer
-%type <std::string> exp
-%type <std::string> prefixexp
-%type <std::string> functioncall
-%type <std::string> args
-%type <std::string> function
-%type <std::string> funcbody
-%type <std::string> parlist
-%type <std::string> tableconstructor
-%type <std::string> fieldlist
-%type <std::string> fieldlist_layer
-%type <std::string> field
-%type <std::string> fieldsep
-%type <std::string> binop
-%type <std::string> unop
+%type <Node> chunk
+%type <Node> chunk_layer
+%type <Node> laststat_layer
+%type <Node> stat
+%type <Node> elseif_layer
+%type <Node> laststat
+%type <Node> funcname
+%type <Node> funcname_layer
+%type <Node> varlist
+%type <Node> varlist_layer
+%type <Node> var
+%type <Node> namelist
+%type <Node> namelist_layer
+%type <Node> explist
+%type <Node> explist_layer
+%type <Node> exp
+%type <Node> exp_layer
+%type <Node> Number
+%type <Node> prefixexp
+%type <Node> functioncall
+%type <Node> args
+%type <Node> function
+%type <Node> funcbody
+%type <Node> parlist
+%type <Node> tableconstructor
+%type <Node> fieldlist
+%type <Node> fieldlist_layer
+%type <Node> field
+%type <Node> fieldsep
+%type <Node> binop
+%type <Node> unop
 
 %token END 0 "end of file"
 %%
 
-S : //block { $$ = Node("Start", ""); root = $$; }
-	Number {std::cout << $1;	}
+S : block { $$ = Node("Start", ""); $$.children.push_back($1); root = $$; }
   ;
-/*
-block : chunk {}
+
+block : chunk { $$ = $1; }
       ;
 
-chunk : { std::cout << "EMPTY CHUNK"; }
-      | chunk_layer                   { std::cout << $1; }
-      | chunk_layer laststat_layer    { std::cout << $1 << "" << $2;}
-	  | laststat_layer				  { std::cout << $1; }
+chunk : 							  { $$ = Node("Block", "empty"); }
+      | chunk_layer                   { $$ = Node("Block", ""); $$.children.push_back($1); }
+      | chunk_layer laststat_layer    { $$ = Node("Block", ""); $$.children.push_back($1); $$.children.push_back($2); }
+	  | laststat_layer				  { $$ = Node("Block", ""); $$.children.push_back($1);}
       ;
 
-chunk_layer:  stat                                                    { $$ = $1;}
-            | stat SEMICOLON                                          { $$ = $1 + $2;}
-			| chunk_layer stat                                        { $$ = $1 + $2;}
-            | chunk_layer stat SEMICOLON                              { $$ = $1 + $2 + $3;}
+chunk_layer:  stat                              { $$ = Node("Statement", ""); $$.children.push_back($1); }
+            | stat SEMICOLON                    { $$ = Node("Statement", ""); $$.children.push_back($1); }
+			| chunk_layer stat                  { $$ = Node("Statement", ""); $$.children.push_back($1); $$.children.push_back($2); }
+            | chunk_layer stat SEMICOLON        { $$ = Node("Statement", ""); $$.children.push_back($1); $$.children.push_back($2); }
 			;
 
-laststat_layer : laststat               { $$ = $1;}
-               | laststat SEMICOLON     { $$ = $1+$2;}
+laststat_layer : laststat               { $$ = Node("Last statement", ""); $$.children.push_back($1); }
+               | laststat SEMICOLON     { $$ = Node("Last statement", ""); $$.children.push_back($1); }
                ;
 
 
 stat : varlist EQUAL explist  								{}
      | functioncall           								{}
-     | DO block end           								{}
+     | DO block end           								{ $$ = $2;}
      | WHILE exp DO block end 								{}
 	 | REPEAT block UNTIL exp 								{}
 	 | IF exp THEN block end			    				{}
@@ -139,7 +149,7 @@ stat : varlist EQUAL explist  								{}
      | FOR namelist IN explist DO block end 				{}
      | FUNCTION funcname funcbody 							{}
      | LOCAL FUNCTION Name funcbody 						{}
-     | LOCAL namelist 										{}
+     | LOCAL namelist 										{ $$ = $2;}		/* HUR SKA LOCAL HANTERAS? */
      | LOCAL namelist EQUAL explist 						{}
      ;
 
@@ -147,9 +157,9 @@ elseif_layer : ELSEIF exp THEN block				{}
 			 | elseif_layer ELSEIF exp THEN block		{}
 			 ;
 
-laststat : RETURN         { $$ = "RETURN";}
+laststat : RETURN         { $$ = Node("Statement","return");}
 		 | RETURN explist {}
-         | BREAK          { $$ = "BREAK";}
+         | BREAK          { $$ = Node("Statement","break");}
          ;
 funcname : Name											{}
 		 | Name COLON Name								{}
@@ -161,7 +171,7 @@ funcname_layer : DOT Name 					{}
 			   | funcname_layer DOT Name	{}
 			   ;
 
-varlist : var                  {}
+varlist : var                  {$$ = $1;}
 		| var varlist_layer    {}
         ;
 
@@ -169,12 +179,12 @@ varlist_layer : COMMA var					{}
 			  | varlist_layer COMMA var		{}
 			  ;
 
-var : Name                           {}
+var : Name                           { $$ = Node("Identifier",$1); }
     | prefixexp LEFTBRACKET exp RIGHTBRACKET  {}
     | prefixexp DOT Name             {}
     ;
 
-namelist : Name                {}
+namelist : Name                { $$ = Node("Identifier", $1); }
          | Name namelist_layer {}
          ;
 
@@ -189,20 +199,31 @@ explist : exp					{}
 explist_layer : exp COMMA				{}
 			  | explist_layer exp COMMA {}
 			  ;
-			  // KLART HIT NER
-			  // Saknar regex för Number och String
-exp : NIL						{}
-	| FALSE						{}
-	| TRUE						{}
-	| Number					{}
-	| String					{}
-	| DOTDOTDOT					{}
-	| function					{}
-	| prefixexp					{}
-	| tableconstructor			{}
-	| exp binop exp				{}
-	| unop exp					{}
+
+  // EXP STRUKTUREN BEHÖVER DESIGNAS OM
+exp : exp_layer								{}
+	| exp_rec binop exp_layer				{}
+	| unop exp_layer						{}
 	;
+
+exp_rec : exp_layer
+		| exp_rec binop
+
+exp_layer : NIL							{}
+		  | FALSE						{}
+		  | TRUE						{}
+		  | Number						{}
+		  | String						{}
+		  | DOTDOTDOT					{}
+		  | function					{}
+		  | prefixexp					{}
+		  | tableconstructor			{}
+
+Number : INTEGER				{}
+	   | DECIMAL				{}
+	   | POWEROF				{}
+	   | HEXADECIMAL			{}
+	   ;
 
 prefixexp : var 									{}
 		  | functioncall 							{}
@@ -275,4 +296,3 @@ unop : MINUS 	{}
 	 | NOT 		{}
 	 | HASHTAG	{}
 	 ;
-*/

@@ -55,8 +55,13 @@
 "..."                           { return yy::parser::make_DOTDOTDOT(yytext); }
 
 
+([0-9]+)                                             { return yy::parser::make_INTEGER(yytext); }
+[0-9]+\.[0-9]+                                       { return yy::parser::make_DECIMAL(yytext); }
+[0-9]+\.[0-9]+(e\-|E)[0-9]+                          { return yy::parser::make_POWEROF(yytext); }
+0x[0-9a-fA-F]+                                       { return yy::parser::make_HEXADECIMAL(yytext); }
+
 (([a-zA-Z_])([a-zA-Z0-9_]+))                         { return yy::parser::make_Name(yytext); }
-[0-9]+(\.)*[0-9]*((e-[0-9]+)|(E[0-9]+)|(x([a-f]+|[0-9]+))|([0-9]+)|([0-9]*))  { return yy::parser::make_Number(yytext); }
+
 <<EOF>>                                                return yy::parser::make_END();
 
 %%
