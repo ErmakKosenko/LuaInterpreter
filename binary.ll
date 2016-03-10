@@ -60,8 +60,8 @@
 [0-9]+\.[0-9]+(e\-|E)[0-9]+                          { return yy::parser::make_POWEROF(yytext); }
 0x[0-9a-fA-F]+                                       { return yy::parser::make_HEXADECIMAL(yytext); }
 
-(([a-zA-Z_])([a-zA-Z0-9_]+))                         { return yy::parser::make_Name(yytext); }
-
+(_[0-9a-zA-Z_]+|[a-zA-Z]+([0-9a-zA-Z_]+)?)           { return yy::parser::make_NAME(yytext); }
+\"([a-zA-Z0-9 :])+\"                                     { return yy::parser::make_STRING(yytext); }
 <<EOF>>                                                return yy::parser::make_END();
 
 %%

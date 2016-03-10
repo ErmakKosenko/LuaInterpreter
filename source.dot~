@@ -1,0 +1,109 @@
+
+
+    
+
+   ""
+     
+
+digraph { 
+Start0 [label="Start"];
+Block2 [label="Block"];
+Start0 -> Block2;
+Statementchunk3 [label="Statementchunk"];
+Block2 -> Statementchunk3;
+Statement4 [label="Statement"];
+Statementchunk3 -> Statement4;
+varlist5 [label="varlist"];
+Statement4 -> varlist5;
+var6 [label="var"];
+varlist5 -> var6;
+Identifier7 [label="a"];
+var6 -> Identifier7;
+equal8 [label="="];
+Statement4 -> equal8;
+explist9 [label="explist"];
+Statement4 -> explist9;
+exp10 [label="exp"];
+explist9 -> exp10;
+integer11 [label="10"];
+exp10 -> integer11;
+Statement12 [label="Statement"];
+Statementchunk3 -> Statement12;
+while13 [label="while"];
+Statement12 -> while13;
+exp14 [label="exp"];
+Statement12 -> exp14;
+prefixexp15 [label="prefixexp"];
+exp14 -> prefixexp15;
+leftparentheses16 [label="leftparentheses"];
+prefixexp15 -> leftparentheses16;
+exp17 [label="exp"];
+prefixexp15 -> exp17;
+prefixexp18 [label="prefixexp"];
+exp17 -> prefixexp18;
+var19 [label="var"];
+prefixexp18 -> var19;
+Identifier20 [label="a"];
+var19 -> Identifier20;
+binop21 [label="<"];
+exp17 -> binop21;
+integer22 [label="20"];
+exp17 -> integer22;
+rightparentheses23 [label="rightparentheses"];
+prefixexp15 -> rightparentheses23;
+do24 [label="do"];
+Statement12 -> do24;
+Block25 [label="Block"];
+Statement12 -> Block25;
+Statementchunk26 [label="Statementchunk"];
+Block25 -> Statementchunk26;
+Statement27 [label="Statement"];
+Statementchunk26 -> Statement27;
+functioncall28 [label="functioncall"];
+Statement27 -> functioncall28;
+prefixexp29 [label="prefixexp"];
+functioncall28 -> prefixexp29;
+var30 [label="var"];
+prefixexp29 -> var30;
+Identifier31 [label="print"];
+var30 -> Identifier31;
+args32 [label="args"];
+functioncall28 -> args32;
+leftparentheses33 [label="leftparentheses"];
+args32 -> leftparentheses33;
+funcbody34 [label="funcbody"];
+args32 -> funcbody34;
+namelist35 [label="namelist"];
+funcbody34 -> namelist35;
+Identifier36 [label="apa123"];
+namelist35 -> Identifier36;
+rightparentheses37 [label="rightparentheses"];
+args32 -> rightparentheses37;
+Statement38 [label="Statement"];
+Statementchunk26 -> Statement38;
+varlist39 [label="varlist"];
+Statement38 -> varlist39;
+var40 [label="var"];
+varlist39 -> var40;
+Identifier41 [label="a"];
+var40 -> Identifier41;
+equal42 [label="="];
+Statement38 -> equal42;
+explist43 [label="explist"];
+Statement38 -> explist43;
+exp44 [label="exp"];
+explist43 -> exp44;
+prefixexp45 [label="prefixexp"];
+exp44 -> prefixexp45;
+var46 [label="var"];
+prefixexp45 -> var46;
+Identifier47 [label="a"];
+var46 -> Identifier47;
+binop48 [label="+"];
+exp44 -> binop48;
+integer49 [label="1"];
+exp44 -> integer49;
+end50 [label="end"];
+Statement12 -> end50;
+
+}

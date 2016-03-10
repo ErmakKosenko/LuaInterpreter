@@ -70,8 +70,8 @@
 %token <std::string> POWEROF
 %token <std::string> HEXADECIMAL
 
-%token <std::string> String
-%token <std::string> Name
+%token <std::string> STRING
+%token <std::string> NAME
 
 
 
@@ -94,7 +94,10 @@
 %type <Node> explist_layer
 %type <Node> exp
 %type <Node> exp_layer
+%type <Node> exp_trail
 %type <Node> Number
+%type <Node> Name
+%type <Node> String
 %type <Node> prefixexp
 %type <Node> functioncall
 %type <Node> args
@@ -124,175 +127,182 @@ chunk : 							  { $$ = Node("Block", "empty"); }
 	  | laststat_layer				  { $$ = Node("Block", ""); $$.children.push_back($1);}
       ;
 
-chunk_layer:  stat                              { $$ = Node("Statement", ""); $$.children.push_back($1); }
-            | stat SEMICOLON                    { $$ = Node("Statement", ""); $$.children.push_back($1); }
-			| chunk_layer stat                  { $$ = Node("Statement", ""); $$.children.push_back($1); $$.children.push_back($2); }
-            | chunk_layer stat SEMICOLON        { $$ = Node("Statement", ""); $$.children.push_back($1); $$.children.push_back($2); }
+chunk_layer:  stat                              { $$ = Node("Statementchunk",""); $$.children.push_back($1); }
+            | stat SEMICOLON                    { $$ = Node("Statementchunk",""); $$.children.push_back($1); $$.children.push_back(Node("semicolon",";")); }
+			| chunk_layer stat                  { $$ = Node("Statementchunk",""); for(Node e : $1.children){$$.children.push_back(e);} $$.children.push_back($2);  }
+            | chunk_layer stat SEMICOLON        { $$ = Node("Statementchunk",""); for(Node e : $1.children){$$.children.push_back(e);} $$.children.push_back($2); $$.children.push_back(Node("semicolon",";")); }
 			;
 
-laststat_layer : laststat               { $$ = Node("Last statement", ""); $$.children.push_back($1); }
-               | laststat SEMICOLON     { $$ = Node("Last statement", ""); $$.children.push_back($1); }
+laststat_layer : laststat               { $$ = $1; }
+               | laststat SEMICOLON     { $$ = $1; $$.children.push_back(Node("semicolon",";")); }
                ;
 
 
-stat : varlist EQUAL explist  								{ $$ = Node("Operator", "equals:"); $$.children.push_back($1); $$.children.push_back($3); }
-     | functioncall           								{ $$ = Node("Functioncall",""); $$.children.push_back($1);}
-     | DO block end           								{ $$ = $2;}
-     | WHILE exp DO block end 								{ $$ = Node("While", ""); $$.children.push_back($2); $$.children.push_back(Node("Do","")); $$.children.push_back($4); }
-	 | REPEAT block UNTIL exp 								{ $$ = Node("Repeat", $4); $$.children.push_back($2); }
-	 | IF exp THEN block end			    				{ $$ = Node("If-statement", ""); $$.children.push_back(Node("If", "")); $$.children.push_back($2); $$.children.push_back(Node("then", "")); $$.children.push_back($4); }
-	 | IF exp THEN block ELSE block end 	   				{ $$ = Node("If-statement", ""); $$.children.push_back(Node("If", $2)); $$.children.push_back(Node("Then", $4);); $$.children.push_back(Node("Else", $6)); }
-     | IF exp THEN block elseif_layer end    				{ $$ = Node("If-statement", ""); $$.children.push_back(Node("If", $2)); $$.children.push_back(Node("Then", $4);); $$.children.push_back($5); }
-	 | IF exp THEN block elseif_layer ELSE block end    	{ $$ = Node("If-statement", ""); $$.children.push_back(Node("If", $2)); $$.children.push_back(Node("Then", $4);); $$.children.push_back($5); $$.children.push_back(Node("Else", $7));}
-     | FOR Name EQUAL exp COMMA exp DO block end 			{ $$ = Node("For", ""); Node equal("Equal", ); equal.children.push_back($2); equal.children.push_back($4); $$.children.push_back(equal); $$.children.push_back(Node("Exp", $6)); $$.children.push_back(Node("Do", $8)); }
-     | FOR Name EQUAL exp COMMA exp COMMA exp DO block end  { $$ = Node("For", ""); Node equal("Equal", ); equal.children.push_back($2); equal.children.push_back($4); $$.children.push_back(equal); $$.children.push_back(Node("Exp", $6)); $$.children.push_back(Node("Exp", $8)); $$.children.push_back(Node("Do", $10));}
-     | FOR namelist IN explist DO block end 				{ $$ = Node("For", ""); Node in("In", ""); in.children.push_back($2); in.children.push_back($4); $$.children.push_back(in); $$.children.push_back(Node("Do", $6));}
-     | FUNCTION funcname funcbody 							{ $$ = Node("Function", ""); $$.children.push_back($2); $$.children.push_back($3); }
-     | LOCAL FUNCTION Name funcbody 						{ $$ = Node("Local Function", ""); $$.children.push_back($3); $$.children.push_back($4);}
-     | LOCAL namelist 										{ $$ = $2;}		/* HUR SKA LOCAL HANTERAS? */
-     | LOCAL namelist EQUAL explist 						{}
+stat : varlist EQUAL explist  								{ $$ = Node("Statement", ""); $$.children.push_back($1); $$.children.push_back(Node("equal","=")); $$.children.push_back($3); }
+     | functioncall           								{ $$ = Node("Statement",""); $$.children.push_back($1);}
+     | DO block end           								{ $$ = Node("Statement",""); $$.children.push_back(Node("do","do")); $$.children.push_back($2); $$.children.push_back(Node("end","end"));}
+     | WHILE exp DO block end 								{ $$ = Node("Statement",""); $$.children.push_back(Node("while","while")); $$.children.push_back($2); $$.children.push_back(Node("do","do")); $$.children.push_back($4); $$.children.push_back(Node("end","end")); }
+	 | REPEAT block UNTIL exp 								{ $$ = Node("Statement",""); $$.children.push_back(Node("repeat", "")); $$.children.push_back($2); $$.children.push_back(Node("until", "")); $$.children.push_back($4); }
+	 | IF exp THEN block end			    				{ $$ = Node("Statement",""); $$.children.push_back(Node("if","if")); $$.children.push_back($2); $$.children.push_back(Node("then","then")); $$.children.push_back($4); $$.children.push_back(Node("end","end")); }
+	 | IF exp THEN block ELSE block end 	   				{ $$ = Node("Statement",""); $$.children.push_back(Node("if","if")); $$.children.push_back($2); $$.children.push_back(Node("then","then")); $$.children.push_back($4); $$.children.push_back(Node("else","else")); $$.children.push_back($6); $$.children.push_back(Node("end","end")); }
+     | IF exp THEN block elseif_layer end    				{ $$ = Node("Statement",""); $$.children.push_back(Node("if","if")); $$.children.push_back($2); $$.children.push_back(Node("then","then")); $$.children.push_back($4); $$.children.push_back(Node("else if","else if")); for (Node e : $5.children){ $$.children.push_back(e); } $$.children.push_back(Node("end","end")); }
+	 | IF exp THEN block elseif_layer ELSE block end    	{ $$ = Node("Statement",""); $$.children.push_back(Node("if","if")); $$.children.push_back($2); $$.children.push_back(Node("then","then")); $$.children.push_back($4); $$.children.push_back(Node("else if","else if")); for (Node e : $5.children){ $$.children.push_back(e); } $$.children.push_back(Node("else","else")); $$.children.push_back($7); $$.children.push_back(Node("end","end")); }
+     | FOR Name EQUAL exp COMMA exp DO block end 			{ $$ = Node("Statement",""); $$.children.push_back(Node("for","for")); $$.children.push_back($2); $$.children.push_back(Node("equal","=")); $$.children.push_back($4); $$.children.push_back(Node("comma",",")); $$.children.push_back($6); $$.children.push_back(Node("do","do")); $$.children.push_back($8); $$.children.push_back(Node("end","end"));}
+     | FOR Name EQUAL exp COMMA exp COMMA exp DO block end  { $$ = Node("Statement",""); $$.children.push_back(Node("for","for")); $$.children.push_back($2); $$.children.push_back(Node("equal","=")); $$.children.push_back($4); $$.children.push_back(Node("comma",",")); $$.children.push_back($6); $$.children.push_back(Node("comma",",")); $$.children.push_back($8); $$.children.push_back(Node("do","do")); $$.children.push_back($10); $$.children.push_back(Node("end","end")); }
+     | FOR namelist IN explist DO block end 				{ $$ = Node("Statement",""); $$.children.push_back(Node("for","for")); $$.children.push_back($2); $$.children.push_back(Node("in","in")); $$.children.push_back($4); $$.children.push_back(Node("do","do")); $$.children.push_back($6); $$.children.push_back(Node("end","end"));}
+     | FUNCTION funcname funcbody 							{ $$ = Node("Statement",""); $$.children.push_back(Node("function","function")); $$.children.push_back($2); $$.children.push_back($3); }
+     | LOCAL FUNCTION Name funcbody 						{ $$ = Node("Statement",""); $$.children.push_back(Node("local","local")); $$.children.push_back(Node("function","function")); $$.children.push_back($3); $$.children.push_back($4);}
+     | LOCAL namelist 										{ $$ = Node("Statement",""); $$.children.push_back(Node("local","local")); $$.children.push_back($2); }
+     | LOCAL namelist EQUAL explist 						{ $$ = Node("Statement",""); $$.children.push_back(Node("local","local")); $$.children.push_back($2); $$.children.push_back(Node("equal","=")); $$.children.push_back($4); }
      ;
 
-elseif_layer : ELSEIF exp THEN block				{}
-			 | elseif_layer ELSEIF exp THEN block		{}
+elseif_layer : ELSEIF exp THEN block					{ $$ = Node("else if","else if"); $$.children.push_back($2); $$.children.push_back(Node("then","then")); $$.children.push_back($4); }
+			 | elseif_layer ELSEIF exp THEN block		{ $$ = $1;  $$.children.push_back(Node("else if","else if")); $$.children.push_back($3); $$.children.push_back(Node("then","then")); $$.children.push_back($5);}
 			 ;
 
-laststat : RETURN         { $$ = Node("Statement","return");}
-		 | RETURN explist {}
-         | BREAK          { $$ = Node("Statement","break");}
+laststat : RETURN         { $$ = Node("Last statement",""); $$.children.push_back(Node("return","return")); }
+		 | RETURN explist { $$ = Node("Last statement",""); $$.children.push_back(Node("return","return")); $$.children.push_back($2); }
+         | BREAK          { $$ = Node("Last statement",""); $$.children.push_back(Node("break","break")); }
          ;
-funcname : Name											{}
-		 | Name COLON Name								{}
-		 | Name funcname_layer                          {}
-         | Name funcname_layer COLON Name               {}
+funcname : Name											{ $$ = Node("funcname",""); $$.children.push_back($1);}
+		 | Name COLON Name								{ $$ = Node("funcname",""); $$.children.push_back($1); $$.children.push_back(Node("colon",":")); $$.children.push_back($3); }
+		 | Name funcname_layer                          { $$ = Node("funcname",""); $$.children.push_back($1); for(Node e : $2.children){$$.children.push_back(e);} 	}
+         | Name funcname_layer COLON Name               { $$ = Node("funcname",""); $$.children.push_back($1); for(Node e : $2.children){$$.children.push_back(e);} $$.children.push_back(Node("colon",":")); $$.children.push_back($4);}
          ;
 
-funcname_layer : DOT Name 					{}
-			   | funcname_layer DOT Name	{}
+funcname_layer : DOT Name 					{ $$ = Node("dot","."); $$.children.push_back($2); }
+			   | funcname_layer DOT Name	{ $$ = $1; $$.children.push_back(Node("dot",".")); $$.children.push_back($3); }
 			   ;
 
-varlist : var                  {$$ = $1;}
-		| var varlist_layer    {}
+varlist : var                  { $$ = Node("varlist",""); $$.children.push_back($1); }
+		| var varlist_layer    { $$ = Node("varlist",""); $$.children.push_back($1); for(Node e : $2.children){$$.children.push_back(e);} }
         ;
 
-varlist_layer : COMMA var					{}
-			  | varlist_layer COMMA var		{}
+varlist_layer : COMMA var					{ $$ = Node("comma",","); $$.children.push_back($2); }
+			  | varlist_layer COMMA var		{ $$ = $1; $$.children.push_back(Node("comma",",")); $$.children.push_back($3);}
 			  ;
 
-var : Name                           { $$ = Node("Identifier",$1); }
-    | prefixexp LEFTBRACKET exp RIGHTBRACKET  {}
-    | prefixexp DOT Name             {}
+var : Name                           		  { $$ = Node("var",""); $$.children.push_back($1); }
+    | prefixexp LEFTBRACKET exp RIGHTBRACKET  { $$ = Node("var",""); $$.children.push_back($1); $$.children.push_back(Node("leftbracket","[")); $$.children.push_back($3); $$.children.push_back(Node("rightbracket","]")); }
+    | prefixexp DOT Name             		  { $$ = Node("var",""); $$.children.push_back($1); $$.children.push_back(Node("dot","."));}
     ;
 
-namelist : Name                { $$ = Node("Namelist", $1); }
-         | Name namelist_layer {}
+namelist : Name                { $$ = Node("namelist", ""); $$.children.push_back($1); }
+         | Name namelist_layer { $$ = Node("namelist", ""); $$.children.push_back($1); for(Node e : $2.children){$$.children.push_back(e);} }
          ;
 
-namelist_layer : COMMA Name					{}
-			   | namelist_layer COMMA Name	{}
+namelist_layer : COMMA Name					{ $$ = Node("namelist_layer",""); $$.children.push_back(Node("comma",",")); $$.children.push_back($2); }
+			   | namelist_layer COMMA Name	{ $$ = $1; $$.children.push_back(Node("comma",",")); $$.children.push_back($3); }
 			   ;
 
-explist : exp					{}
-		| explist_layer exp 	{}
+explist : exp					{ $$ = Node("explist", ""); $$.children.push_back($1); }
+		| explist_layer exp 	{ $$ = Node("explist", ""); for(Node e: $1.children){$$.children.push_back(e);} $$.children.push_back($2); }
 		;
 
-explist_layer : exp COMMA				{}
-			  | explist_layer exp COMMA {}
+explist_layer : exp COMMA				{ $$ = Node("explist_layer",""); $$.children.push_back($1); $$.children.push_back(Node("comma",",")); }
+			  | explist_layer exp COMMA { $$ = $1; $$.children.push_back($1); $$.children.push_back(Node("comma",",")); }
 			  ;
 
-  // EXP STRUKTUREN BEHÖVER DESIGNAS OM
-exp : exp_layer								{}
-	| exp_rec binop exp_layer				{}
-	| unop exp_layer						{}
+
+exp : exp_layer				{ $$ = Node("exp",""); $$.children.push_back($1); }
+ 	| exp binop exp_trail	{ $$ = Node("exp",""); for(Node e : $1.children){$$.children.push_back(e);} $$.children.push_back($2); $$.children.push_back($3); }
+	| unop exp				{ $$ = Node("exp",""); $$.children.push_back($1); $$.children.push_back($2); }
 	;
 
-exp_rec : exp_layer
-		| exp_rec binop
+exp_trail : exp_layer {$$ = $1;}
+		  ;
 
-exp_layer : NIL							{ $$ = $1;}
-		  | FALSE						{ $$ = $1;}
-		  | TRUE						{ $$ = $1;}
-		  | Number						{ $$ = $1;}
-		  | String						{ $$ = $1;}
-		  | DOTDOTDOT					{ $$ = $1;}
-		  | function					{ $$ = $1;}
-		  | prefixexp					{ $$ = $1;}
-		  | tableconstructor			{ $$ = $1;}
+exp_layer : NIL					{ $$ = Node("nil",$1);}
+		  | FALSE				{ $$ = Node("false",$1);}
+		  | TRUE				{ $$ = Node("true",$1);}
+		  | Number				{ $$ = $1;}
+		  | String				{ $$ = $1;}
+		  | DOTDOTDOT			{ $$ = Node("dotdotdot",$1);}
+		  | function			{ $$ = $1;}
+		  | prefixexp			{ $$ = $1;}
+		  | tableconstructor	{ $$ = $1;}
+		  ;
 
-Number : INTEGER				{ $$ = $1;}
-	   | DECIMAL				{ $$ = $1;}
-	   | POWEROF				{ $$ = $1;}
-	   | HEXADECIMAL			{ $$ = $1;}
+Number : INTEGER				{ $$ = Node("integer", $1); }
+	   | DECIMAL				{ $$ = Node("decimal", $1);}
+	   | POWEROF				{ $$ = Node("powerof", $1);}
+	   | HEXADECIMAL			{ $$ = Node("hexadecimal", $1);}
 	   ;
 
-prefixexp : var 									{}
-		  | functioncall 							{}
-		  | LEFTPARENTHESES exp RIGHTPARENTHESES	{}
-		  ;
-
-functioncall : prefixexp args				{}
-			 | prefixexp COLON Name args	{}
-			 ;
-
-args : LEFTPARENTHESES  RIGHTPARENTHESES		{}
-	 | LEFTPARENTHESES parlist RIGHTPARENTHESES	{}
-	 | tableconstructor							{}
-	 | String									{}
+Name : NAME { $$ = Node("Identifier", $1); }
 	 ;
 
-function : FUNCTION funcbody	{}
-		 ;
+String : STRING { std::string temp; for(int i=1;i<$1.length()-1;i++){temp = temp + $1[i];}  $$ = Node("String",temp);}
+	   ;
 
-funcbody : LEFTPARENTHESES 		   RIGHTPARENTHESES block end   {}
-		 | LEFTPARENTHESES parlist RIGHTPARENTHESES block end 	{}
-		 ;
-
-parlist : namelist					{}
-		| namelist COMMA DOTDOTDOT	{}
-		| 				 DOTDOTDOT	{}
-		;
-
-tableconstructor : LEFTBRACES 			RIGHTBRACES		{}
-				 | LEFTBRACES fieldlist RIGHTBRACES		{}
-				 ;
-
-fieldlist : field 							{}
-		  | field fieldlist_layer			{}
-		  | field 				  fieldsep	{}
-		  | field fieldlist_layer fieldsep	{}
+prefixexp : var 									{ $$ = Node("prefixexp",""); $$.children.push_back($1); }
+		  | functioncall 							{ $$ = Node("prefixexp",""); $$.children.push_back($1);}
+		  | LEFTPARENTHESES exp RIGHTPARENTHESES	{ $$ = Node("prefixexp",""); $$.children.push_back(Node("leftparentheses","(")); $$.children.push_back(Node($2)); $$.children.push_back(Node("rightparentheses",")")); }
 		  ;
 
-fieldlist_layer : 				  fieldsep field    {}
-				| fieldlist_layer fieldsep field	{}
+functioncall : prefixexp args				{ $$ = Node("functioncall",""); $$.children.push_back($1); $$.children.push_back($2); }
+			 | prefixexp COLON Name args	{ $$ = Node("functioncall",""); $$.children.push_back($1); $$.children.push_back(Node("colon",":")); $$.children.push_back($3); $$.children.push_back($4);}
+			 ;
+
+args : LEFTPARENTHESES  RIGHTPARENTHESES		{ $$ = Node("args",""); $$.children.push_back(Node("leftparentheses","(")); $$.children.push_back(Node("rightparentheses",")")); }
+	 | LEFTPARENTHESES parlist RIGHTPARENTHESES	{ $$ = Node("args",""); $$.children.push_back(Node("leftparentheses","(")); $$.children.push_back($2); $$.children.push_back(Node("rightparentheses",")"));}
+	 | tableconstructor							{ $$ = Node("args",""); $$.children.push_back($1); }
+	 | String									{ $$ = Node("args",""); $$.children.push_back($1); }
+	 ;
+
+function : FUNCTION funcbody	{ $$ = Node("function","function"); $$.children.push_back(Node("function","function")); $$.children.push_back($2); }
+		 ;
+
+funcbody : LEFTPARENTHESES 		   RIGHTPARENTHESES block end   { $$ = Node("funcbody",""); $$.children.push_back(Node("leftparentheses","(")); $$.children.push_back(Node("rightparentheses",")")); $$.children.push_back($3); $$.children.push_back(Node("end","end")); }
+		 | LEFTPARENTHESES parlist RIGHTPARENTHESES block end 	{ $$ = Node("funcbody",""); $$.children.push_back(Node("leftparentheses","(")); $$.children.push_back($2); $$.children.push_back(Node("rightparentheses",")")); $$.children.push_back($4); $$.children.push_back(Node("end","end"));}
+		 ;
+
+parlist : namelist					{ $$ = Node("funcbody",""); $$.children.push_back($1); }
+		| namelist COMMA DOTDOTDOT	{ $$ = Node("funcbody",""); $$.children.push_back($1); $$.children.push_back(Node("comma",",")); $$.children.push_back(Node("dotdotdot","...")); }
+		| 				 DOTDOTDOT	{ $$ = Node("funcbody",""); $$.children.push_back(Node("dotdotdot","..."));}
+		;
+
+tableconstructor : LEFTBRACES 			RIGHTBRACES		{ $$ = Node("tableconstructor",""); $$.children.push_back(Node("leftbraces","[")); $$.children.push_back(Node("rightbraces","]")); }
+				 | LEFTBRACES fieldlist RIGHTBRACES		{ $$ = Node("tableconstructor",""); $$.children.push_back(Node("leftbraces","[")); $$.children.push_back($2); $$.children.push_back(Node("rightbraces","]"));}
+				 ;
+
+fieldlist : field 							{ $$ = Node("fieldlist",""); $$.children.push_back($1); }
+		  | field fieldlist_layer			{ $$ = Node("fieldlist",""); $$.children.push_back($1); for(Node e : $2.children){$$.children.push_back(e);}}
+		  | field 				  fieldsep	{ $$ = Node("fieldlist",""); $$.children.push_back($1); $$.children.push_back($2); }
+		  | field fieldlist_layer fieldsep	{ $$ = Node("fieldlist",""); $$.children.push_back($1); for(Node e : $2.children){$$.children.push_back(e);} $$.children.push_back($3); }
+		  ;
+
+fieldlist_layer : 				  fieldsep field    { $$ = Node("fieldlist_layer",""); $$.children.push_back($1); $$.children.push_back($2); }
+				| fieldlist_layer fieldsep field	{ $$ = $1; $$.children.push_back($2); $$.children.push_back($3);}
 				;
 
-field : LEFTBRACKET exp RIGHTBRACKET EQUAL exp 		{}
-	  | Name EQUAL 	exp 							{}
-	  | 			exp								{}
+field : LEFTBRACKET exp RIGHTBRACKET EQUAL exp 		{ $$ = Node("field",""); $$.children.push_back(Node("leftbracket","[")); $$.children.push_back($2); $$.children.push_back(Node("rightbracket","]")); $$.children.push_back(Node("equal","=")); $$.children.push_back($5); }
+	  | Name EQUAL 	exp 							{ $$ = Node("field",""); $$.children.push_back($1); $$.children.push_back(Node("equal","=")); $$.children.push_back($3); }
+	  | 			exp								{ $$ = Node("field",""); $$.children.push_back($1);}
 	  ;
 
 fieldsep : COLON		{ $$ = Node("Fieldsep", $1);}
 		 | SEMICOLON	{ $$ = Node("Fieldsep", $1);}
 		 ;
 //BYTA NAMN PÅ EQUALTO?
-binop : PLUS			{ $$ = Node("Binop", $1);}
-	  | MINUS			{ $$ = Node("Binop", $1);}
-	  | MULTIPLY		{ $$ = Node("Binop", $1);}
-	  | FORWARDSLASH	{ $$ = Node("Binop", $1);}
-	  | CARET			{ $$ = Node("Binop", $1);}
-	  | PERCENT			{ $$ = Node("Binop", $1);}
-	  | DOTDOT			{ $$ = Node("Binop", $1);}
-	  | LESSTHAN		{ $$ = Node("Binop", $1);}
-	  | LESSOREQUAL		{ $$ = Node("Binop", $1);}
-	  | GREATERTHAN		{ $$ = Node("Binop", $1);}
-	  | GREATEROREQUAL	{ $$ = Node("Binop", $1);}
-	  | EQUALTO			{ $$ = Node("Binop", $1);}
-	  | TILDEEQUAL		{ $$ = Node("Binop", $1);}
-	  | AND				{ $$ = Node("Binop", $1);}
-	  | OR				{ $$ = Node("Binop", $1);}
+binop : PLUS			{ $$ = Node("binop", $1);}
+	  | MINUS			{ $$ = Node("binop", $1);}
+	  | MULTIPLY		{ $$ = Node("binop", $1);}
+	  | FORWARDSLASH	{ $$ = Node("binop", $1);}
+	  | CARET			{ $$ = Node("binop", $1);}
+	  | PERCENT			{ $$ = Node("binop", $1);}
+	  | DOTDOT			{ $$ = Node("binop", $1);}
+	  | LESSTHAN		{ $$ = Node("binop", $1);}
+	  | LESSOREQUAL		{ $$ = Node("binop", $1);}
+	  | GREATERTHAN		{ $$ = Node("binop", $1);}
+	  | GREATEROREQUAL	{ $$ = Node("binop", $1);}
+	  | EQUALTO			{ $$ = Node("binop", $1);}
+	  | TILDEEQUAL		{ $$ = Node("binop", $1);}
+	  | AND				{ $$ = Node("binop", $1);}
+	  | OR				{ $$ = Node("binop", $1);}
 	  ;
 
-unop : MINUS 	{ $$ = Node("Unop", $1);}
-	 | NOT 		{ $$ = Node("Unop", $1);}
-	 | HASHTAG	{ $$ = Node("Unop", $1);}
+unop : MINUS 	{ $$ = Node("unop", $1);}
+	 | NOT 		{ $$ = Node("unop", $1);}
+	 | HASHTAG	{ $$ = Node("unop", $1);}
 	 ;

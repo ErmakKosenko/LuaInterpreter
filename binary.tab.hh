@@ -288,8 +288,11 @@ namespace yy {
       // explist
       // explist_layer
       // exp
+      // exp_trail
       // exp_layer
       // Number
+      // Name
+      // String
       // prefixexp
       // functioncall
       // args
@@ -356,8 +359,8 @@ namespace yy {
       // DECIMAL
       // POWEROF
       // HEXADECIMAL
-      // String
-      // Name
+      // STRING
+      // NAME
       char dummy2[sizeof(std::string)];
 };
 
@@ -430,8 +433,8 @@ namespace yy {
         DECIMAL = 306,
         POWEROF = 307,
         HEXADECIMAL = 308,
-        String = 309,
-        Name = 310
+        STRING = 309,
+        NAME = 310
       };
     };
 
@@ -734,11 +737,11 @@ namespace yy {
 
     static inline
     symbol_type
-    make_String (const std::string& v);
+    make_STRING (const std::string& v);
 
     static inline
     symbol_type
-    make_Name (const std::string& v);
+    make_NAME (const std::string& v);
 
 
     /// Build a parser object.
@@ -936,10 +939,10 @@ namespace yy {
     enum
     {
       yyeof_ = 0,
-      yylast_ = 398,     ///< Last index in yytable_.
-      yynnts_ = 35,  ///< Number of nonterminal symbols.
+      yylast_ = 753,     ///< Last index in yytable_.
+      yynnts_ = 37,  ///< Number of nonterminal symbols.
       yyempty_ = -2,
-      yyfinal_ = 61, ///< Termination state number.
+      yyfinal_ = 62, ///< Termination state number.
       yyterror_ = 1,
       yyerrcode_ = 256,
       yyntokens_ = 56  ///< Number of tokens.
@@ -1039,21 +1042,24 @@ namespace yy {
       case 72: // explist
       case 73: // explist_layer
       case 74: // exp
+      case 75: // exp_trail
       case 76: // exp_layer
       case 77: // Number
-      case 78: // prefixexp
-      case 79: // functioncall
-      case 80: // args
-      case 81: // function
-      case 82: // funcbody
-      case 83: // parlist
-      case 84: // tableconstructor
-      case 85: // fieldlist
-      case 86: // fieldlist_layer
-      case 87: // field
-      case 88: // fieldsep
-      case 89: // binop
-      case 90: // unop
+      case 78: // Name
+      case 79: // String
+      case 80: // prefixexp
+      case 81: // functioncall
+      case 82: // args
+      case 83: // function
+      case 84: // funcbody
+      case 85: // parlist
+      case 86: // tableconstructor
+      case 87: // fieldlist
+      case 88: // fieldlist_layer
+      case 89: // field
+      case 90: // fieldsep
+      case 91: // binop
+      case 92: // unop
         value.copy< Node > (other.value);
         break;
 
@@ -1108,8 +1114,8 @@ namespace yy {
       case 51: // DECIMAL
       case 52: // POWEROF
       case 53: // HEXADECIMAL
-      case 54: // String
-      case 55: // Name
+      case 54: // STRING
+      case 55: // NAME
         value.copy< std::string > (other.value);
         break;
 
@@ -1147,21 +1153,24 @@ namespace yy {
       case 72: // explist
       case 73: // explist_layer
       case 74: // exp
+      case 75: // exp_trail
       case 76: // exp_layer
       case 77: // Number
-      case 78: // prefixexp
-      case 79: // functioncall
-      case 80: // args
-      case 81: // function
-      case 82: // funcbody
-      case 83: // parlist
-      case 84: // tableconstructor
-      case 85: // fieldlist
-      case 86: // fieldlist_layer
-      case 87: // field
-      case 88: // fieldsep
-      case 89: // binop
-      case 90: // unop
+      case 78: // Name
+      case 79: // String
+      case 80: // prefixexp
+      case 81: // functioncall
+      case 82: // args
+      case 83: // function
+      case 84: // funcbody
+      case 85: // parlist
+      case 86: // tableconstructor
+      case 87: // fieldlist
+      case 88: // fieldlist_layer
+      case 89: // field
+      case 90: // fieldsep
+      case 91: // binop
+      case 92: // unop
         value.copy< Node > (v);
         break;
 
@@ -1216,8 +1225,8 @@ namespace yy {
       case 51: // DECIMAL
       case 52: // POWEROF
       case 53: // HEXADECIMAL
-      case 54: // String
-      case 55: // Name
+      case 54: // STRING
+      case 55: // NAME
         value.copy< std::string > (v);
         break;
 
@@ -1281,21 +1290,24 @@ namespace yy {
       case 72: // explist
       case 73: // explist_layer
       case 74: // exp
+      case 75: // exp_trail
       case 76: // exp_layer
       case 77: // Number
-      case 78: // prefixexp
-      case 79: // functioncall
-      case 80: // args
-      case 81: // function
-      case 82: // funcbody
-      case 83: // parlist
-      case 84: // tableconstructor
-      case 85: // fieldlist
-      case 86: // fieldlist_layer
-      case 87: // field
-      case 88: // fieldsep
-      case 89: // binop
-      case 90: // unop
+      case 78: // Name
+      case 79: // String
+      case 80: // prefixexp
+      case 81: // functioncall
+      case 82: // args
+      case 83: // function
+      case 84: // funcbody
+      case 85: // parlist
+      case 86: // tableconstructor
+      case 87: // fieldlist
+      case 88: // fieldlist_layer
+      case 89: // field
+      case 90: // fieldsep
+      case 91: // binop
+      case 92: // unop
         value.template destroy< Node > ();
         break;
 
@@ -1350,8 +1362,8 @@ namespace yy {
       case 51: // DECIMAL
       case 52: // POWEROF
       case 53: // HEXADECIMAL
-      case 54: // String
-      case 55: // Name
+      case 54: // STRING
+      case 55: // NAME
         value.template destroy< std::string > ();
         break;
 
@@ -1387,21 +1399,24 @@ namespace yy {
       case 72: // explist
       case 73: // explist_layer
       case 74: // exp
+      case 75: // exp_trail
       case 76: // exp_layer
       case 77: // Number
-      case 78: // prefixexp
-      case 79: // functioncall
-      case 80: // args
-      case 81: // function
-      case 82: // funcbody
-      case 83: // parlist
-      case 84: // tableconstructor
-      case 85: // fieldlist
-      case 86: // fieldlist_layer
-      case 87: // field
-      case 88: // fieldsep
-      case 89: // binop
-      case 90: // unop
+      case 78: // Name
+      case 79: // String
+      case 80: // prefixexp
+      case 81: // functioncall
+      case 82: // args
+      case 83: // function
+      case 84: // funcbody
+      case 85: // parlist
+      case 86: // tableconstructor
+      case 87: // fieldlist
+      case 88: // fieldlist_layer
+      case 89: // field
+      case 90: // fieldsep
+      case 91: // binop
+      case 92: // unop
         value.move< Node > (s.value);
         break;
 
@@ -1456,8 +1471,8 @@ namespace yy {
       case 51: // DECIMAL
       case 52: // POWEROF
       case 53: // HEXADECIMAL
-      case 54: // String
-      case 55: // Name
+      case 54: // STRING
+      case 55: // NAME
         value.move< std::string > (s.value);
         break;
 
@@ -1831,21 +1846,21 @@ namespace yy {
   }
 
   parser::symbol_type
-  parser::make_String (const std::string& v)
+  parser::make_STRING (const std::string& v)
   {
-    return symbol_type (token::String, v);
+    return symbol_type (token::STRING, v);
   }
 
   parser::symbol_type
-  parser::make_Name (const std::string& v)
+  parser::make_NAME (const std::string& v)
   {
-    return symbol_type (token::Name, v);
+    return symbol_type (token::NAME, v);
   }
 
 
 
 } // yy
-#line 1849 "binary.tab.hh" // lalr1.cc:372
+#line 1864 "binary.tab.hh" // lalr1.cc:372
 
 
 
