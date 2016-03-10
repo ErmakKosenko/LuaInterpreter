@@ -145,8 +145,8 @@ stat : varlist EQUAL explist  								{ $$ = Node("Statement", ""); $$.children.
 	 | REPEAT block UNTIL exp 								{ $$ = Node("Statement",""); $$.children.push_back(Node("repeat", "")); $$.children.push_back($2); $$.children.push_back(Node("until", "")); $$.children.push_back($4); }
 	 | IF exp THEN block end			    				{ $$ = Node("Statement",""); $$.children.push_back(Node("if","if")); $$.children.push_back($2); $$.children.push_back(Node("then","then")); $$.children.push_back($4); $$.children.push_back(Node("end","end")); }
 	 | IF exp THEN block ELSE block end 	   				{ $$ = Node("Statement",""); $$.children.push_back(Node("if","if")); $$.children.push_back($2); $$.children.push_back(Node("then","then")); $$.children.push_back($4); $$.children.push_back(Node("else","else")); $$.children.push_back($6); $$.children.push_back(Node("end","end")); }
-     | IF exp THEN block elseif_layer end    				{ $$ = Node("Statement",""); $$.children.push_back(Node("if","if")); $$.children.push_back($2); $$.children.push_back(Node("then","then")); $$.children.push_back($4); $$.children.push_back(Node("else if","else if")); for (Node e : $5.children){ $$.children.push_back(e); } $$.children.push_back(Node("end","end")); }
-	 | IF exp THEN block elseif_layer ELSE block end    	{ $$ = Node("Statement",""); $$.children.push_back(Node("if","if")); $$.children.push_back($2); $$.children.push_back(Node("then","then")); $$.children.push_back($4); $$.children.push_back(Node("else if","else if")); for (Node e : $5.children){ $$.children.push_back(e); } $$.children.push_back(Node("else","else")); $$.children.push_back($7); $$.children.push_back(Node("end","end")); }
+     | IF exp THEN block elseif_layer end    				{ $$ = Node("Statement",""); $$.children.push_back(Node("if","if")); $$.children.push_back($2); $$.children.push_back(Node("then","then")); $$.children.push_back($4); $$.children.push_back(Node("elseif","elseif")); for (Node e : $5.children){ $$.children.push_back(e); } $$.children.push_back(Node("end","end")); }
+	 | IF exp THEN block elseif_layer ELSE block end    	{ $$ = Node("Statement",""); $$.children.push_back(Node("if","if")); $$.children.push_back($2); $$.children.push_back(Node("then","then")); $$.children.push_back($4); $$.children.push_back(Node("elseif","elseif")); for (Node e : $5.children){ $$.children.push_back(e); } $$.children.push_back(Node("else","else")); $$.children.push_back($7); $$.children.push_back(Node("end","end")); }
      | FOR Name EQUAL exp COMMA exp DO block end 			{ $$ = Node("Statement",""); $$.children.push_back(Node("for","for")); $$.children.push_back($2); $$.children.push_back(Node("equal","=")); $$.children.push_back($4); $$.children.push_back(Node("comma",",")); $$.children.push_back($6); $$.children.push_back(Node("do","do")); $$.children.push_back($8); $$.children.push_back(Node("end","end"));}
      | FOR Name EQUAL exp COMMA exp COMMA exp DO block end  { $$ = Node("Statement",""); $$.children.push_back(Node("for","for")); $$.children.push_back($2); $$.children.push_back(Node("equal","=")); $$.children.push_back($4); $$.children.push_back(Node("comma",",")); $$.children.push_back($6); $$.children.push_back(Node("comma",",")); $$.children.push_back($8); $$.children.push_back(Node("do","do")); $$.children.push_back($10); $$.children.push_back(Node("end","end")); }
      | FOR namelist IN explist DO block end 				{ $$ = Node("Statement",""); $$.children.push_back(Node("for","for")); $$.children.push_back($2); $$.children.push_back(Node("in","in")); $$.children.push_back($4); $$.children.push_back(Node("do","do")); $$.children.push_back($6); $$.children.push_back(Node("end","end"));}
@@ -156,13 +156,13 @@ stat : varlist EQUAL explist  								{ $$ = Node("Statement", ""); $$.children.
      | LOCAL namelist EQUAL explist 						{ $$ = Node("Statement",""); $$.children.push_back(Node("local","local")); $$.children.push_back($2); $$.children.push_back(Node("equal","=")); $$.children.push_back($4); }
      ;
 
-elseif_layer : ELSEIF exp THEN block					{ $$ = Node("else if","else if"); $$.children.push_back($2); $$.children.push_back(Node("then","then")); $$.children.push_back($4); }
-			 | elseif_layer ELSEIF exp THEN block		{ $$ = $1;  $$.children.push_back(Node("else if","else if")); $$.children.push_back($3); $$.children.push_back(Node("then","then")); $$.children.push_back($5);}
+elseif_layer : ELSEIF exp THEN block					{ $$ = Node("elseif","elseif"); $$.children.push_back($2); $$.children.push_back(Node("then","then")); $$.children.push_back($4); }
+			 | elseif_layer ELSEIF exp THEN block		{ $$ = $1;  $$.children.push_back(Node("elseif","elseif")); $$.children.push_back($3); $$.children.push_back(Node("then","then")); $$.children.push_back($5);}
 			 ;
 
-laststat : RETURN         { $$ = Node("Last statement",""); $$.children.push_back(Node("return","return")); }
-		 | RETURN explist { $$ = Node("Last statement",""); $$.children.push_back(Node("return","return")); $$.children.push_back($2); }
-         | BREAK          { $$ = Node("Last statement",""); $$.children.push_back(Node("break","break")); }
+laststat : RETURN         { $$ = Node("Laststatement",""); $$.children.push_back(Node("return","return")); }
+		 | RETURN explist { $$ = Node("Laststatement",""); $$.children.push_back(Node("return","return")); $$.children.push_back($2); }
+         | BREAK          { $$ = Node("Laststatement",""); $$.children.push_back(Node("break","break")); }
          ;
 funcname : Name											{ $$ = Node("funcname",""); $$.children.push_back($1);}
 		 | Name COLON Name								{ $$ = Node("funcname",""); $$.children.push_back($1); $$.children.push_back(Node("colon",":")); $$.children.push_back($3); }
