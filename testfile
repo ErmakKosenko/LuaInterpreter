@@ -1,7 +1,29 @@
-a=10
-
-while( a < 20 )
-do
-   print "value of a:"
-   a = a+1
+local function Ordered()
+ 
+  local key2val, nextkey, firstkey = {}, {}, {}
+  nextkey[nextkey] = firstkey
+ 
+  local function onext(self, key)
+    while key ~= nil do
+      key = nextkey[key]
+      local val = self[key]
+      if val ~= nil then return key, val end
+    end
+  end
+ 
+  local selfmeta = firstkey
+ 
+  selfmeta.__nextkey = nextkey
+ 
+  function selfmeta:__newindex(key, val)
+    rawset(self, key, val)
+    if nextkey[key] == nil then 
+      nextkey[nextkey[nextkey]] = key
+      nextkey[nextkey] = key
+    end
+  end
+ 
+  function selfmeta:__pairs() return onext, self, firstkey end
+ 
+  return setmetatable(key2val, selfmeta)
 end

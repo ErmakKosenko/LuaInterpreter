@@ -245,7 +245,7 @@ functioncall : prefixexp args				{ $$ = Node("functioncall",""); $$.children.pus
 			 ;
 
 args : LEFTPARENTHESES  RIGHTPARENTHESES		{ $$ = Node("args",""); $$.children.push_back(Node("leftparentheses","(")); $$.children.push_back(Node("rightparentheses",")")); }
-	 | LEFTPARENTHESES parlist RIGHTPARENTHESES	{ $$ = Node("args",""); $$.children.push_back(Node("leftparentheses","(")); $$.children.push_back($2); $$.children.push_back(Node("rightparentheses",")"));}
+	 | LEFTPARENTHESES explist RIGHTPARENTHESES	{ $$ = Node("args",""); $$.children.push_back(Node("leftparentheses","(")); $$.children.push_back($2); $$.children.push_back(Node("rightparentheses",")"));}
 	 | tableconstructor							{ $$ = Node("args",""); $$.children.push_back($1); }
 	 | String									{ $$ = Node("args",""); $$.children.push_back($1); }
 	 ;
