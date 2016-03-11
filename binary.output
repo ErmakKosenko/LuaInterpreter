@@ -1,5 +1,5 @@
 State 23 conflicts: 1 reduce/reduce
-State 48 conflicts: 2 shift/reduce
+State 48 conflicts: 1 shift/reduce
 State 55 conflicts: 1 shift/reduce
 State 81 conflicts: 1 shift/reduce
 State 111 conflicts: 15 shift/reduce
@@ -141,13 +141,13 @@ Grammar
    98      | Name EQUAL exp
    99      | exp
 
-  100 fieldsep: COLON
+  100 fieldsep: COMMA
   101         | SEMICOLON
 
   102 binop: PLUS
   103      | MINUS
   104      | MULTIPLY
-  105      | FORWARDSLASH
+  105      | DEVIDE
   106      | CARET
   107      | PERCENT
   108      | DOTDOT
@@ -193,7 +193,7 @@ WHILE (278) 16
 PLUS (279) 102
 MINUS (280) 103 117
 MULTIPLY (281) 104
-FORWARDSLASH (282) 105
+DEVIDE (282) 105
 PERCENT (283) 107
 CARET (284) 106
 HASHTAG (285) 119
@@ -211,8 +211,8 @@ RIGHTBRACES (296) 89 90
 LEFTBRACKET (297) 45 97
 RIGHTBRACKET (298) 45 97
 SEMICOLON (299) 8 10 12 101
-COLON (300) 35 37 78 100
-COMMA (301) 22 23 42 43 49 50 53 54 87
+COLON (300) 35 37 78
+COMMA (301) 22 23 42 43 49 50 53 54 87 100
 DOT (302) 38 39 46
 DOTDOT (303) 108
 DOTDOTDOT (304) 64 87 88
@@ -941,7 +941,7 @@ State 44
     PLUS            shift, and go to state 97
     MINUS           shift, and go to state 98
     MULTIPLY        shift, and go to state 99
-    FORWARDSLASH    shift, and go to state 100
+    DEVIDE          shift, and go to state 100
     PERCENT         shift, and go to state 101
     CARET           shift, and go to state 102
     EQUALTO         shift, and go to state 103
@@ -992,7 +992,6 @@ State 48
     STRING           shift, and go to state 42
 
     LEFTPARENTHESES  [reduce using rule 66 (exp_layer)]
-    COLON            [reduce using rule 66 (exp_layer)]
     $default         reduce using rule 66 (exp_layer)
 
     String            go to state 74
@@ -1147,7 +1146,7 @@ State 59
     PLUS            shift, and go to state 97
     MINUS           shift, and go to state 98
     MULTIPLY        shift, and go to state 99
-    FORWARDSLASH    shift, and go to state 100
+    DEVIDE          shift, and go to state 100
     PERCENT         shift, and go to state 101
     CARET           shift, and go to state 102
     EQUALTO         shift, and go to state 103
@@ -1175,7 +1174,7 @@ State 60
     PLUS            shift, and go to state 97
     MINUS           shift, and go to state 98
     MULTIPLY        shift, and go to state 99
-    FORWARDSLASH    shift, and go to state 100
+    DEVIDE          shift, and go to state 100
     PERCENT         shift, and go to state 101
     CARET           shift, and go to state 102
     EQUALTO         shift, and go to state 103
@@ -1199,7 +1198,7 @@ State 61
     PLUS              shift, and go to state 97
     MINUS             shift, and go to state 98
     MULTIPLY          shift, and go to state 99
-    FORWARDSLASH      shift, and go to state 100
+    DEVIDE            shift, and go to state 100
     PERCENT           shift, and go to state 101
     CARET             shift, and go to state 102
     EQUALTO           shift, and go to state 103
@@ -1629,7 +1628,7 @@ State 90
     PLUS            shift, and go to state 97
     MINUS           shift, and go to state 98
     MULTIPLY        shift, and go to state 99
-    FORWARDSLASH    shift, and go to state 100
+    DEVIDE          shift, and go to state 100
     PERCENT         shift, and go to state 101
     CARET           shift, and go to state 102
     EQUALTO         shift, and go to state 103
@@ -1670,7 +1669,7 @@ State 93
    94          | field . fieldlist_layer fieldsep
 
     SEMICOLON  shift, and go to state 143
-    COLON      shift, and go to state 144
+    COMMA      shift, and go to state 144
 
     $default  reduce using rule 91 (fieldlist)
 
@@ -1749,7 +1748,7 @@ State 99
 
 State 100
 
-  105 binop: FORWARDSLASH .
+  105 binop: DEVIDE .
 
     $default  reduce using rule 105 (binop)
 
@@ -1857,7 +1856,7 @@ State 111
     PLUS            shift, and go to state 97
     MINUS           shift, and go to state 98
     MULTIPLY        shift, and go to state 99
-    FORWARDSLASH    shift, and go to state 100
+    DEVIDE          shift, and go to state 100
     PERCENT         shift, and go to state 101
     CARET           shift, and go to state 102
     EQUALTO         shift, and go to state 103
@@ -1873,7 +1872,7 @@ State 111
     PLUS            [reduce using rule 57 (exp)]
     MINUS           [reduce using rule 57 (exp)]
     MULTIPLY        [reduce using rule 57 (exp)]
-    FORWARDSLASH    [reduce using rule 57 (exp)]
+    DEVIDE          [reduce using rule 57 (exp)]
     PERCENT         [reduce using rule 57 (exp)]
     CARET           [reduce using rule 57 (exp)]
     EQUALTO         [reduce using rule 57 (exp)]
@@ -1978,7 +1977,7 @@ State 115
     PLUS            shift, and go to state 97
     MINUS           shift, and go to state 98
     MULTIPLY        shift, and go to state 99
-    FORWARDSLASH    shift, and go to state 100
+    DEVIDE          shift, and go to state 100
     PERCENT         shift, and go to state 101
     CARET           shift, and go to state 102
     EQUALTO         shift, and go to state 103
@@ -2101,7 +2100,7 @@ State 125
     PLUS            shift, and go to state 97
     MINUS           shift, and go to state 98
     MULTIPLY        shift, and go to state 99
-    FORWARDSLASH    shift, and go to state 100
+    DEVIDE          shift, and go to state 100
     PERCENT         shift, and go to state 101
     CARET           shift, and go to state 102
     EQUALTO         shift, and go to state 103
@@ -2154,7 +2153,7 @@ State 129
     PLUS            shift, and go to state 97
     MINUS           shift, and go to state 98
     MULTIPLY        shift, and go to state 99
-    FORWARDSLASH    shift, and go to state 100
+    DEVIDE          shift, and go to state 100
     PERCENT         shift, and go to state 101
     CARET           shift, and go to state 102
     EQUALTO         shift, and go to state 103
@@ -2282,7 +2281,7 @@ State 140
     PLUS            shift, and go to state 97
     MINUS           shift, and go to state 98
     MULTIPLY        shift, and go to state 99
-    FORWARDSLASH    shift, and go to state 100
+    DEVIDE          shift, and go to state 100
     PERCENT         shift, and go to state 101
     CARET           shift, and go to state 102
     EQUALTO         shift, and go to state 103
@@ -2347,7 +2346,7 @@ State 143
 
 State 144
 
-  100 fieldsep: COLON .
+  100 fieldsep: COMMA .
 
     $default  reduce using rule 100 (fieldsep)
 
@@ -2359,7 +2358,7 @@ State 145
    96 fieldlist_layer: fieldlist_layer . fieldsep field
 
     SEMICOLON  shift, and go to state 143
-    COLON      shift, and go to state 144
+    COMMA      shift, and go to state 144
 
     $default  reduce using rule 92 (fieldlist)
 
@@ -2457,7 +2456,7 @@ State 152
     PLUS            shift, and go to state 97
     MINUS           shift, and go to state 98
     MULTIPLY        shift, and go to state 99
-    FORWARDSLASH    shift, and go to state 100
+    DEVIDE          shift, and go to state 100
     PERCENT         shift, and go to state 101
     CARET           shift, and go to state 102
     EQUALTO         shift, and go to state 103
@@ -2667,7 +2666,7 @@ State 168
     PLUS            shift, and go to state 97
     MINUS           shift, and go to state 98
     MULTIPLY        shift, and go to state 99
-    FORWARDSLASH    shift, and go to state 100
+    DEVIDE          shift, and go to state 100
     PERCENT         shift, and go to state 101
     CARET           shift, and go to state 102
     EQUALTO         shift, and go to state 103
@@ -2838,7 +2837,7 @@ State 177
     PLUS            shift, and go to state 97
     MINUS           shift, and go to state 98
     MULTIPLY        shift, and go to state 99
-    FORWARDSLASH    shift, and go to state 100
+    DEVIDE          shift, and go to state 100
     PERCENT         shift, and go to state 101
     CARET           shift, and go to state 102
     EQUALTO         shift, and go to state 103
@@ -2933,7 +2932,7 @@ State 184
     PLUS            shift, and go to state 97
     MINUS           shift, and go to state 98
     MULTIPLY        shift, and go to state 99
-    FORWARDSLASH    shift, and go to state 100
+    DEVIDE          shift, and go to state 100
     PERCENT         shift, and go to state 101
     CARET           shift, and go to state 102
     EQUALTO         shift, and go to state 103
@@ -3108,7 +3107,7 @@ State 192
     PLUS            shift, and go to state 97
     MINUS           shift, and go to state 98
     MULTIPLY        shift, and go to state 99
-    FORWARDSLASH    shift, and go to state 100
+    DEVIDE          shift, and go to state 100
     PERCENT         shift, and go to state 101
     CARET           shift, and go to state 102
     EQUALTO         shift, and go to state 103
@@ -3180,7 +3179,7 @@ State 196
     PLUS            shift, and go to state 97
     MINUS           shift, and go to state 98
     MULTIPLY        shift, and go to state 99
-    FORWARDSLASH    shift, and go to state 100
+    DEVIDE          shift, and go to state 100
     PERCENT         shift, and go to state 101
     CARET           shift, and go to state 102
     EQUALTO         shift, and go to state 103
@@ -3212,7 +3211,7 @@ State 198
     PLUS            shift, and go to state 97
     MINUS           shift, and go to state 98
     MULTIPLY        shift, and go to state 99
-    FORWARDSLASH    shift, and go to state 100
+    DEVIDE          shift, and go to state 100
     PERCENT         shift, and go to state 101
     CARET           shift, and go to state 102
     EQUALTO         shift, and go to state 103

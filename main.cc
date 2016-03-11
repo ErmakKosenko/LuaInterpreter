@@ -12,6 +12,8 @@ int main(int argc, char **argv) {
   if (!parser.parse()) {
       //root.dump();
       root.dotFormat();
+      root.interpret();
+      root.shuntingYardAlgo("4+4");
     //  DO SHIT
   }
   return 0;

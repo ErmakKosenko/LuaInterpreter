@@ -332,7 +332,7 @@ namespace yy {
       // PLUS
       // MINUS
       // MULTIPLY
-      // FORWARDSLASH
+      // DEVIDE
       // PERCENT
       // CARET
       // HASHTAG
@@ -406,7 +406,7 @@ namespace yy {
         PLUS = 279,
         MINUS = 280,
         MULTIPLY = 281,
-        FORWARDSLASH = 282,
+        DEVIDE = 282,
         PERCENT = 283,
         CARET = 284,
         HASHTAG = 285,
@@ -629,7 +629,7 @@ namespace yy {
 
     static inline
     symbol_type
-    make_FORWARDSLASH (const std::string& v);
+    make_DEVIDE (const std::string& v);
 
     static inline
     symbol_type
@@ -1087,7 +1087,7 @@ namespace yy {
       case 24: // PLUS
       case 25: // MINUS
       case 26: // MULTIPLY
-      case 27: // FORWARDSLASH
+      case 27: // DEVIDE
       case 28: // PERCENT
       case 29: // CARET
       case 30: // HASHTAG
@@ -1198,7 +1198,7 @@ namespace yy {
       case 24: // PLUS
       case 25: // MINUS
       case 26: // MULTIPLY
-      case 27: // FORWARDSLASH
+      case 27: // DEVIDE
       case 28: // PERCENT
       case 29: // CARET
       case 30: // HASHTAG
@@ -1335,7 +1335,7 @@ namespace yy {
       case 24: // PLUS
       case 25: // MINUS
       case 26: // MULTIPLY
-      case 27: // FORWARDSLASH
+      case 27: // DEVIDE
       case 28: // PERCENT
       case 29: // CARET
       case 30: // HASHTAG
@@ -1444,7 +1444,7 @@ namespace yy {
       case 24: // PLUS
       case 25: // MINUS
       case 26: // MULTIPLY
-      case 27: // FORWARDSLASH
+      case 27: // DEVIDE
       case 28: // PERCENT
       case 29: // CARET
       case 30: // HASHTAG
@@ -1684,9 +1684,9 @@ namespace yy {
   }
 
   parser::symbol_type
-  parser::make_FORWARDSLASH (const std::string& v)
+  parser::make_DEVIDE (const std::string& v)
   {
-    return symbol_type (token::FORWARDSLASH, v);
+    return symbol_type (token::DEVIDE, v);
   }
 
   parser::symbol_type
