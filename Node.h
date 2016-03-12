@@ -1,9 +1,9 @@
 
-#include <vector>
+#include <list>
 #include <stack>
 
 struct Container {
-	std::vector<std::string> values;
+	std::list<std::string> values;
 };
 
 
@@ -76,7 +76,7 @@ class Node {
 					information = e.evaluateFunctioncall();
 				}
 			}
-
+			/*
 			std::cout << std::endl << "Prefix: " << information.values[0] << std::endl;
 			std::cout << "Args: " << information.values[1];
 			std::cout << std::endl << std::endl << "_______PROGRAM OUTPUT________" << std::endl;
@@ -86,7 +86,7 @@ class Node {
 				std::cout << information.values[1];
 			}
 			std::cout << std::endl;
-
+			*/
 		}
 
 		Container evaluateFunctioncall() {
@@ -120,7 +120,7 @@ class Node {
 					prefixexp += e.evaluateVar();
 				} else if (e.tag == "functioncall") {
 					functionInformation = e.evaluateFunctioncall();
-					prefixexp += functionInformation.values[1];
+					//prefixexp += functionInformation.values[1];
 				} else if (e.tag == "leftparentheses") {
 					//prefixexp += e.value;
 				} else if (e.tag == "exp") {
@@ -172,119 +172,102 @@ class Node {
 
 		std::string evaluateExplist(){
 			std::string explist = "";
+			std::string newToken = "";
+			int val1, val2;
 			for (Node e : children) {
 				if (e.tag == "exp") {
-					explist += e.evaluateExp();
+					newToken = e.evaluateExp();
+					val1 = std::stoi(newToken);
+					if (explist != "") {
+						val2 = std::stoi(explist);
+						val1 += val2;
+					}
+					explist = std::to_string(val1);
 				} else if (e.tag == "comma") {
 					explist += e.value;
 				}
 			}
+			std::cout << explist;
 			return explist;
 		}
 
 		std::string evaluateExp() {
-			std::string exp = "", temp = "";
-			std::list<std::string> values;
-			std::list<std::string> output;
-			std::stack<std::string> operatorStack;
+			std::list<std::string> operatorList;
+			std::string retvalue = "", currentToken = "", lastOp = "";
+			int currentValue, retrivedValue, tokenOperation;
+
 			for (Node e : children) {
-				if (e.tag == "nil") {
-					exp += e.value;
-				} else if (e.tag == "false") {
-					exp += e.value;
-				} else if (e.tag == "true") {
-					exp += e.value;
-				} else if (e.tag == "integer") {
-					values.push_back(e.value);
-					exp += e.value;
-				} else if (e.tag == "decimal") {
-					exp += e.value;
-					values.push_back(e.value);
-				} else if (e.tag == "powerof") {
-					exp += e.value;
-					values.push_back(e.value);
-				} else if (e.tag == "hexadecimal") {
-					exp += e.value;
-					values.push_back(e.value);
-				} else if (e.tag == "string") {
-					exp += e.value;
-				} else if (e.tag == "dotdotdot") {
-					exp += e.value;
-				} else if (e.tag == "function") {
-
-				} else if (e.tag == "prefixexp") {
-					temp = e.evaluatePrefixexp();
-					exp += temp;
-					values.push_back(temp);
-				} else if (e.tag == "tableconstructor") {
-
-				} else if (e.tag == "binop") {
-					values.push_back(e.value);
-					exp += e.value;
-					/*
-					int val1, val2;
-					std::string sval1, sval2;
-					std::string binop = e.value;
-					exp += e.value;
-					sval1 = values.top();
-					values.pop();
-					sval2 = values.top();
-					values.pop();
-					val1 = std::stoi(sval1);
-					val2 = std::stoi(sval2);
-					if (binop == "+") {
-						val1 = val2 + val1;
-					} else if (binop == "-") {
-						val1 = val2 - val1;
-					} else if (binop == "*") {
-						val1 = val2 * val1;
-					} else if (binop == "/") {
-						std::cout << "/////" << val1 << " " << val2;
-						val1 = val2 / val1;
-					} else if (binop == "^") {
-						int temp1 = val2;
-						for(int i = 1; i < val1; i++)
-							val2 = val2 * temp1;
-						val1 = val2;
-					} else if (binop == "%") {
-						val1 = val2 % val1;
-						std::cout << "VAL!%%%%" << val1;
-					}
-					values.push(std::to_string(val1));
-					*/
-				} else if (e.tag == "unop") {
-					exp += e.value;
-					//values.push(e.value);
+				if (e.tag == "term") {
+					retvalue = e.evaluateTerm();
+					operatorList.push_back(retvalue);
+				} else if (e.tag == "exp") {
+					retvalue = e.evaluateExp();
+					operatorList.push_front(retvalue);
+				} else if (e.tag == "binop" && e.value == "+") {
+					operatorList.push_back("plus");
+				} else if ((e.tag == "binop" || e.tag == "unop") && e.value == "-") {
+					operatorList.push_back("minus");
+				} else if (e.tag == "unop" && e.value == "not") {
+					operatorList.push_back("not");
+				} else if (e.tag == "unop" && e.value == "hashtag") {
+					operatorList.push_back("hashtag");
 				}
 			}
-			/*
-			while (!values.empty()) {
-				std::string currentToken = values.front();
-				std::string operatorToken = "";
-				values.pop_front();
-				if (currentToken != "+" || currentToken != "-" || currentToken != "*" || currentToken != "/" || currentToken != "" || currentToken != "%+") {
-					output.push_back(currentToken);
-				} else if (true) {
-					while (!operatorStack.empty() && currentToken ) {
-						operatorToken = operatorStack.top();
-					}
-				}
-			}
-			*/
 
-
-			for (std::string e : values) {
+			for (std::string e : operatorList) {
 				std::cout << e << " ";
 			}
 			std::cout << std::endl;
-			return exp;
+
+			currentToken = operatorList.front();
+			operatorList.pop_front();
+
+			if (currentToken == "-") {
+				int oldValue = std::stoi(currentToken);
+				oldValue = oldValue - 2*oldValue;
+				operatorList.pop_front();
+				operatorList.push_front(std::to_string(oldValue));
+			} else if (currentToken == "not") {
+				std::cout << "NOT IMPLEMENTED!";
+			} else if (currentToken == "hashtag") {
+				std::cout << "NOT IMPLEMENTED!";
+			} else {
+				operatorList.push_front(currentToken);
+			}
+			currentValue = 0;
+
+			for (std::string e : operatorList) {
+				std::cout << e << " ";
+			}
+
+			while (!operatorList.empty()) {
+				currentToken = operatorList.front();
+				operatorList.pop_front();
+				std::cout << "CurrentToken: " << currentToken;
+				if (currentToken == "minus") {
+					lastOp = "minus";
+					currentToken = operatorList.front();
+					operatorList.pop_front();
+					currentValue = retrivedValue - std::stoi(currentToken);
+				} else if (currentToken == "plus") {
+					currentToken = operatorList.front();
+					operatorList.pop_front();
+					currentValue = retrivedValue + std::stoi(currentToken);
+				} else {
+					retrivedValue = std::stoi(currentToken);
+				}
+			}
+			std::cout << currentValue << "    ";
+			return std::to_string(currentValue);
 		}
 
-		std::string shuntingYardAlgo(std::string input) {
-			std::stack<std::string> operatorStack;
-			std::string output;
+		std::string evaluateTerm() {
 
-			return "";
+			if (children.size() == 1 && children.front().tag == "integer") {
+				return children.front().value;
+			}
+
+			return "20";
 		}
 
 };

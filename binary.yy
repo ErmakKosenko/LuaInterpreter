@@ -73,6 +73,12 @@
 %token <std::string> STRING
 %token <std::string> NAME
 
+%precedence THEN
+%precedence ELSE
+
+%left LESSTHAN GREATERTHAN EQUAL LESSOREQUAL GREATEROREQUAL
+%left PLUS MINUS
+%left MULTIPLY DEVIDE
 
 
 %type <Node> S
@@ -95,6 +101,8 @@
 %type <Node> exp
 %type <Node> exp_layer
 %type <Node> exp_trail
+%type <Node> factor
+%type <Node> term
 %type <Node> Number
 %type <Node> Name
 %type <Node> String
@@ -203,25 +211,53 @@ explist_layer : exp COMMA				{ $$ = Node("explist_layer",""); $$.children.push_b
 			  | explist_layer exp COMMA { $$ = $1; $$.children.push_back($1); $$.children.push_back(Node("comma",",")); }
 			  ;
 
-
+/*
 exp : exp_layer				{ $$ = Node("exp",""); $$.children.push_back($1); }
- 	| exp binop exp_trail	{ $$ = Node("exp",""); for(Node e : $1.children){$$.children.push_back(e);} $$.children.push_back($3); $$.children.push_back($2); }
+ 	| exp binop exp_layer	{ $$ = Node("exp",""); for(Node e : $1.children){$$.children.push_back(e);} $$.children.push_back($2); $$.children.push_back($3); }
 	| unop exp				{ $$ = Node("exp",""); $$.children.push_back($1); $$.children.push_back($2); }
 	;
 
 exp_trail : exp_layer {$$ = $1;}
 		  ;
+*/
+
+exp : exp PLUS term 		{ $$ = Node("exp",""); $$.children.push_back($1); $$.children.push_back(Node("binop",$2)); $$.children.push_back($3); }
+	| exp MINUS term		{ $$ = Node("exp",""); $$.children.push_back($1); $$.children.push_back(Node("binop",$2)); $$.children.push_back($3);}
+	| term					{ $$ = $1; }
+	| MINUS exp				{ $$ = $2; $$.children.push_front(Node("unop",$1)); }
+	| NOT exp				{ $$ = $2; $$.children.push_front(Node("unop",$1)); }
+	| HASHTAG exp			{ $$ = $2; $$.children.push_front(Node("unop",$1)); }
+	;
+
+term : term MULTIPLY exp_layer			{ $$ = Node("term",""); $$.children.push_back($1); $$.children.push_back(Node("binop",$2)); $$.children.push_back($3);}
+ 	 | term DEVIDE exp_layer			{ $$ = Node("term",""); $$.children.push_back($1); $$.children.push_back(Node("binop",$2)); $$.children.push_back($3); }
+	 | term PERCENT exp_layer 			{ $$ = Node("term",""); $$.children.push_back($1); $$.children.push_back(Node("binop",$2)); $$.children.push_back($3);}
+	 | term DOTDOT exp_layer 			{ $$ = Node("term",""); $$.children.push_back($1); $$.children.push_back(Node("binop",$2)); $$.children.push_back($3);}
+	 | term LESSTHAN exp_layer 			{ $$ = Node("term",""); $$.children.push_back($1); $$.children.push_back(Node("binop",$2)); $$.children.push_back($3);}
+	 | term LESSOREQUAL exp_layer 		{ $$ = Node("term",""); $$.children.push_back($1); $$.children.push_back(Node("binop",$2)); $$.children.push_back($3);}
+	 | term GREATERTHAN exp_layer 		{ $$ = Node("term",""); $$.children.push_back($1); $$.children.push_back(Node("binop",$2)); $$.children.push_back($3);}
+	 | term GREATEROREQUAL exp_layer	{ $$ = Node("term",""); $$.children.push_back($1); $$.children.push_back(Node("binop",$2)); $$.children.push_back($3);}
+	 | term EQUALTO exp_layer 			{ $$ = Node("term",""); $$.children.push_back($1); $$.children.push_back(Node("binop",$2)); $$.children.push_back($3);}
+	 | term TILDEEQUAL exp_layer 		{ $$ = Node("term",""); $$.children.push_back($1); $$.children.push_back(Node("binop",$2)); $$.children.push_back($3);}
+	 | term AND exp_layer 				{ $$ = Node("term",""); $$.children.push_back($1); $$.children.push_back(Node("binop",$2)); $$.children.push_back($3);}
+	 | term OR exp_layer 				{ $$ = Node("term",""); $$.children.push_back($1); $$.children.push_back(Node("binop",$2)); $$.children.push_back($3);}
+	 | exp_layer						{ $$ = Node("term",""); $$.children.push_back($1); }
+	 ;
+
+factor : exp_layer									{ $$ = Node("factor",""); $$.children.push_back($1); }
+	   ;
 
 exp_layer : NIL					{ $$ = Node("nil",$1);}
-		  | FALSE				{ $$ = Node("false",$1);}
-		  | TRUE				{ $$ = Node("true",$1);}
-		  | Number				{ $$ = $1;}
-		  | String				{ $$ = $1;}
-		  | DOTDOTDOT			{ $$ = Node("dotdotdot",$1);}
-		  | function			{ $$ = $1;}
-		  | prefixexp			{ $$ = $1;}
-		  | tableconstructor	{ $$ = $1;}
-		  ;
+	   	  | FALSE				{ $$ = Node("false",$1);}
+	   	  | TRUE				{ $$ = Node("true",$1);}
+	   	  | Number				{ $$ = $1;}
+	      | String				{ $$ = $1;}
+	      | DOTDOTDOT			{ $$ = Node("dotdotdot",$1);}
+	      | function			{ $$ = $1;}
+	      | prefixexp			{ $$ = $1;}
+	      | tableconstructor	{ $$ = $1;}
+	      ;
+
 
 Number : INTEGER				{ $$ = Node("integer", $1); }
 	   | DECIMAL				{ $$ = Node("decimal", $1);}

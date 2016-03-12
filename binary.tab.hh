@@ -288,7 +288,7 @@ namespace yy {
       // explist
       // explist_layer
       // exp
-      // exp_trail
+      // term
       // exp_layer
       // Number
       // Name
@@ -304,8 +304,6 @@ namespace yy {
       // fieldlist_layer
       // field
       // fieldsep
-      // binop
-      // unop
       char dummy1[sizeof(Node)];
 
       // AND
@@ -800,7 +798,7 @@ namespace yy {
     /// \param yyvalue   the value to check
     static bool yy_table_value_is_error_ (int yyvalue);
 
-    static const signed char yypact_ninf_;
+    static const short int yypact_ninf_;
     static const signed char yytable_ninf_;
 
     /// Convert a scanner token number \a t to a symbol number.
@@ -817,7 +815,7 @@ namespace yy {
   static const unsigned char yydefact_[];
 
   // YYPGOTO[NTERM-NUM].
-  static const signed char yypgoto_[];
+  static const short int yypgoto_[];
 
   // YYDEFGOTO[NTERM-NUM].
   static const short int yydefgoto_[];
@@ -939,8 +937,8 @@ namespace yy {
     enum
     {
       yyeof_ = 0,
-      yylast_ = 770,     ///< Last index in yytable_.
-      yynnts_ = 37,  ///< Number of nonterminal symbols.
+      yylast_ = 426,     ///< Last index in yytable_.
+      yynnts_ = 35,  ///< Number of nonterminal symbols.
       yyempty_ = -2,
       yyfinal_ = 62, ///< Termination state number.
       yyterror_ = 1,
@@ -1042,7 +1040,7 @@ namespace yy {
       case 72: // explist
       case 73: // explist_layer
       case 74: // exp
-      case 75: // exp_trail
+      case 75: // term
       case 76: // exp_layer
       case 77: // Number
       case 78: // Name
@@ -1058,8 +1056,6 @@ namespace yy {
       case 88: // fieldlist_layer
       case 89: // field
       case 90: // fieldsep
-      case 91: // binop
-      case 92: // unop
         value.copy< Node > (other.value);
         break;
 
@@ -1153,7 +1149,7 @@ namespace yy {
       case 72: // explist
       case 73: // explist_layer
       case 74: // exp
-      case 75: // exp_trail
+      case 75: // term
       case 76: // exp_layer
       case 77: // Number
       case 78: // Name
@@ -1169,8 +1165,6 @@ namespace yy {
       case 88: // fieldlist_layer
       case 89: // field
       case 90: // fieldsep
-      case 91: // binop
-      case 92: // unop
         value.copy< Node > (v);
         break;
 
@@ -1290,7 +1284,7 @@ namespace yy {
       case 72: // explist
       case 73: // explist_layer
       case 74: // exp
-      case 75: // exp_trail
+      case 75: // term
       case 76: // exp_layer
       case 77: // Number
       case 78: // Name
@@ -1306,8 +1300,6 @@ namespace yy {
       case 88: // fieldlist_layer
       case 89: // field
       case 90: // fieldsep
-      case 91: // binop
-      case 92: // unop
         value.template destroy< Node > ();
         break;
 
@@ -1399,7 +1391,7 @@ namespace yy {
       case 72: // explist
       case 73: // explist_layer
       case 74: // exp
-      case 75: // exp_trail
+      case 75: // term
       case 76: // exp_layer
       case 77: // Number
       case 78: // Name
@@ -1415,8 +1407,6 @@ namespace yy {
       case 88: // fieldlist_layer
       case 89: // field
       case 90: // fieldsep
-      case 91: // binop
-      case 92: // unop
         value.move< Node > (s.value);
         break;
 
@@ -1860,7 +1850,7 @@ namespace yy {
 
 
 } // yy
-#line 1864 "binary.tab.hh" // lalr1.cc:372
+#line 1854 "binary.tab.hh" // lalr1.cc:372
 
 
 

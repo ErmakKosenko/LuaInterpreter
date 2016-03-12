@@ -1,8 +1,47 @@
+Nonterminals useless in grammar
+
+   factor
+   binop
+   unop
+   exp_trail
+
+
+Terminals unused in grammar
+
+   CARET
+
+
+Rules useless in grammar
+
+  117 factor: exp_layer
+
+  118 binop: PLUS
+  119      | MINUS
+  120      | MULTIPLY
+  121      | DEVIDE
+  122      | CARET
+  123      | PERCENT
+  124      | DOTDOT
+  125      | LESSTHAN
+  126      | LESSOREQUAL
+  127      | GREATERTHAN
+  128      | GREATEROREQUAL
+  129      | EQUALTO
+  130      | TILDEEQUAL
+  131      | AND
+  132      | OR
+
+  133 unop: MINUS
+  134     | NOT
+  135     | HASHTAG
+
+
 State 23 conflicts: 1 reduce/reduce
-State 48 conflicts: 1 shift/reduce
+State 49 conflicts: 1 shift/reduce
 State 55 conflicts: 1 shift/reduce
 State 81 conflicts: 1 shift/reduce
-State 111 conflicts: 15 shift/reduce
+State 88 conflicts: 2 shift/reduce
+State 90 conflicts: 2 shift/reduce
 
 
 Grammar
@@ -80,148 +119,143 @@ Grammar
    53 explist_layer: exp COMMA
    54              | explist_layer exp COMMA
 
-   55 exp: exp_layer
-   56    | exp binop exp_trail
-   57    | unop exp
+   55 exp: exp PLUS term
+   56    | exp MINUS term
+   57    | term
+   58    | MINUS exp
+   59    | NOT exp
+   60    | HASHTAG exp
 
-   58 exp_trail: exp_layer
+   61 term: term MULTIPLY exp_layer
+   62     | term DEVIDE exp_layer
+   63     | term PERCENT exp_layer
+   64     | term DOTDOT exp_layer
+   65     | term LESSTHAN exp_layer
+   66     | term LESSOREQUAL exp_layer
+   67     | term GREATERTHAN exp_layer
+   68     | term GREATEROREQUAL exp_layer
+   69     | term EQUALTO exp_layer
+   70     | term TILDEEQUAL exp_layer
+   71     | term AND exp_layer
+   72     | term OR exp_layer
+   73     | exp_layer
 
-   59 exp_layer: NIL
-   60          | FALSE
-   61          | TRUE
-   62          | Number
-   63          | String
-   64          | DOTDOTDOT
-   65          | function
-   66          | prefixexp
-   67          | tableconstructor
+   74 exp_layer: NIL
+   75          | FALSE
+   76          | TRUE
+   77          | Number
+   78          | String
+   79          | DOTDOTDOT
+   80          | function
+   81          | prefixexp
+   82          | tableconstructor
 
-   68 Number: INTEGER
-   69       | DECIMAL
-   70       | POWEROF
-   71       | HEXADECIMAL
+   83 Number: INTEGER
+   84       | DECIMAL
+   85       | POWEROF
+   86       | HEXADECIMAL
 
-   72 Name: NAME
+   87 Name: NAME
 
-   73 String: STRING
+   88 String: STRING
 
-   74 prefixexp: var
-   75          | functioncall
-   76          | LEFTPARENTHESES exp RIGHTPARENTHESES
+   89 prefixexp: var
+   90          | functioncall
+   91          | LEFTPARENTHESES exp RIGHTPARENTHESES
 
-   77 functioncall: prefixexp args
-   78             | prefixexp COLON Name args
+   92 functioncall: prefixexp args
+   93             | prefixexp COLON Name args
 
-   79 args: LEFTPARENTHESES RIGHTPARENTHESES
-   80     | LEFTPARENTHESES explist RIGHTPARENTHESES
-   81     | tableconstructor
-   82     | String
+   94 args: LEFTPARENTHESES RIGHTPARENTHESES
+   95     | LEFTPARENTHESES explist RIGHTPARENTHESES
+   96     | tableconstructor
+   97     | String
 
-   83 function: FUNCTION funcbody
+   98 function: FUNCTION funcbody
 
-   84 funcbody: LEFTPARENTHESES RIGHTPARENTHESES block end
-   85         | LEFTPARENTHESES parlist RIGHTPARENTHESES block end
+   99 funcbody: LEFTPARENTHESES RIGHTPARENTHESES block end
+  100         | LEFTPARENTHESES parlist RIGHTPARENTHESES block end
 
-   86 parlist: namelist
-   87        | namelist COMMA DOTDOTDOT
-   88        | DOTDOTDOT
+  101 parlist: namelist
+  102        | namelist COMMA DOTDOTDOT
+  103        | DOTDOTDOT
 
-   89 tableconstructor: LEFTBRACES RIGHTBRACES
-   90                 | LEFTBRACES fieldlist RIGHTBRACES
+  104 tableconstructor: LEFTBRACES RIGHTBRACES
+  105                 | LEFTBRACES fieldlist RIGHTBRACES
 
-   91 fieldlist: field
-   92          | field fieldlist_layer
-   93          | field fieldsep
-   94          | field fieldlist_layer fieldsep
+  106 fieldlist: field
+  107          | field fieldlist_layer
+  108          | field fieldsep
+  109          | field fieldlist_layer fieldsep
 
-   95 fieldlist_layer: fieldsep field
-   96                | fieldlist_layer fieldsep field
+  110 fieldlist_layer: fieldsep field
+  111                | fieldlist_layer fieldsep field
 
-   97 field: LEFTBRACKET exp RIGHTBRACKET EQUAL exp
-   98      | Name EQUAL exp
-   99      | exp
+  112 field: LEFTBRACKET exp RIGHTBRACKET EQUAL exp
+  113      | Name EQUAL exp
+  114      | exp
 
-  100 fieldsep: COMMA
-  101         | SEMICOLON
-
-  102 binop: PLUS
-  103      | MINUS
-  104      | MULTIPLY
-  105      | DEVIDE
-  106      | CARET
-  107      | PERCENT
-  108      | DOTDOT
-  109      | LESSTHAN
-  110      | LESSOREQUAL
-  111      | GREATERTHAN
-  112      | GREATEROREQUAL
-  113      | EQUALTO
-  114      | TILDEEQUAL
-  115      | AND
-  116      | OR
-
-  117 unop: MINUS
-  118     | NOT
-  119     | HASHTAG
+  115 fieldsep: COMMA
+  116         | SEMICOLON
 
 
 Terminals, with rules where they appear
 
 "end of file" (0) 0
 error (256)
-AND (258) 115
+AND (258) 71
 BREAK (259) 33
 DO (260) 15 16 22 23 24
 ELSE (261) 19 21
 ELSEIF (262) 29 30
-end (263) 15 16 18 19 20 21 22 23 24 84 85
-FALSE (264) 60
+end (263) 15 16 18 19 20 21 22 23 24 99 100
+FALSE (264) 75
 FOR (265) 22 23 24
-FUNCTION (266) 25 26 83
+FUNCTION (266) 25 26 98
 IF (267) 18 19 20 21
 IN (268) 24
 LOCAL (269) 26 27 28
-NIL (270) 59
-NOT (271) 118
-OR (272) 116
+NIL (270) 74
+NOT (271) 59
+OR (272) 72
 REPEAT (273) 17
 RETURN (274) 31 32
 THEN (275) 18 19 20 21 29 30
-TRUE (276) 61
+TRUE (276) 76
 UNTIL (277) 17
 WHILE (278) 16
-PLUS (279) 102
-MINUS (280) 103 117
-MULTIPLY (281) 104
-DEVIDE (282) 105
-PERCENT (283) 107
-CARET (284) 106
-HASHTAG (285) 119
-EQUALTO (286) 113
-TILDEEQUAL (287) 114
-LESSOREQUAL (288) 110
-GREATEROREQUAL (289) 112
-LESSTHAN (290) 109
-GREATERTHAN (291) 111
-EQUAL (292) 13 22 23 28 97 98
-LEFTPARENTHESES (293) 76 79 80 84 85
-RIGHTPARENTHESES (294) 76 79 80 84 85
-LEFTBRACES (295) 89 90
-RIGHTBRACES (296) 89 90
-LEFTBRACKET (297) 45 97
-RIGHTBRACKET (298) 45 97
-SEMICOLON (299) 8 10 12 101
-COLON (300) 35 37 78
-COMMA (301) 22 23 42 43 49 50 53 54 87 100
+PLUS (279) 55
+MINUS (280) 56 58
+MULTIPLY (281) 61
+DEVIDE (282) 62
+PERCENT (283) 63
+CARET (284)
+HASHTAG (285) 60
+EQUALTO (286) 69
+TILDEEQUAL (287) 70
+LESSOREQUAL (288) 66
+GREATEROREQUAL (289) 68
+LESSTHAN (290) 65
+GREATERTHAN (291) 67
+EQUAL (292) 13 22 23 28 112 113
+LEFTPARENTHESES (293) 91 94 95 99 100
+RIGHTPARENTHESES (294) 91 94 95 99 100
+LEFTBRACES (295) 104 105
+RIGHTBRACES (296) 104 105
+LEFTBRACKET (297) 45 112
+RIGHTBRACKET (298) 45 112
+SEMICOLON (299) 8 10 12 116
+COLON (300) 35 37 93
+COMMA (301) 22 23 42 43 49 50 53 54 102 115
 DOT (302) 38 39 46
-DOTDOT (303) 108
-DOTDOTDOT (304) 64 87 88
-INTEGER (305) 68
-DECIMAL (306) 69
-POWEROF (307) 70
-HEXADECIMAL (308) 71
-STRING (309) 73
-NAME (310) 72
+DOTDOT (303) 64
+DOTDOTDOT (304) 79 102 103
+INTEGER (305) 83
+DECIMAL (306) 84
+POWEROF (307) 85
+HEXADECIMAL (308) 86
+STRING (309) 88
+NAME (310) 87
 
 
 Nonterminals, with rules where they appear
@@ -231,8 +265,8 @@ $accept (56)
 S (57)
     on left: 1, on right: 0
 block (58)
-    on left: 2, on right: 1 15 16 17 18 19 20 21 22 23 24 29 30 84
-    85
+    on left: 2, on right: 1 15 16 17 18 19 20 21 22 23 24 29 30 99
+    100
 chunk (59)
     on left: 3 4 5 6, on right: 2
 chunk_layer (60)
@@ -255,56 +289,53 @@ varlist (67)
 varlist_layer (68)
     on left: 42 43, on right: 41 43
 var (69)
-    on left: 44 45 46, on right: 40 41 42 43 74
+    on left: 44 45 46, on right: 40 41 42 43 89
 namelist (70)
-    on left: 47 48, on right: 24 27 28 86 87
+    on left: 47 48, on right: 24 27 28 101 102
 namelist_layer (71)
     on left: 49 50, on right: 48 50
 explist (72)
-    on left: 51 52, on right: 13 24 28 32 80
+    on left: 51 52, on right: 13 24 28 32 95
 explist_layer (73)
     on left: 53 54, on right: 52 54
 exp (74)
-    on left: 55 56 57, on right: 16 17 18 19 20 21 22 23 29 30 45 51
-    52 53 54 56 57 76 97 98 99
-exp_trail (75)
-    on left: 58, on right: 56
+    on left: 55 56 57 58 59 60, on right: 16 17 18 19 20 21 22 23 29
+    30 45 51 52 53 54 55 56 58 59 60 91 112 113 114
+term (75)
+    on left: 61 62 63 64 65 66 67 68 69 70 71 72 73, on right: 55 56
+    57 61 62 63 64 65 66 67 68 69 70 71 72
 exp_layer (76)
-    on left: 59 60 61 62 63 64 65 66 67, on right: 55 58
+    on left: 74 75 76 77 78 79 80 81 82, on right: 61 62 63 64 65 66
+    67 68 69 70 71 72 73
 Number (77)
-    on left: 68 69 70 71, on right: 62
+    on left: 83 84 85 86, on right: 77
 Name (78)
-    on left: 72, on right: 22 23 26 34 35 36 37 38 39 44 46 47 48 49
-    50 78 98
+    on left: 87, on right: 22 23 26 34 35 36 37 38 39 44 46 47 48 49
+    50 93 113
 String (79)
-    on left: 73, on right: 63 82
+    on left: 88, on right: 78 97
 prefixexp (80)
-    on left: 74 75 76, on right: 45 46 66 77 78
+    on left: 89 90 91, on right: 45 46 81 92 93
 functioncall (81)
-    on left: 77 78, on right: 14 75
+    on left: 92 93, on right: 14 90
 args (82)
-    on left: 79 80 81 82, on right: 77 78
+    on left: 94 95 96 97, on right: 92 93
 function (83)
-    on left: 83, on right: 65
+    on left: 98, on right: 80
 funcbody (84)
-    on left: 84 85, on right: 25 26 83
+    on left: 99 100, on right: 25 26 98
 parlist (85)
-    on left: 86 87 88, on right: 85
+    on left: 101 102 103, on right: 100
 tableconstructor (86)
-    on left: 89 90, on right: 67 81
+    on left: 104 105, on right: 82 96
 fieldlist (87)
-    on left: 91 92 93 94, on right: 90
+    on left: 106 107 108 109, on right: 105
 fieldlist_layer (88)
-    on left: 95 96, on right: 92 94 96
+    on left: 110 111, on right: 107 109 111
 field (89)
-    on left: 97 98 99, on right: 91 92 93 94 95 96
+    on left: 112 113 114, on right: 106 107 108 109 110 111
 fieldsep (90)
-    on left: 100 101, on right: 93 94 95 96
-binop (91)
-    on left: 102 103 104 105 106 107 108 109 110 111 112 113 114 115
-    116, on right: 56
-unop (92)
-    on left: 117 118 119, on right: 57
+    on left: 115 116, on right: 108 109 110 111
 
 
 State 0
@@ -425,15 +456,15 @@ State 5
 
     var               go to state 43
     exp               go to state 44
-    exp_layer         go to state 45
-    Number            go to state 46
+    term              go to state 45
+    exp_layer         go to state 46
+    Number            go to state 47
     Name              go to state 21
-    String            go to state 47
-    prefixexp         go to state 48
-    functioncall      go to state 49
-    function          go to state 50
-    tableconstructor  go to state 51
-    unop              go to state 52
+    String            go to state 48
+    prefixexp         go to state 49
+    functioncall      go to state 50
+    function          go to state 51
+    tableconstructor  go to state 52
 
 
 State 6
@@ -508,15 +539,15 @@ State 8
     explist           go to state 57
     explist_layer     go to state 58
     exp               go to state 59
-    exp_layer         go to state 45
-    Number            go to state 46
+    term              go to state 45
+    exp_layer         go to state 46
+    Number            go to state 47
     Name              go to state 21
-    String            go to state 47
-    prefixexp         go to state 48
-    functioncall      go to state 49
-    function          go to state 50
-    tableconstructor  go to state 51
-    unop              go to state 52
+    String            go to state 48
+    prefixexp         go to state 49
+    functioncall      go to state 50
+    function          go to state 51
+    tableconstructor  go to state 52
 
 
 State 9
@@ -542,20 +573,20 @@ State 9
 
     var               go to state 43
     exp               go to state 60
-    exp_layer         go to state 45
-    Number            go to state 46
+    term              go to state 45
+    exp_layer         go to state 46
+    Number            go to state 47
     Name              go to state 21
-    String            go to state 47
-    prefixexp         go to state 48
-    functioncall      go to state 49
-    function          go to state 50
-    tableconstructor  go to state 51
-    unop              go to state 52
+    String            go to state 48
+    prefixexp         go to state 49
+    functioncall      go to state 50
+    function          go to state 51
+    tableconstructor  go to state 52
 
 
 State 10
 
-   76 prefixexp: LEFTPARENTHESES . exp RIGHTPARENTHESES
+   91 prefixexp: LEFTPARENTHESES . exp RIGHTPARENTHESES
 
     FALSE            shift, and go to state 29
     FUNCTION         shift, and go to state 30
@@ -576,22 +607,22 @@ State 10
 
     var               go to state 43
     exp               go to state 61
-    exp_layer         go to state 45
-    Number            go to state 46
+    term              go to state 45
+    exp_layer         go to state 46
+    Number            go to state 47
     Name              go to state 21
-    String            go to state 47
-    prefixexp         go to state 48
-    functioncall      go to state 49
-    function          go to state 50
-    tableconstructor  go to state 51
-    unop              go to state 52
+    String            go to state 48
+    prefixexp         go to state 49
+    functioncall      go to state 50
+    function          go to state 51
+    tableconstructor  go to state 52
 
 
 State 11
 
-   72 Name: NAME .
+   87 Name: NAME .
 
-    $default  reduce using rule 72 (Name)
+    $default  reduce using rule 87 (Name)
 
 
 State 12
@@ -684,12 +715,12 @@ State 20
 
    40 varlist: var .
    41        | var . varlist_layer
-   74 prefixexp: var .
+   89 prefixexp: var .
 
     COMMA  shift, and go to state 68
 
     EQUAL     reduce using rule 40 (varlist)
-    $default  reduce using rule 74 (prefixexp)
+    $default  reduce using rule 89 (prefixexp)
 
     varlist_layer  go to state 69
 
@@ -705,8 +736,8 @@ State 22
 
    45 var: prefixexp . LEFTBRACKET exp RIGHTBRACKET
    46    | prefixexp . DOT Name
-   77 functioncall: prefixexp . args
-   78             | prefixexp . COLON Name args
+   92 functioncall: prefixexp . args
+   93             | prefixexp . COLON Name args
 
     LEFTPARENTHESES  shift, and go to state 70
     LEFTBRACES       shift, and go to state 36
@@ -723,15 +754,15 @@ State 22
 State 23
 
    14 stat: functioncall .
-   75 prefixexp: functioncall .
+   90 prefixexp: functioncall .
 
     LEFTPARENTHESES  reduce using rule 14 (stat)
-    LEFTPARENTHESES  [reduce using rule 75 (prefixexp)]
-    LEFTBRACES       reduce using rule 75 (prefixexp)
-    LEFTBRACKET      reduce using rule 75 (prefixexp)
-    COLON            reduce using rule 75 (prefixexp)
-    DOT              reduce using rule 75 (prefixexp)
-    STRING           reduce using rule 75 (prefixexp)
+    LEFTPARENTHESES  [reduce using rule 90 (prefixexp)]
+    LEFTBRACES       reduce using rule 90 (prefixexp)
+    LEFTBRACKET      reduce using rule 90 (prefixexp)
+    COLON            reduce using rule 90 (prefixexp)
+    DOT              reduce using rule 90 (prefixexp)
+    STRING           reduce using rule 90 (prefixexp)
     $default         reduce using rule 14 (stat)
 
 
@@ -790,14 +821,14 @@ State 28
 
 State 29
 
-   60 exp_layer: FALSE .
+   75 exp_layer: FALSE .
 
-    $default  reduce using rule 60 (exp_layer)
+    $default  reduce using rule 75 (exp_layer)
 
 
 State 30
 
-   83 function: FUNCTION . funcbody
+   98 function: FUNCTION . funcbody
 
     LEFTPARENTHESES  shift, and go to state 82
 
@@ -806,43 +837,14 @@ State 30
 
 State 31
 
-   59 exp_layer: NIL .
+   74 exp_layer: NIL .
 
-    $default  reduce using rule 59 (exp_layer)
+    $default  reduce using rule 74 (exp_layer)
 
 
 State 32
 
-  118 unop: NOT .
-
-    $default  reduce using rule 118 (unop)
-
-
-State 33
-
-   61 exp_layer: TRUE .
-
-    $default  reduce using rule 61 (exp_layer)
-
-
-State 34
-
-  117 unop: MINUS .
-
-    $default  reduce using rule 117 (unop)
-
-
-State 35
-
-  119 unop: HASHTAG .
-
-    $default  reduce using rule 119 (unop)
-
-
-State 36
-
-   89 tableconstructor: LEFTBRACES . RIGHTBRACES
-   90                 | LEFTBRACES . fieldlist RIGHTBRACES
+   59 exp: NOT . exp
 
     FALSE            shift, and go to state 29
     FUNCTION         shift, and go to state 30
@@ -853,8 +855,81 @@ State 36
     HASHTAG          shift, and go to state 35
     LEFTPARENTHESES  shift, and go to state 10
     LEFTBRACES       shift, and go to state 36
-    RIGHTBRACES      shift, and go to state 88
-    LEFTBRACKET      shift, and go to state 89
+    DOTDOTDOT        shift, and go to state 37
+    INTEGER          shift, and go to state 38
+    DECIMAL          shift, and go to state 39
+    POWEROF          shift, and go to state 40
+    HEXADECIMAL      shift, and go to state 41
+    STRING           shift, and go to state 42
+    NAME             shift, and go to state 11
+
+    var               go to state 43
+    exp               go to state 88
+    term              go to state 45
+    exp_layer         go to state 46
+    Number            go to state 47
+    Name              go to state 21
+    String            go to state 48
+    prefixexp         go to state 49
+    functioncall      go to state 50
+    function          go to state 51
+    tableconstructor  go to state 52
+
+
+State 33
+
+   76 exp_layer: TRUE .
+
+    $default  reduce using rule 76 (exp_layer)
+
+
+State 34
+
+   58 exp: MINUS . exp
+
+    FALSE            shift, and go to state 29
+    FUNCTION         shift, and go to state 30
+    NIL              shift, and go to state 31
+    NOT              shift, and go to state 32
+    TRUE             shift, and go to state 33
+    MINUS            shift, and go to state 34
+    HASHTAG          shift, and go to state 35
+    LEFTPARENTHESES  shift, and go to state 10
+    LEFTBRACES       shift, and go to state 36
+    DOTDOTDOT        shift, and go to state 37
+    INTEGER          shift, and go to state 38
+    DECIMAL          shift, and go to state 39
+    POWEROF          shift, and go to state 40
+    HEXADECIMAL      shift, and go to state 41
+    STRING           shift, and go to state 42
+    NAME             shift, and go to state 11
+
+    var               go to state 43
+    exp               go to state 89
+    term              go to state 45
+    exp_layer         go to state 46
+    Number            go to state 47
+    Name              go to state 21
+    String            go to state 48
+    prefixexp         go to state 49
+    functioncall      go to state 50
+    function          go to state 51
+    tableconstructor  go to state 52
+
+
+State 35
+
+   60 exp: HASHTAG . exp
+
+    FALSE            shift, and go to state 29
+    FUNCTION         shift, and go to state 30
+    NIL              shift, and go to state 31
+    NOT              shift, and go to state 32
+    TRUE             shift, and go to state 33
+    MINUS            shift, and go to state 34
+    HASHTAG          shift, and go to state 35
+    LEFTPARENTHESES  shift, and go to state 10
+    LEFTBRACES       shift, and go to state 36
     DOTDOTDOT        shift, and go to state 37
     INTEGER          shift, and go to state 38
     DECIMAL          shift, and go to state 39
@@ -865,164 +940,21 @@ State 36
 
     var               go to state 43
     exp               go to state 90
-    exp_layer         go to state 45
-    Number            go to state 46
-    Name              go to state 91
-    String            go to state 47
-    prefixexp         go to state 48
-    functioncall      go to state 49
-    function          go to state 50
-    tableconstructor  go to state 51
-    fieldlist         go to state 92
-    field             go to state 93
-    unop              go to state 52
-
-
-State 37
-
-   64 exp_layer: DOTDOTDOT .
-
-    $default  reduce using rule 64 (exp_layer)
-
-
-State 38
-
-   68 Number: INTEGER .
-
-    $default  reduce using rule 68 (Number)
-
-
-State 39
-
-   69 Number: DECIMAL .
-
-    $default  reduce using rule 69 (Number)
-
-
-State 40
-
-   70 Number: POWEROF .
-
-    $default  reduce using rule 70 (Number)
-
-
-State 41
-
-   71 Number: HEXADECIMAL .
-
-    $default  reduce using rule 71 (Number)
-
-
-State 42
-
-   73 String: STRING .
-
-    $default  reduce using rule 73 (String)
-
-
-State 43
-
-   74 prefixexp: var .
-
-    $default  reduce using rule 74 (prefixexp)
-
-
-State 44
-
-   18 stat: IF exp . THEN block end
-   19     | IF exp . THEN block ELSE block end
-   20     | IF exp . THEN block elseif_layer end
-   21     | IF exp . THEN block elseif_layer ELSE block end
-   56 exp: exp . binop exp_trail
-
-    AND             shift, and go to state 94
-    OR              shift, and go to state 95
-    THEN            shift, and go to state 96
-    PLUS            shift, and go to state 97
-    MINUS           shift, and go to state 98
-    MULTIPLY        shift, and go to state 99
-    DEVIDE          shift, and go to state 100
-    PERCENT         shift, and go to state 101
-    CARET           shift, and go to state 102
-    EQUALTO         shift, and go to state 103
-    TILDEEQUAL      shift, and go to state 104
-    LESSOREQUAL     shift, and go to state 105
-    GREATEROREQUAL  shift, and go to state 106
-    LESSTHAN        shift, and go to state 107
-    GREATERTHAN     shift, and go to state 108
-    DOTDOT          shift, and go to state 109
-
-    binop  go to state 110
-
-
-State 45
-
-   55 exp: exp_layer .
-
-    $default  reduce using rule 55 (exp)
-
-
-State 46
-
-   62 exp_layer: Number .
-
-    $default  reduce using rule 62 (exp_layer)
-
-
-State 47
-
-   63 exp_layer: String .
-
-    $default  reduce using rule 63 (exp_layer)
-
-
-State 48
-
-   45 var: prefixexp . LEFTBRACKET exp RIGHTBRACKET
-   46    | prefixexp . DOT Name
-   66 exp_layer: prefixexp .
-   77 functioncall: prefixexp . args
-   78             | prefixexp . COLON Name args
-
-    LEFTPARENTHESES  shift, and go to state 70
-    LEFTBRACES       shift, and go to state 36
-    LEFTBRACKET      shift, and go to state 71
-    COLON            shift, and go to state 72
-    DOT              shift, and go to state 73
-    STRING           shift, and go to state 42
-
-    LEFTPARENTHESES  [reduce using rule 66 (exp_layer)]
-    $default         reduce using rule 66 (exp_layer)
-
-    String            go to state 74
-    args              go to state 75
-    tableconstructor  go to state 76
-
-
-State 49
-
-   75 prefixexp: functioncall .
-
-    $default  reduce using rule 75 (prefixexp)
-
-
-State 50
-
-   65 exp_layer: function .
-
-    $default  reduce using rule 65 (exp_layer)
-
-
-State 51
-
-   67 exp_layer: tableconstructor .
-
-    $default  reduce using rule 67 (exp_layer)
-
-
-State 52
-
-   57 exp: unop . exp
+    term              go to state 45
+    exp_layer         go to state 46
+    Number            go to state 47
+    Name              go to state 21
+    String            go to state 48
+    prefixexp         go to state 49
+    functioncall      go to state 50
+    function          go to state 51
+    tableconstructor  go to state 52
+
+
+State 36
+
+  104 tableconstructor: LEFTBRACES . RIGHTBRACES
+  105                 | LEFTBRACES . fieldlist RIGHTBRACES
 
     FALSE            shift, and go to state 29
     FUNCTION         shift, and go to state 30
@@ -1033,6 +965,8 @@ State 52
     HASHTAG          shift, and go to state 35
     LEFTPARENTHESES  shift, and go to state 10
     LEFTBRACES       shift, and go to state 36
+    RIGHTBRACES      shift, and go to state 91
+    LEFTBRACKET      shift, and go to state 92
     DOTDOTDOT        shift, and go to state 37
     INTEGER          shift, and go to state 38
     DECIMAL          shift, and go to state 39
@@ -1042,16 +976,178 @@ State 52
     NAME             shift, and go to state 11
 
     var               go to state 43
-    exp               go to state 111
-    exp_layer         go to state 45
-    Number            go to state 46
-    Name              go to state 21
-    String            go to state 47
-    prefixexp         go to state 48
-    functioncall      go to state 49
-    function          go to state 50
-    tableconstructor  go to state 51
-    unop              go to state 52
+    exp               go to state 93
+    term              go to state 45
+    exp_layer         go to state 46
+    Number            go to state 47
+    Name              go to state 94
+    String            go to state 48
+    prefixexp         go to state 49
+    functioncall      go to state 50
+    function          go to state 51
+    tableconstructor  go to state 52
+    fieldlist         go to state 95
+    field             go to state 96
+
+
+State 37
+
+   79 exp_layer: DOTDOTDOT .
+
+    $default  reduce using rule 79 (exp_layer)
+
+
+State 38
+
+   83 Number: INTEGER .
+
+    $default  reduce using rule 83 (Number)
+
+
+State 39
+
+   84 Number: DECIMAL .
+
+    $default  reduce using rule 84 (Number)
+
+
+State 40
+
+   85 Number: POWEROF .
+
+    $default  reduce using rule 85 (Number)
+
+
+State 41
+
+   86 Number: HEXADECIMAL .
+
+    $default  reduce using rule 86 (Number)
+
+
+State 42
+
+   88 String: STRING .
+
+    $default  reduce using rule 88 (String)
+
+
+State 43
+
+   89 prefixexp: var .
+
+    $default  reduce using rule 89 (prefixexp)
+
+
+State 44
+
+   18 stat: IF exp . THEN block end
+   19     | IF exp . THEN block ELSE block end
+   20     | IF exp . THEN block elseif_layer end
+   21     | IF exp . THEN block elseif_layer ELSE block end
+   55 exp: exp . PLUS term
+   56    | exp . MINUS term
+
+    THEN   shift, and go to state 97
+    PLUS   shift, and go to state 98
+    MINUS  shift, and go to state 99
+
+
+State 45
+
+   57 exp: term .
+   61 term: term . MULTIPLY exp_layer
+   62     | term . DEVIDE exp_layer
+   63     | term . PERCENT exp_layer
+   64     | term . DOTDOT exp_layer
+   65     | term . LESSTHAN exp_layer
+   66     | term . LESSOREQUAL exp_layer
+   67     | term . GREATERTHAN exp_layer
+   68     | term . GREATEROREQUAL exp_layer
+   69     | term . EQUALTO exp_layer
+   70     | term . TILDEEQUAL exp_layer
+   71     | term . AND exp_layer
+   72     | term . OR exp_layer
+
+    AND             shift, and go to state 100
+    OR              shift, and go to state 101
+    MULTIPLY        shift, and go to state 102
+    DEVIDE          shift, and go to state 103
+    PERCENT         shift, and go to state 104
+    EQUALTO         shift, and go to state 105
+    TILDEEQUAL      shift, and go to state 106
+    LESSOREQUAL     shift, and go to state 107
+    GREATEROREQUAL  shift, and go to state 108
+    LESSTHAN        shift, and go to state 109
+    GREATERTHAN     shift, and go to state 110
+    DOTDOT          shift, and go to state 111
+
+    $default  reduce using rule 57 (exp)
+
+
+State 46
+
+   73 term: exp_layer .
+
+    $default  reduce using rule 73 (term)
+
+
+State 47
+
+   77 exp_layer: Number .
+
+    $default  reduce using rule 77 (exp_layer)
+
+
+State 48
+
+   78 exp_layer: String .
+
+    $default  reduce using rule 78 (exp_layer)
+
+
+State 49
+
+   45 var: prefixexp . LEFTBRACKET exp RIGHTBRACKET
+   46    | prefixexp . DOT Name
+   81 exp_layer: prefixexp .
+   92 functioncall: prefixexp . args
+   93             | prefixexp . COLON Name args
+
+    LEFTPARENTHESES  shift, and go to state 70
+    LEFTBRACES       shift, and go to state 36
+    LEFTBRACKET      shift, and go to state 71
+    COLON            shift, and go to state 72
+    DOT              shift, and go to state 73
+    STRING           shift, and go to state 42
+
+    LEFTPARENTHESES  [reduce using rule 81 (exp_layer)]
+    $default         reduce using rule 81 (exp_layer)
+
+    String            go to state 74
+    args              go to state 75
+    tableconstructor  go to state 76
+
+
+State 50
+
+   90 prefixexp: functioncall .
+
+    $default  reduce using rule 90 (prefixexp)
+
+
+State 51
+
+   80 exp_layer: function .
+
+    $default  reduce using rule 80 (exp_layer)
+
+
+State 52
+
+   82 exp_layer: tableconstructor .
+
+    $default  reduce using rule 82 (exp_layer)
 
 
 State 53
@@ -1124,93 +1220,51 @@ State 58
 
     var               go to state 43
     exp               go to state 115
-    exp_layer         go to state 45
-    Number            go to state 46
+    term              go to state 45
+    exp_layer         go to state 46
+    Number            go to state 47
     Name              go to state 21
-    String            go to state 47
-    prefixexp         go to state 48
-    functioncall      go to state 49
-    function          go to state 50
-    tableconstructor  go to state 51
-    unop              go to state 52
+    String            go to state 48
+    prefixexp         go to state 49
+    functioncall      go to state 50
+    function          go to state 51
+    tableconstructor  go to state 52
 
 
 State 59
 
    51 explist: exp .
    53 explist_layer: exp . COMMA
-   56 exp: exp . binop exp_trail
+   55 exp: exp . PLUS term
+   56    | exp . MINUS term
 
-    AND             shift, and go to state 94
-    OR              shift, and go to state 95
-    PLUS            shift, and go to state 97
-    MINUS           shift, and go to state 98
-    MULTIPLY        shift, and go to state 99
-    DEVIDE          shift, and go to state 100
-    PERCENT         shift, and go to state 101
-    CARET           shift, and go to state 102
-    EQUALTO         shift, and go to state 103
-    TILDEEQUAL      shift, and go to state 104
-    LESSOREQUAL     shift, and go to state 105
-    GREATEROREQUAL  shift, and go to state 106
-    LESSTHAN        shift, and go to state 107
-    GREATERTHAN     shift, and go to state 108
-    COMMA           shift, and go to state 116
-    DOTDOT          shift, and go to state 109
+    PLUS   shift, and go to state 98
+    MINUS  shift, and go to state 99
+    COMMA  shift, and go to state 116
 
     $default  reduce using rule 51 (explist)
-
-    binop  go to state 110
 
 
 State 60
 
    16 stat: WHILE exp . DO block end
-   56 exp: exp . binop exp_trail
+   55 exp: exp . PLUS term
+   56    | exp . MINUS term
 
-    AND             shift, and go to state 94
-    DO              shift, and go to state 117
-    OR              shift, and go to state 95
-    PLUS            shift, and go to state 97
-    MINUS           shift, and go to state 98
-    MULTIPLY        shift, and go to state 99
-    DEVIDE          shift, and go to state 100
-    PERCENT         shift, and go to state 101
-    CARET           shift, and go to state 102
-    EQUALTO         shift, and go to state 103
-    TILDEEQUAL      shift, and go to state 104
-    LESSOREQUAL     shift, and go to state 105
-    GREATEROREQUAL  shift, and go to state 106
-    LESSTHAN        shift, and go to state 107
-    GREATERTHAN     shift, and go to state 108
-    DOTDOT          shift, and go to state 109
-
-    binop  go to state 110
+    DO     shift, and go to state 117
+    PLUS   shift, and go to state 98
+    MINUS  shift, and go to state 99
 
 
 State 61
 
-   56 exp: exp . binop exp_trail
-   76 prefixexp: LEFTPARENTHESES exp . RIGHTPARENTHESES
+   55 exp: exp . PLUS term
+   56    | exp . MINUS term
+   91 prefixexp: LEFTPARENTHESES exp . RIGHTPARENTHESES
 
-    AND               shift, and go to state 94
-    OR                shift, and go to state 95
-    PLUS              shift, and go to state 97
-    MINUS             shift, and go to state 98
-    MULTIPLY          shift, and go to state 99
-    DEVIDE            shift, and go to state 100
-    PERCENT           shift, and go to state 101
-    CARET             shift, and go to state 102
-    EQUALTO           shift, and go to state 103
-    TILDEEQUAL        shift, and go to state 104
-    LESSOREQUAL       shift, and go to state 105
-    GREATEROREQUAL    shift, and go to state 106
-    LESSTHAN          shift, and go to state 107
-    GREATERTHAN       shift, and go to state 108
+    PLUS              shift, and go to state 98
+    MINUS             shift, and go to state 99
     RIGHTPARENTHESES  shift, and go to state 118
-    DOTDOT            shift, and go to state 109
-
-    binop  go to state 110
 
 
 State 62
@@ -1276,15 +1330,15 @@ State 67
     explist           go to state 120
     explist_layer     go to state 58
     exp               go to state 59
-    exp_layer         go to state 45
-    Number            go to state 46
+    term              go to state 45
+    exp_layer         go to state 46
+    Number            go to state 47
     Name              go to state 21
-    String            go to state 47
-    prefixexp         go to state 48
-    functioncall      go to state 49
-    function          go to state 50
-    tableconstructor  go to state 51
-    unop              go to state 52
+    String            go to state 48
+    prefixexp         go to state 49
+    functioncall      go to state 50
+    function          go to state 51
+    tableconstructor  go to state 52
 
 
 State 68
@@ -1297,7 +1351,7 @@ State 68
     var           go to state 121
     Name          go to state 21
     prefixexp     go to state 22
-    functioncall  go to state 49
+    functioncall  go to state 50
 
 
 State 69
@@ -1312,8 +1366,8 @@ State 69
 
 State 70
 
-   79 args: LEFTPARENTHESES . RIGHTPARENTHESES
-   80     | LEFTPARENTHESES . explist RIGHTPARENTHESES
+   94 args: LEFTPARENTHESES . RIGHTPARENTHESES
+   95     | LEFTPARENTHESES . explist RIGHTPARENTHESES
 
     FALSE             shift, and go to state 29
     FUNCTION          shift, and go to state 30
@@ -1337,15 +1391,15 @@ State 70
     explist           go to state 124
     explist_layer     go to state 58
     exp               go to state 59
-    exp_layer         go to state 45
-    Number            go to state 46
+    term              go to state 45
+    exp_layer         go to state 46
+    Number            go to state 47
     Name              go to state 21
-    String            go to state 47
-    prefixexp         go to state 48
-    functioncall      go to state 49
-    function          go to state 50
-    tableconstructor  go to state 51
-    unop              go to state 52
+    String            go to state 48
+    prefixexp         go to state 49
+    functioncall      go to state 50
+    function          go to state 51
+    tableconstructor  go to state 52
 
 
 State 71
@@ -1371,20 +1425,20 @@ State 71
 
     var               go to state 43
     exp               go to state 125
-    exp_layer         go to state 45
-    Number            go to state 46
+    term              go to state 45
+    exp_layer         go to state 46
+    Number            go to state 47
     Name              go to state 21
-    String            go to state 47
-    prefixexp         go to state 48
-    functioncall      go to state 49
-    function          go to state 50
-    tableconstructor  go to state 51
-    unop              go to state 52
+    String            go to state 48
+    prefixexp         go to state 49
+    functioncall      go to state 50
+    function          go to state 51
+    tableconstructor  go to state 52
 
 
 State 72
 
-   78 functioncall: prefixexp COLON . Name args
+   93 functioncall: prefixexp COLON . Name args
 
     NAME  shift, and go to state 11
 
@@ -1402,23 +1456,23 @@ State 73
 
 State 74
 
-   82 args: String .
+   97 args: String .
 
-    $default  reduce using rule 82 (args)
+    $default  reduce using rule 97 (args)
 
 
 State 75
 
-   77 functioncall: prefixexp args .
+   92 functioncall: prefixexp args .
 
-    $default  reduce using rule 77 (functioncall)
+    $default  reduce using rule 92 (functioncall)
 
 
 State 76
 
-   81 args: tableconstructor .
+   96 args: tableconstructor .
 
-    $default  reduce using rule 81 (args)
+    $default  reduce using rule 96 (args)
 
 
 State 77
@@ -1453,15 +1507,15 @@ State 78
     explist           go to state 128
     explist_layer     go to state 58
     exp               go to state 59
-    exp_layer         go to state 45
-    Number            go to state 46
+    term              go to state 45
+    exp_layer         go to state 46
+    Number            go to state 47
     Name              go to state 21
-    String            go to state 47
-    prefixexp         go to state 48
-    functioncall      go to state 49
-    function          go to state 50
-    tableconstructor  go to state 51
-    unop              go to state 52
+    String            go to state 48
+    prefixexp         go to state 49
+    functioncall      go to state 50
+    function          go to state 51
+    tableconstructor  go to state 52
 
 
 State 79
@@ -1488,15 +1542,15 @@ State 79
 
     var               go to state 43
     exp               go to state 129
-    exp_layer         go to state 45
-    Number            go to state 46
+    term              go to state 45
+    exp_layer         go to state 46
+    Number            go to state 47
     Name              go to state 21
-    String            go to state 47
-    prefixexp         go to state 48
-    functioncall      go to state 49
-    function          go to state 50
-    tableconstructor  go to state 51
-    unop              go to state 52
+    String            go to state 48
+    prefixexp         go to state 49
+    functioncall      go to state 50
+    function          go to state 51
+    tableconstructor  go to state 52
 
 
 State 80
@@ -1521,8 +1575,8 @@ State 81
 
 State 82
 
-   84 funcbody: LEFTPARENTHESES . RIGHTPARENTHESES block end
-   85         | LEFTPARENTHESES . parlist RIGHTPARENTHESES block end
+   99 funcbody: LEFTPARENTHESES . RIGHTPARENTHESES block end
+  100         | LEFTPARENTHESES . parlist RIGHTPARENTHESES block end
 
     RIGHTPARENTHESES  shift, and go to state 132
     DOTDOTDOT         shift, and go to state 133
@@ -1572,21 +1626,58 @@ State 86
 
 State 87
 
-   83 function: FUNCTION funcbody .
+   98 function: FUNCTION funcbody .
 
-    $default  reduce using rule 83 (function)
+    $default  reduce using rule 98 (function)
 
 
 State 88
 
-   89 tableconstructor: LEFTBRACES RIGHTBRACES .
+   55 exp: exp . PLUS term
+   56    | exp . MINUS term
+   59    | NOT exp .
 
-    $default  reduce using rule 89 (tableconstructor)
+    PLUS   shift, and go to state 98
+    MINUS  shift, and go to state 99
+
+    PLUS      [reduce using rule 59 (exp)]
+    MINUS     [reduce using rule 59 (exp)]
+    $default  reduce using rule 59 (exp)
 
 
 State 89
 
-   97 field: LEFTBRACKET . exp RIGHTBRACKET EQUAL exp
+   55 exp: exp . PLUS term
+   56    | exp . MINUS term
+   58    | MINUS exp .
+
+    $default  reduce using rule 58 (exp)
+
+
+State 90
+
+   55 exp: exp . PLUS term
+   56    | exp . MINUS term
+   60    | HASHTAG exp .
+
+    PLUS   shift, and go to state 98
+    MINUS  shift, and go to state 99
+
+    PLUS      [reduce using rule 60 (exp)]
+    MINUS     [reduce using rule 60 (exp)]
+    $default  reduce using rule 60 (exp)
+
+
+State 91
+
+  104 tableconstructor: LEFTBRACES RIGHTBRACES .
+
+    $default  reduce using rule 104 (tableconstructor)
+
+
+State 92
+
+  112 field: LEFTBRACKET . exp RIGHTBRACKET EQUAL exp
 
     FALSE            shift, and go to state 29
     FUNCTION         shift, and go to state 30
@@ -1607,91 +1698,63 @@ State 89
 
     var               go to state 43
     exp               go to state 140
-    exp_layer         go to state 45
-    Number            go to state 46
+    term              go to state 45
+    exp_layer         go to state 46
+    Number            go to state 47
     Name              go to state 21
-    String            go to state 47
-    prefixexp         go to state 48
-    functioncall      go to state 49
-    function          go to state 50
-    tableconstructor  go to state 51
-    unop              go to state 52
+    String            go to state 48
+    prefixexp         go to state 49
+    functioncall      go to state 50
+    function          go to state 51
+    tableconstructor  go to state 52
 
 
-State 90
+State 93
 
-   56 exp: exp . binop exp_trail
-   99 field: exp .
+   55 exp: exp . PLUS term
+   56    | exp . MINUS term
+  114 field: exp .
 
-    AND             shift, and go to state 94
-    OR              shift, and go to state 95
-    PLUS            shift, and go to state 97
-    MINUS           shift, and go to state 98
-    MULTIPLY        shift, and go to state 99
-    DEVIDE          shift, and go to state 100
-    PERCENT         shift, and go to state 101
-    CARET           shift, and go to state 102
-    EQUALTO         shift, and go to state 103
-    TILDEEQUAL      shift, and go to state 104
-    LESSOREQUAL     shift, and go to state 105
-    GREATEROREQUAL  shift, and go to state 106
-    LESSTHAN        shift, and go to state 107
-    GREATERTHAN     shift, and go to state 108
-    DOTDOT          shift, and go to state 109
+    PLUS   shift, and go to state 98
+    MINUS  shift, and go to state 99
 
-    $default  reduce using rule 99 (field)
-
-    binop  go to state 110
+    $default  reduce using rule 114 (field)
 
 
-State 91
+State 94
 
    44 var: Name .
-   98 field: Name . EQUAL exp
+  113 field: Name . EQUAL exp
 
     EQUAL  shift, and go to state 141
 
     $default  reduce using rule 44 (var)
 
 
-State 92
+State 95
 
-   90 tableconstructor: LEFTBRACES fieldlist . RIGHTBRACES
+  105 tableconstructor: LEFTBRACES fieldlist . RIGHTBRACES
 
     RIGHTBRACES  shift, and go to state 142
 
 
-State 93
+State 96
 
-   91 fieldlist: field .
-   92          | field . fieldlist_layer
-   93          | field . fieldsep
-   94          | field . fieldlist_layer fieldsep
+  106 fieldlist: field .
+  107          | field . fieldlist_layer
+  108          | field . fieldsep
+  109          | field . fieldlist_layer fieldsep
 
     SEMICOLON  shift, and go to state 143
     COMMA      shift, and go to state 144
 
-    $default  reduce using rule 91 (fieldlist)
+    $default  reduce using rule 106 (fieldlist)
 
     fieldlist_layer  go to state 145
     fieldsep         go to state 146
 
 
-State 94
-
-  115 binop: AND .
-
-    $default  reduce using rule 115 (binop)
-
-
-State 95
-
-  116 binop: OR .
-
-    $default  reduce using rule 116 (binop)
-
-
-State 96
+State 97
 
    18 stat: IF exp THEN . block end
    19     | IF exp THEN . block ELSE block end
@@ -1725,100 +1788,9 @@ State 96
     functioncall    go to state 23
 
 
-State 97
-
-  102 binop: PLUS .
-
-    $default  reduce using rule 102 (binop)
-
-
 State 98
 
-  103 binop: MINUS .
-
-    $default  reduce using rule 103 (binop)
-
-
-State 99
-
-  104 binop: MULTIPLY .
-
-    $default  reduce using rule 104 (binop)
-
-
-State 100
-
-  105 binop: DEVIDE .
-
-    $default  reduce using rule 105 (binop)
-
-
-State 101
-
-  107 binop: PERCENT .
-
-    $default  reduce using rule 107 (binop)
-
-
-State 102
-
-  106 binop: CARET .
-
-    $default  reduce using rule 106 (binop)
-
-
-State 103
-
-  113 binop: EQUALTO .
-
-    $default  reduce using rule 113 (binop)
-
-
-State 104
-
-  114 binop: TILDEEQUAL .
-
-    $default  reduce using rule 114 (binop)
-
-
-State 105
-
-  110 binop: LESSOREQUAL .
-
-    $default  reduce using rule 110 (binop)
-
-
-State 106
-
-  112 binop: GREATEROREQUAL .
-
-    $default  reduce using rule 112 (binop)
-
-
-State 107
-
-  109 binop: LESSTHAN .
-
-    $default  reduce using rule 109 (binop)
-
-
-State 108
-
-  111 binop: GREATERTHAN .
-
-    $default  reduce using rule 111 (binop)
-
-
-State 109
-
-  108 binop: DOTDOT .
-
-    $default  reduce using rule 108 (binop)
-
-
-State 110
-
-   56 exp: exp binop . exp_trail
+   55 exp: exp PLUS . term
 
     FALSE            shift, and go to state 29
     FUNCTION         shift, and go to state 30
@@ -1835,56 +1807,393 @@ State 110
     NAME             shift, and go to state 11
 
     var               go to state 43
-    exp_trail         go to state 148
-    exp_layer         go to state 149
-    Number            go to state 46
+    term              go to state 148
+    exp_layer         go to state 46
+    Number            go to state 47
     Name              go to state 21
-    String            go to state 47
-    prefixexp         go to state 48
-    functioncall      go to state 49
-    function          go to state 50
-    tableconstructor  go to state 51
+    String            go to state 48
+    prefixexp         go to state 49
+    functioncall      go to state 50
+    function          go to state 51
+    tableconstructor  go to state 52
+
+
+State 99
+
+   56 exp: exp MINUS . term
+
+    FALSE            shift, and go to state 29
+    FUNCTION         shift, and go to state 30
+    NIL              shift, and go to state 31
+    TRUE             shift, and go to state 33
+    LEFTPARENTHESES  shift, and go to state 10
+    LEFTBRACES       shift, and go to state 36
+    DOTDOTDOT        shift, and go to state 37
+    INTEGER          shift, and go to state 38
+    DECIMAL          shift, and go to state 39
+    POWEROF          shift, and go to state 40
+    HEXADECIMAL      shift, and go to state 41
+    STRING           shift, and go to state 42
+    NAME             shift, and go to state 11
+
+    var               go to state 43
+    term              go to state 149
+    exp_layer         go to state 46
+    Number            go to state 47
+    Name              go to state 21
+    String            go to state 48
+    prefixexp         go to state 49
+    functioncall      go to state 50
+    function          go to state 51
+    tableconstructor  go to state 52
+
+
+State 100
+
+   71 term: term AND . exp_layer
+
+    FALSE            shift, and go to state 29
+    FUNCTION         shift, and go to state 30
+    NIL              shift, and go to state 31
+    TRUE             shift, and go to state 33
+    LEFTPARENTHESES  shift, and go to state 10
+    LEFTBRACES       shift, and go to state 36
+    DOTDOTDOT        shift, and go to state 37
+    INTEGER          shift, and go to state 38
+    DECIMAL          shift, and go to state 39
+    POWEROF          shift, and go to state 40
+    HEXADECIMAL      shift, and go to state 41
+    STRING           shift, and go to state 42
+    NAME             shift, and go to state 11
+
+    var               go to state 43
+    exp_layer         go to state 150
+    Number            go to state 47
+    Name              go to state 21
+    String            go to state 48
+    prefixexp         go to state 49
+    functioncall      go to state 50
+    function          go to state 51
+    tableconstructor  go to state 52
+
+
+State 101
+
+   72 term: term OR . exp_layer
+
+    FALSE            shift, and go to state 29
+    FUNCTION         shift, and go to state 30
+    NIL              shift, and go to state 31
+    TRUE             shift, and go to state 33
+    LEFTPARENTHESES  shift, and go to state 10
+    LEFTBRACES       shift, and go to state 36
+    DOTDOTDOT        shift, and go to state 37
+    INTEGER          shift, and go to state 38
+    DECIMAL          shift, and go to state 39
+    POWEROF          shift, and go to state 40
+    HEXADECIMAL      shift, and go to state 41
+    STRING           shift, and go to state 42
+    NAME             shift, and go to state 11
+
+    var               go to state 43
+    exp_layer         go to state 151
+    Number            go to state 47
+    Name              go to state 21
+    String            go to state 48
+    prefixexp         go to state 49
+    functioncall      go to state 50
+    function          go to state 51
+    tableconstructor  go to state 52
+
+
+State 102
+
+   61 term: term MULTIPLY . exp_layer
+
+    FALSE            shift, and go to state 29
+    FUNCTION         shift, and go to state 30
+    NIL              shift, and go to state 31
+    TRUE             shift, and go to state 33
+    LEFTPARENTHESES  shift, and go to state 10
+    LEFTBRACES       shift, and go to state 36
+    DOTDOTDOT        shift, and go to state 37
+    INTEGER          shift, and go to state 38
+    DECIMAL          shift, and go to state 39
+    POWEROF          shift, and go to state 40
+    HEXADECIMAL      shift, and go to state 41
+    STRING           shift, and go to state 42
+    NAME             shift, and go to state 11
+
+    var               go to state 43
+    exp_layer         go to state 152
+    Number            go to state 47
+    Name              go to state 21
+    String            go to state 48
+    prefixexp         go to state 49
+    functioncall      go to state 50
+    function          go to state 51
+    tableconstructor  go to state 52
+
+
+State 103
+
+   62 term: term DEVIDE . exp_layer
+
+    FALSE            shift, and go to state 29
+    FUNCTION         shift, and go to state 30
+    NIL              shift, and go to state 31
+    TRUE             shift, and go to state 33
+    LEFTPARENTHESES  shift, and go to state 10
+    LEFTBRACES       shift, and go to state 36
+    DOTDOTDOT        shift, and go to state 37
+    INTEGER          shift, and go to state 38
+    DECIMAL          shift, and go to state 39
+    POWEROF          shift, and go to state 40
+    HEXADECIMAL      shift, and go to state 41
+    STRING           shift, and go to state 42
+    NAME             shift, and go to state 11
+
+    var               go to state 43
+    exp_layer         go to state 153
+    Number            go to state 47
+    Name              go to state 21
+    String            go to state 48
+    prefixexp         go to state 49
+    functioncall      go to state 50
+    function          go to state 51
+    tableconstructor  go to state 52
+
+
+State 104
+
+   63 term: term PERCENT . exp_layer
+
+    FALSE            shift, and go to state 29
+    FUNCTION         shift, and go to state 30
+    NIL              shift, and go to state 31
+    TRUE             shift, and go to state 33
+    LEFTPARENTHESES  shift, and go to state 10
+    LEFTBRACES       shift, and go to state 36
+    DOTDOTDOT        shift, and go to state 37
+    INTEGER          shift, and go to state 38
+    DECIMAL          shift, and go to state 39
+    POWEROF          shift, and go to state 40
+    HEXADECIMAL      shift, and go to state 41
+    STRING           shift, and go to state 42
+    NAME             shift, and go to state 11
+
+    var               go to state 43
+    exp_layer         go to state 154
+    Number            go to state 47
+    Name              go to state 21
+    String            go to state 48
+    prefixexp         go to state 49
+    functioncall      go to state 50
+    function          go to state 51
+    tableconstructor  go to state 52
+
+
+State 105
+
+   69 term: term EQUALTO . exp_layer
+
+    FALSE            shift, and go to state 29
+    FUNCTION         shift, and go to state 30
+    NIL              shift, and go to state 31
+    TRUE             shift, and go to state 33
+    LEFTPARENTHESES  shift, and go to state 10
+    LEFTBRACES       shift, and go to state 36
+    DOTDOTDOT        shift, and go to state 37
+    INTEGER          shift, and go to state 38
+    DECIMAL          shift, and go to state 39
+    POWEROF          shift, and go to state 40
+    HEXADECIMAL      shift, and go to state 41
+    STRING           shift, and go to state 42
+    NAME             shift, and go to state 11
+
+    var               go to state 43
+    exp_layer         go to state 155
+    Number            go to state 47
+    Name              go to state 21
+    String            go to state 48
+    prefixexp         go to state 49
+    functioncall      go to state 50
+    function          go to state 51
+    tableconstructor  go to state 52
+
+
+State 106
+
+   70 term: term TILDEEQUAL . exp_layer
+
+    FALSE            shift, and go to state 29
+    FUNCTION         shift, and go to state 30
+    NIL              shift, and go to state 31
+    TRUE             shift, and go to state 33
+    LEFTPARENTHESES  shift, and go to state 10
+    LEFTBRACES       shift, and go to state 36
+    DOTDOTDOT        shift, and go to state 37
+    INTEGER          shift, and go to state 38
+    DECIMAL          shift, and go to state 39
+    POWEROF          shift, and go to state 40
+    HEXADECIMAL      shift, and go to state 41
+    STRING           shift, and go to state 42
+    NAME             shift, and go to state 11
+
+    var               go to state 43
+    exp_layer         go to state 156
+    Number            go to state 47
+    Name              go to state 21
+    String            go to state 48
+    prefixexp         go to state 49
+    functioncall      go to state 50
+    function          go to state 51
+    tableconstructor  go to state 52
+
+
+State 107
+
+   66 term: term LESSOREQUAL . exp_layer
+
+    FALSE            shift, and go to state 29
+    FUNCTION         shift, and go to state 30
+    NIL              shift, and go to state 31
+    TRUE             shift, and go to state 33
+    LEFTPARENTHESES  shift, and go to state 10
+    LEFTBRACES       shift, and go to state 36
+    DOTDOTDOT        shift, and go to state 37
+    INTEGER          shift, and go to state 38
+    DECIMAL          shift, and go to state 39
+    POWEROF          shift, and go to state 40
+    HEXADECIMAL      shift, and go to state 41
+    STRING           shift, and go to state 42
+    NAME             shift, and go to state 11
+
+    var               go to state 43
+    exp_layer         go to state 157
+    Number            go to state 47
+    Name              go to state 21
+    String            go to state 48
+    prefixexp         go to state 49
+    functioncall      go to state 50
+    function          go to state 51
+    tableconstructor  go to state 52
+
+
+State 108
+
+   68 term: term GREATEROREQUAL . exp_layer
+
+    FALSE            shift, and go to state 29
+    FUNCTION         shift, and go to state 30
+    NIL              shift, and go to state 31
+    TRUE             shift, and go to state 33
+    LEFTPARENTHESES  shift, and go to state 10
+    LEFTBRACES       shift, and go to state 36
+    DOTDOTDOT        shift, and go to state 37
+    INTEGER          shift, and go to state 38
+    DECIMAL          shift, and go to state 39
+    POWEROF          shift, and go to state 40
+    HEXADECIMAL      shift, and go to state 41
+    STRING           shift, and go to state 42
+    NAME             shift, and go to state 11
+
+    var               go to state 43
+    exp_layer         go to state 158
+    Number            go to state 47
+    Name              go to state 21
+    String            go to state 48
+    prefixexp         go to state 49
+    functioncall      go to state 50
+    function          go to state 51
+    tableconstructor  go to state 52
+
+
+State 109
+
+   65 term: term LESSTHAN . exp_layer
+
+    FALSE            shift, and go to state 29
+    FUNCTION         shift, and go to state 30
+    NIL              shift, and go to state 31
+    TRUE             shift, and go to state 33
+    LEFTPARENTHESES  shift, and go to state 10
+    LEFTBRACES       shift, and go to state 36
+    DOTDOTDOT        shift, and go to state 37
+    INTEGER          shift, and go to state 38
+    DECIMAL          shift, and go to state 39
+    POWEROF          shift, and go to state 40
+    HEXADECIMAL      shift, and go to state 41
+    STRING           shift, and go to state 42
+    NAME             shift, and go to state 11
+
+    var               go to state 43
+    exp_layer         go to state 159
+    Number            go to state 47
+    Name              go to state 21
+    String            go to state 48
+    prefixexp         go to state 49
+    functioncall      go to state 50
+    function          go to state 51
+    tableconstructor  go to state 52
+
+
+State 110
+
+   67 term: term GREATERTHAN . exp_layer
+
+    FALSE            shift, and go to state 29
+    FUNCTION         shift, and go to state 30
+    NIL              shift, and go to state 31
+    TRUE             shift, and go to state 33
+    LEFTPARENTHESES  shift, and go to state 10
+    LEFTBRACES       shift, and go to state 36
+    DOTDOTDOT        shift, and go to state 37
+    INTEGER          shift, and go to state 38
+    DECIMAL          shift, and go to state 39
+    POWEROF          shift, and go to state 40
+    HEXADECIMAL      shift, and go to state 41
+    STRING           shift, and go to state 42
+    NAME             shift, and go to state 11
+
+    var               go to state 43
+    exp_layer         go to state 160
+    Number            go to state 47
+    Name              go to state 21
+    String            go to state 48
+    prefixexp         go to state 49
+    functioncall      go to state 50
+    function          go to state 51
+    tableconstructor  go to state 52
 
 
 State 111
 
-   56 exp: exp . binop exp_trail
-   57    | unop exp .
+   64 term: term DOTDOT . exp_layer
 
-    AND             shift, and go to state 94
-    OR              shift, and go to state 95
-    PLUS            shift, and go to state 97
-    MINUS           shift, and go to state 98
-    MULTIPLY        shift, and go to state 99
-    DEVIDE          shift, and go to state 100
-    PERCENT         shift, and go to state 101
-    CARET           shift, and go to state 102
-    EQUALTO         shift, and go to state 103
-    TILDEEQUAL      shift, and go to state 104
-    LESSOREQUAL     shift, and go to state 105
-    GREATEROREQUAL  shift, and go to state 106
-    LESSTHAN        shift, and go to state 107
-    GREATERTHAN     shift, and go to state 108
-    DOTDOT          shift, and go to state 109
+    FALSE            shift, and go to state 29
+    FUNCTION         shift, and go to state 30
+    NIL              shift, and go to state 31
+    TRUE             shift, and go to state 33
+    LEFTPARENTHESES  shift, and go to state 10
+    LEFTBRACES       shift, and go to state 36
+    DOTDOTDOT        shift, and go to state 37
+    INTEGER          shift, and go to state 38
+    DECIMAL          shift, and go to state 39
+    POWEROF          shift, and go to state 40
+    HEXADECIMAL      shift, and go to state 41
+    STRING           shift, and go to state 42
+    NAME             shift, and go to state 11
 
-    AND             [reduce using rule 57 (exp)]
-    OR              [reduce using rule 57 (exp)]
-    PLUS            [reduce using rule 57 (exp)]
-    MINUS           [reduce using rule 57 (exp)]
-    MULTIPLY        [reduce using rule 57 (exp)]
-    DEVIDE          [reduce using rule 57 (exp)]
-    PERCENT         [reduce using rule 57 (exp)]
-    CARET           [reduce using rule 57 (exp)]
-    EQUALTO         [reduce using rule 57 (exp)]
-    TILDEEQUAL      [reduce using rule 57 (exp)]
-    LESSOREQUAL     [reduce using rule 57 (exp)]
-    GREATEROREQUAL  [reduce using rule 57 (exp)]
-    LESSTHAN        [reduce using rule 57 (exp)]
-    GREATERTHAN     [reduce using rule 57 (exp)]
-    DOTDOT          [reduce using rule 57 (exp)]
-    $default        reduce using rule 57 (exp)
-
-    binop  go to state 110
+    var               go to state 43
+    exp_layer         go to state 161
+    Number            go to state 47
+    Name              go to state 21
+    String            go to state 48
+    prefixexp         go to state 49
+    functioncall      go to state 50
+    function          go to state 51
+    tableconstructor  go to state 52
 
 
 State 112
@@ -1893,7 +2202,7 @@ State 112
 
     LEFTPARENTHESES  shift, and go to state 82
 
-    funcbody  go to state 150
+    funcbody  go to state 162
 
 
 State 113
@@ -1918,18 +2227,18 @@ State 113
     NAME             shift, and go to state 11
 
     var               go to state 43
-    explist           go to state 151
+    explist           go to state 163
     explist_layer     go to state 58
     exp               go to state 59
-    exp_layer         go to state 45
-    Number            go to state 46
+    term              go to state 45
+    exp_layer         go to state 46
+    Number            go to state 47
     Name              go to state 21
-    String            go to state 47
-    prefixexp         go to state 48
-    functioncall      go to state 49
-    function          go to state 50
-    tableconstructor  go to state 51
-    unop              go to state 52
+    String            go to state 48
+    prefixexp         go to state 49
+    functioncall      go to state 50
+    function          go to state 51
+    tableconstructor  go to state 52
 
 
 State 114
@@ -1954,44 +2263,30 @@ State 114
     NAME             shift, and go to state 11
 
     var               go to state 43
-    exp               go to state 152
-    exp_layer         go to state 45
-    Number            go to state 46
+    exp               go to state 164
+    term              go to state 45
+    exp_layer         go to state 46
+    Number            go to state 47
     Name              go to state 21
-    String            go to state 47
-    prefixexp         go to state 48
-    functioncall      go to state 49
-    function          go to state 50
-    tableconstructor  go to state 51
-    unop              go to state 52
+    String            go to state 48
+    prefixexp         go to state 49
+    functioncall      go to state 50
+    function          go to state 51
+    tableconstructor  go to state 52
 
 
 State 115
 
    52 explist: explist_layer exp .
    54 explist_layer: explist_layer exp . COMMA
-   56 exp: exp . binop exp_trail
+   55 exp: exp . PLUS term
+   56    | exp . MINUS term
 
-    AND             shift, and go to state 94
-    OR              shift, and go to state 95
-    PLUS            shift, and go to state 97
-    MINUS           shift, and go to state 98
-    MULTIPLY        shift, and go to state 99
-    DEVIDE          shift, and go to state 100
-    PERCENT         shift, and go to state 101
-    CARET           shift, and go to state 102
-    EQUALTO         shift, and go to state 103
-    TILDEEQUAL      shift, and go to state 104
-    LESSOREQUAL     shift, and go to state 105
-    GREATEROREQUAL  shift, and go to state 106
-    LESSTHAN        shift, and go to state 107
-    GREATERTHAN     shift, and go to state 108
-    COMMA           shift, and go to state 153
-    DOTDOT          shift, and go to state 109
+    PLUS   shift, and go to state 98
+    MINUS  shift, and go to state 99
+    COMMA  shift, and go to state 165
 
     $default  reduce using rule 52 (explist)
-
-    binop  go to state 110
 
 
 State 116
@@ -2019,7 +2314,7 @@ State 117
 
     $default  reduce using rule 3 (chunk)
 
-    block           go to state 154
+    block           go to state 166
     chunk           go to state 14
     chunk_layer     go to state 15
     laststat_layer  go to state 16
@@ -2034,9 +2329,9 @@ State 117
 
 State 118
 
-   76 prefixexp: LEFTPARENTHESES exp RIGHTPARENTHESES .
+   91 prefixexp: LEFTPARENTHESES exp RIGHTPARENTHESES .
 
-    $default  reduce using rule 76 (prefixexp)
+    $default  reduce using rule 91 (prefixexp)
 
 
 State 119
@@ -2056,11 +2351,11 @@ State 120
 State 121
 
    42 varlist_layer: COMMA var .
-   74 prefixexp: var .
+   89 prefixexp: var .
 
     EQUAL     reduce using rule 42 (varlist_layer)
     COMMA     reduce using rule 42 (varlist_layer)
-    $default  reduce using rule 74 (prefixexp)
+    $default  reduce using rule 89 (prefixexp)
 
 
 State 122
@@ -2070,61 +2365,47 @@ State 122
     LEFTPARENTHESES  shift, and go to state 10
     NAME             shift, and go to state 11
 
-    var           go to state 155
+    var           go to state 167
     Name          go to state 21
     prefixexp     go to state 22
-    functioncall  go to state 49
+    functioncall  go to state 50
 
 
 State 123
 
-   79 args: LEFTPARENTHESES RIGHTPARENTHESES .
+   94 args: LEFTPARENTHESES RIGHTPARENTHESES .
 
-    $default  reduce using rule 79 (args)
+    $default  reduce using rule 94 (args)
 
 
 State 124
 
-   80 args: LEFTPARENTHESES explist . RIGHTPARENTHESES
+   95 args: LEFTPARENTHESES explist . RIGHTPARENTHESES
 
-    RIGHTPARENTHESES  shift, and go to state 156
+    RIGHTPARENTHESES  shift, and go to state 168
 
 
 State 125
 
    45 var: prefixexp LEFTBRACKET exp . RIGHTBRACKET
-   56 exp: exp . binop exp_trail
+   55 exp: exp . PLUS term
+   56    | exp . MINUS term
 
-    AND             shift, and go to state 94
-    OR              shift, and go to state 95
-    PLUS            shift, and go to state 97
-    MINUS           shift, and go to state 98
-    MULTIPLY        shift, and go to state 99
-    DEVIDE          shift, and go to state 100
-    PERCENT         shift, and go to state 101
-    CARET           shift, and go to state 102
-    EQUALTO         shift, and go to state 103
-    TILDEEQUAL      shift, and go to state 104
-    LESSOREQUAL     shift, and go to state 105
-    GREATEROREQUAL  shift, and go to state 106
-    LESSTHAN        shift, and go to state 107
-    GREATERTHAN     shift, and go to state 108
-    RIGHTBRACKET    shift, and go to state 157
-    DOTDOT          shift, and go to state 109
-
-    binop  go to state 110
+    PLUS          shift, and go to state 98
+    MINUS         shift, and go to state 99
+    RIGHTBRACKET  shift, and go to state 169
 
 
 State 126
 
-   78 functioncall: prefixexp COLON Name . args
+   93 functioncall: prefixexp COLON Name . args
 
     LEFTPARENTHESES  shift, and go to state 70
     LEFTBRACES       shift, and go to state 36
     STRING           shift, and go to state 42
 
     String            go to state 74
-    args              go to state 158
+    args              go to state 170
     tableconstructor  go to state 76
 
 
@@ -2139,33 +2420,19 @@ State 128
 
    24 stat: FOR namelist IN explist . DO block end
 
-    DO  shift, and go to state 159
+    DO  shift, and go to state 171
 
 
 State 129
 
    22 stat: FOR Name EQUAL exp . COMMA exp DO block end
    23     | FOR Name EQUAL exp . COMMA exp COMMA exp DO block end
-   56 exp: exp . binop exp_trail
+   55 exp: exp . PLUS term
+   56    | exp . MINUS term
 
-    AND             shift, and go to state 94
-    OR              shift, and go to state 95
-    PLUS            shift, and go to state 97
-    MINUS           shift, and go to state 98
-    MULTIPLY        shift, and go to state 99
-    DEVIDE          shift, and go to state 100
-    PERCENT         shift, and go to state 101
-    CARET           shift, and go to state 102
-    EQUALTO         shift, and go to state 103
-    TILDEEQUAL      shift, and go to state 104
-    LESSOREQUAL     shift, and go to state 105
-    GREATEROREQUAL  shift, and go to state 106
-    LESSTHAN        shift, and go to state 107
-    GREATERTHAN     shift, and go to state 108
-    COMMA           shift, and go to state 160
-    DOTDOT          shift, and go to state 109
-
-    binop  go to state 110
+    PLUS   shift, and go to state 98
+    MINUS  shift, and go to state 99
+    COMMA  shift, and go to state 172
 
 
 State 130
@@ -2181,12 +2448,12 @@ State 131
 
     NAME  shift, and go to state 11
 
-    Name  go to state 161
+    Name  go to state 173
 
 
 State 132
 
-   84 funcbody: LEFTPARENTHESES RIGHTPARENTHESES . block end
+   99 funcbody: LEFTPARENTHESES RIGHTPARENTHESES . block end
 
     BREAK            shift, and go to state 1
     DO               shift, and go to state 2
@@ -2202,7 +2469,7 @@ State 132
 
     $default  reduce using rule 3 (chunk)
 
-    block           go to state 162
+    block           go to state 174
     chunk           go to state 14
     chunk_layer     go to state 15
     laststat_layer  go to state 16
@@ -2217,26 +2484,26 @@ State 132
 
 State 133
 
-   88 parlist: DOTDOTDOT .
+  103 parlist: DOTDOTDOT .
 
-    $default  reduce using rule 88 (parlist)
+    $default  reduce using rule 103 (parlist)
 
 
 State 134
 
-   86 parlist: namelist .
-   87        | namelist . COMMA DOTDOTDOT
+  101 parlist: namelist .
+  102        | namelist . COMMA DOTDOTDOT
 
-    COMMA  shift, and go to state 163
+    COMMA  shift, and go to state 175
 
-    $default  reduce using rule 86 (parlist)
+    $default  reduce using rule 101 (parlist)
 
 
 State 135
 
-   85 funcbody: LEFTPARENTHESES parlist . RIGHTPARENTHESES block end
+  100 funcbody: LEFTPARENTHESES parlist . RIGHTPARENTHESES block end
 
-    RIGHTPARENTHESES  shift, and go to state 164
+    RIGHTPARENTHESES  shift, and go to state 176
 
 
 State 136
@@ -2259,7 +2526,7 @@ State 138
 
     NAME  shift, and go to state 11
 
-    Name  go to state 165
+    Name  go to state 177
 
 
 State 139
@@ -2268,37 +2535,23 @@ State 139
 
     NAME  shift, and go to state 11
 
-    Name  go to state 166
+    Name  go to state 178
 
 
 State 140
 
-   56 exp: exp . binop exp_trail
-   97 field: LEFTBRACKET exp . RIGHTBRACKET EQUAL exp
+   55 exp: exp . PLUS term
+   56    | exp . MINUS term
+  112 field: LEFTBRACKET exp . RIGHTBRACKET EQUAL exp
 
-    AND             shift, and go to state 94
-    OR              shift, and go to state 95
-    PLUS            shift, and go to state 97
-    MINUS           shift, and go to state 98
-    MULTIPLY        shift, and go to state 99
-    DEVIDE          shift, and go to state 100
-    PERCENT         shift, and go to state 101
-    CARET           shift, and go to state 102
-    EQUALTO         shift, and go to state 103
-    TILDEEQUAL      shift, and go to state 104
-    LESSOREQUAL     shift, and go to state 105
-    GREATEROREQUAL  shift, and go to state 106
-    LESSTHAN        shift, and go to state 107
-    GREATERTHAN     shift, and go to state 108
-    RIGHTBRACKET    shift, and go to state 167
-    DOTDOT          shift, and go to state 109
-
-    binop  go to state 110
+    PLUS          shift, and go to state 98
+    MINUS         shift, and go to state 99
+    RIGHTBRACKET  shift, and go to state 179
 
 
 State 141
 
-   98 field: Name EQUAL . exp
+  113 field: Name EQUAL . exp
 
     FALSE            shift, and go to state 29
     FUNCTION         shift, and go to state 30
@@ -2318,57 +2571,57 @@ State 141
     NAME             shift, and go to state 11
 
     var               go to state 43
-    exp               go to state 168
-    exp_layer         go to state 45
-    Number            go to state 46
+    exp               go to state 180
+    term              go to state 45
+    exp_layer         go to state 46
+    Number            go to state 47
     Name              go to state 21
-    String            go to state 47
-    prefixexp         go to state 48
-    functioncall      go to state 49
-    function          go to state 50
-    tableconstructor  go to state 51
-    unop              go to state 52
+    String            go to state 48
+    prefixexp         go to state 49
+    functioncall      go to state 50
+    function          go to state 51
+    tableconstructor  go to state 52
 
 
 State 142
 
-   90 tableconstructor: LEFTBRACES fieldlist RIGHTBRACES .
+  105 tableconstructor: LEFTBRACES fieldlist RIGHTBRACES .
 
-    $default  reduce using rule 90 (tableconstructor)
+    $default  reduce using rule 105 (tableconstructor)
 
 
 State 143
 
-  101 fieldsep: SEMICOLON .
+  116 fieldsep: SEMICOLON .
 
-    $default  reduce using rule 101 (fieldsep)
+    $default  reduce using rule 116 (fieldsep)
 
 
 State 144
 
-  100 fieldsep: COMMA .
+  115 fieldsep: COMMA .
 
-    $default  reduce using rule 100 (fieldsep)
+    $default  reduce using rule 115 (fieldsep)
 
 
 State 145
 
-   92 fieldlist: field fieldlist_layer .
-   94          | field fieldlist_layer . fieldsep
-   96 fieldlist_layer: fieldlist_layer . fieldsep field
+  107 fieldlist: field fieldlist_layer .
+  109          | field fieldlist_layer . fieldsep
+  111 fieldlist_layer: fieldlist_layer . fieldsep field
 
     SEMICOLON  shift, and go to state 143
     COMMA      shift, and go to state 144
 
-    $default  reduce using rule 92 (fieldlist)
+    $default  reduce using rule 107 (fieldlist)
 
-    fieldsep  go to state 169
+    fieldsep  go to state 181
 
 
 State 146
 
-   93 fieldlist: field fieldsep .
-   95 fieldlist_layer: fieldsep . field
+  108 fieldlist: field fieldsep .
+  110 fieldlist_layer: fieldsep . field
 
     FALSE            shift, and go to state 29
     FUNCTION         shift, and go to state 30
@@ -2379,7 +2632,7 @@ State 146
     HASHTAG          shift, and go to state 35
     LEFTPARENTHESES  shift, and go to state 10
     LEFTBRACES       shift, and go to state 36
-    LEFTBRACKET      shift, and go to state 89
+    LEFTBRACKET      shift, and go to state 92
     DOTDOTDOT        shift, and go to state 37
     INTEGER          shift, and go to state 38
     DECIMAL          shift, and go to state 39
@@ -2388,20 +2641,20 @@ State 146
     STRING           shift, and go to state 42
     NAME             shift, and go to state 11
 
-    $default  reduce using rule 93 (fieldlist)
+    $default  reduce using rule 108 (fieldlist)
 
     var               go to state 43
-    exp               go to state 90
-    exp_layer         go to state 45
-    Number            go to state 46
-    Name              go to state 91
-    String            go to state 47
-    prefixexp         go to state 48
-    functioncall      go to state 49
-    function          go to state 50
-    tableconstructor  go to state 51
-    field             go to state 170
-    unop              go to state 52
+    exp               go to state 93
+    term              go to state 45
+    exp_layer         go to state 46
+    Number            go to state 47
+    Name              go to state 94
+    String            go to state 48
+    prefixexp         go to state 49
+    functioncall      go to state 50
+    function          go to state 51
+    tableconstructor  go to state 52
+    field             go to state 182
 
 
 State 147
@@ -2411,113 +2664,233 @@ State 147
    20     | IF exp THEN block . elseif_layer end
    21     | IF exp THEN block . elseif_layer ELSE block end
 
-    ELSE    shift, and go to state 171
-    ELSEIF  shift, and go to state 172
-    end     shift, and go to state 173
+    ELSE    shift, and go to state 183
+    ELSEIF  shift, and go to state 184
+    end     shift, and go to state 185
 
-    elseif_layer  go to state 174
+    elseif_layer  go to state 186
 
 
 State 148
 
-   56 exp: exp binop exp_trail .
+   55 exp: exp PLUS term .
+   61 term: term . MULTIPLY exp_layer
+   62     | term . DEVIDE exp_layer
+   63     | term . PERCENT exp_layer
+   64     | term . DOTDOT exp_layer
+   65     | term . LESSTHAN exp_layer
+   66     | term . LESSOREQUAL exp_layer
+   67     | term . GREATERTHAN exp_layer
+   68     | term . GREATEROREQUAL exp_layer
+   69     | term . EQUALTO exp_layer
+   70     | term . TILDEEQUAL exp_layer
+   71     | term . AND exp_layer
+   72     | term . OR exp_layer
 
-    $default  reduce using rule 56 (exp)
+    AND             shift, and go to state 100
+    OR              shift, and go to state 101
+    MULTIPLY        shift, and go to state 102
+    DEVIDE          shift, and go to state 103
+    PERCENT         shift, and go to state 104
+    EQUALTO         shift, and go to state 105
+    TILDEEQUAL      shift, and go to state 106
+    LESSOREQUAL     shift, and go to state 107
+    GREATEROREQUAL  shift, and go to state 108
+    LESSTHAN        shift, and go to state 109
+    GREATERTHAN     shift, and go to state 110
+    DOTDOT          shift, and go to state 111
+
+    $default  reduce using rule 55 (exp)
 
 
 State 149
 
-   58 exp_trail: exp_layer .
+   56 exp: exp MINUS term .
+   61 term: term . MULTIPLY exp_layer
+   62     | term . DEVIDE exp_layer
+   63     | term . PERCENT exp_layer
+   64     | term . DOTDOT exp_layer
+   65     | term . LESSTHAN exp_layer
+   66     | term . LESSOREQUAL exp_layer
+   67     | term . GREATERTHAN exp_layer
+   68     | term . GREATEROREQUAL exp_layer
+   69     | term . EQUALTO exp_layer
+   70     | term . TILDEEQUAL exp_layer
+   71     | term . AND exp_layer
+   72     | term . OR exp_layer
 
-    $default  reduce using rule 58 (exp_trail)
+    AND             shift, and go to state 100
+    OR              shift, and go to state 101
+    MULTIPLY        shift, and go to state 102
+    DEVIDE          shift, and go to state 103
+    PERCENT         shift, and go to state 104
+    EQUALTO         shift, and go to state 105
+    TILDEEQUAL      shift, and go to state 106
+    LESSOREQUAL     shift, and go to state 107
+    GREATEROREQUAL  shift, and go to state 108
+    LESSTHAN        shift, and go to state 109
+    GREATERTHAN     shift, and go to state 110
+    DOTDOT          shift, and go to state 111
+
+    $default  reduce using rule 56 (exp)
 
 
 State 150
+
+   71 term: term AND exp_layer .
+
+    $default  reduce using rule 71 (term)
+
+
+State 151
+
+   72 term: term OR exp_layer .
+
+    $default  reduce using rule 72 (term)
+
+
+State 152
+
+   61 term: term MULTIPLY exp_layer .
+
+    $default  reduce using rule 61 (term)
+
+
+State 153
+
+   62 term: term DEVIDE exp_layer .
+
+    $default  reduce using rule 62 (term)
+
+
+State 154
+
+   63 term: term PERCENT exp_layer .
+
+    $default  reduce using rule 63 (term)
+
+
+State 155
+
+   69 term: term EQUALTO exp_layer .
+
+    $default  reduce using rule 69 (term)
+
+
+State 156
+
+   70 term: term TILDEEQUAL exp_layer .
+
+    $default  reduce using rule 70 (term)
+
+
+State 157
+
+   66 term: term LESSOREQUAL exp_layer .
+
+    $default  reduce using rule 66 (term)
+
+
+State 158
+
+   68 term: term GREATEROREQUAL exp_layer .
+
+    $default  reduce using rule 68 (term)
+
+
+State 159
+
+   65 term: term LESSTHAN exp_layer .
+
+    $default  reduce using rule 65 (term)
+
+
+State 160
+
+   67 term: term GREATERTHAN exp_layer .
+
+    $default  reduce using rule 67 (term)
+
+
+State 161
+
+   64 term: term DOTDOT exp_layer .
+
+    $default  reduce using rule 64 (term)
+
+
+State 162
 
    26 stat: LOCAL FUNCTION Name funcbody .
 
     $default  reduce using rule 26 (stat)
 
 
-State 151
+State 163
 
    28 stat: LOCAL namelist EQUAL explist .
 
     $default  reduce using rule 28 (stat)
 
 
-State 152
+State 164
 
    17 stat: REPEAT block UNTIL exp .
-   56 exp: exp . binop exp_trail
+   55 exp: exp . PLUS term
+   56    | exp . MINUS term
 
-    AND             shift, and go to state 94
-    OR              shift, and go to state 95
-    PLUS            shift, and go to state 97
-    MINUS           shift, and go to state 98
-    MULTIPLY        shift, and go to state 99
-    DEVIDE          shift, and go to state 100
-    PERCENT         shift, and go to state 101
-    CARET           shift, and go to state 102
-    EQUALTO         shift, and go to state 103
-    TILDEEQUAL      shift, and go to state 104
-    LESSOREQUAL     shift, and go to state 105
-    GREATEROREQUAL  shift, and go to state 106
-    LESSTHAN        shift, and go to state 107
-    GREATERTHAN     shift, and go to state 108
-    DOTDOT          shift, and go to state 109
+    PLUS   shift, and go to state 98
+    MINUS  shift, and go to state 99
 
     $default  reduce using rule 17 (stat)
 
-    binop  go to state 110
 
-
-State 153
+State 165
 
    54 explist_layer: explist_layer exp COMMA .
 
     $default  reduce using rule 54 (explist_layer)
 
 
-State 154
+State 166
 
    16 stat: WHILE exp DO block . end
 
-    end  shift, and go to state 175
+    end  shift, and go to state 187
 
 
-State 155
+State 167
 
    43 varlist_layer: varlist_layer COMMA var .
-   74 prefixexp: var .
+   89 prefixexp: var .
 
     EQUAL     reduce using rule 43 (varlist_layer)
     COMMA     reduce using rule 43 (varlist_layer)
-    $default  reduce using rule 74 (prefixexp)
+    $default  reduce using rule 89 (prefixexp)
 
 
-State 156
+State 168
 
-   80 args: LEFTPARENTHESES explist RIGHTPARENTHESES .
+   95 args: LEFTPARENTHESES explist RIGHTPARENTHESES .
 
-    $default  reduce using rule 80 (args)
+    $default  reduce using rule 95 (args)
 
 
-State 157
+State 169
 
    45 var: prefixexp LEFTBRACKET exp RIGHTBRACKET .
 
     $default  reduce using rule 45 (var)
 
 
-State 158
+State 170
 
-   78 functioncall: prefixexp COLON Name args .
+   93 functioncall: prefixexp COLON Name args .
 
-    $default  reduce using rule 78 (functioncall)
+    $default  reduce using rule 93 (functioncall)
 
 
-State 159
+State 171
 
    24 stat: FOR namelist IN explist DO . block end
 
@@ -2535,7 +2908,7 @@ State 159
 
     $default  reduce using rule 3 (chunk)
 
-    block           go to state 176
+    block           go to state 188
     chunk           go to state 14
     chunk_layer     go to state 15
     laststat_layer  go to state 16
@@ -2548,7 +2921,7 @@ State 159
     functioncall    go to state 23
 
 
-State 160
+State 172
 
    22 stat: FOR Name EQUAL exp COMMA . exp DO block end
    23     | FOR Name EQUAL exp COMMA . exp COMMA exp DO block end
@@ -2571,42 +2944,42 @@ State 160
     NAME             shift, and go to state 11
 
     var               go to state 43
-    exp               go to state 177
-    exp_layer         go to state 45
-    Number            go to state 46
+    exp               go to state 189
+    term              go to state 45
+    exp_layer         go to state 46
+    Number            go to state 47
     Name              go to state 21
-    String            go to state 47
-    prefixexp         go to state 48
-    functioncall      go to state 49
-    function          go to state 50
-    tableconstructor  go to state 51
-    unop              go to state 52
+    String            go to state 48
+    prefixexp         go to state 49
+    functioncall      go to state 50
+    function          go to state 51
+    tableconstructor  go to state 52
 
 
-State 161
+State 173
 
    50 namelist_layer: namelist_layer COMMA Name .
 
     $default  reduce using rule 50 (namelist_layer)
 
 
-State 162
+State 174
 
-   84 funcbody: LEFTPARENTHESES RIGHTPARENTHESES block . end
+   99 funcbody: LEFTPARENTHESES RIGHTPARENTHESES block . end
 
-    end  shift, and go to state 178
-
-
-State 163
-
-   87 parlist: namelist COMMA . DOTDOTDOT
-
-    DOTDOTDOT  shift, and go to state 179
+    end  shift, and go to state 190
 
 
-State 164
+State 175
 
-   85 funcbody: LEFTPARENTHESES parlist RIGHTPARENTHESES . block end
+  102 parlist: namelist COMMA . DOTDOTDOT
+
+    DOTDOTDOT  shift, and go to state 191
+
+
+State 176
+
+  100 funcbody: LEFTPARENTHESES parlist RIGHTPARENTHESES . block end
 
     BREAK            shift, and go to state 1
     DO               shift, and go to state 2
@@ -2622,7 +2995,7 @@ State 164
 
     $default  reduce using rule 3 (chunk)
 
-    block           go to state 180
+    block           go to state 192
     chunk           go to state 14
     chunk_layer     go to state 15
     laststat_layer  go to state 16
@@ -2635,247 +3008,43 @@ State 164
     functioncall    go to state 23
 
 
-State 165
+State 177
 
    37 funcname: Name funcname_layer COLON Name .
 
     $default  reduce using rule 37 (funcname)
 
 
-State 166
+State 178
 
    39 funcname_layer: funcname_layer DOT Name .
 
     $default  reduce using rule 39 (funcname_layer)
 
 
-State 167
-
-   97 field: LEFTBRACKET exp RIGHTBRACKET . EQUAL exp
-
-    EQUAL  shift, and go to state 181
-
-
-State 168
-
-   56 exp: exp . binop exp_trail
-   98 field: Name EQUAL exp .
-
-    AND             shift, and go to state 94
-    OR              shift, and go to state 95
-    PLUS            shift, and go to state 97
-    MINUS           shift, and go to state 98
-    MULTIPLY        shift, and go to state 99
-    DEVIDE          shift, and go to state 100
-    PERCENT         shift, and go to state 101
-    CARET           shift, and go to state 102
-    EQUALTO         shift, and go to state 103
-    TILDEEQUAL      shift, and go to state 104
-    LESSOREQUAL     shift, and go to state 105
-    GREATEROREQUAL  shift, and go to state 106
-    LESSTHAN        shift, and go to state 107
-    GREATERTHAN     shift, and go to state 108
-    DOTDOT          shift, and go to state 109
-
-    $default  reduce using rule 98 (field)
-
-    binop  go to state 110
-
-
-State 169
-
-   94 fieldlist: field fieldlist_layer fieldsep .
-   96 fieldlist_layer: fieldlist_layer fieldsep . field
-
-    FALSE            shift, and go to state 29
-    FUNCTION         shift, and go to state 30
-    NIL              shift, and go to state 31
-    NOT              shift, and go to state 32
-    TRUE             shift, and go to state 33
-    MINUS            shift, and go to state 34
-    HASHTAG          shift, and go to state 35
-    LEFTPARENTHESES  shift, and go to state 10
-    LEFTBRACES       shift, and go to state 36
-    LEFTBRACKET      shift, and go to state 89
-    DOTDOTDOT        shift, and go to state 37
-    INTEGER          shift, and go to state 38
-    DECIMAL          shift, and go to state 39
-    POWEROF          shift, and go to state 40
-    HEXADECIMAL      shift, and go to state 41
-    STRING           shift, and go to state 42
-    NAME             shift, and go to state 11
-
-    $default  reduce using rule 94 (fieldlist)
-
-    var               go to state 43
-    exp               go to state 90
-    exp_layer         go to state 45
-    Number            go to state 46
-    Name              go to state 91
-    String            go to state 47
-    prefixexp         go to state 48
-    functioncall      go to state 49
-    function          go to state 50
-    tableconstructor  go to state 51
-    field             go to state 182
-    unop              go to state 52
-
-
-State 170
-
-   95 fieldlist_layer: fieldsep field .
-
-    $default  reduce using rule 95 (fieldlist_layer)
-
-
-State 171
-
-   19 stat: IF exp THEN block ELSE . block end
-
-    BREAK            shift, and go to state 1
-    DO               shift, and go to state 2
-    FOR              shift, and go to state 3
-    FUNCTION         shift, and go to state 4
-    IF               shift, and go to state 5
-    LOCAL            shift, and go to state 6
-    REPEAT           shift, and go to state 7
-    RETURN           shift, and go to state 8
-    WHILE            shift, and go to state 9
-    LEFTPARENTHESES  shift, and go to state 10
-    NAME             shift, and go to state 11
-
-    $default  reduce using rule 3 (chunk)
-
-    block           go to state 183
-    chunk           go to state 14
-    chunk_layer     go to state 15
-    laststat_layer  go to state 16
-    stat            go to state 17
-    laststat        go to state 18
-    varlist         go to state 19
-    var             go to state 20
-    Name            go to state 21
-    prefixexp       go to state 22
-    functioncall    go to state 23
-
-
-State 172
-
-   29 elseif_layer: ELSEIF . exp THEN block
-
-    FALSE            shift, and go to state 29
-    FUNCTION         shift, and go to state 30
-    NIL              shift, and go to state 31
-    NOT              shift, and go to state 32
-    TRUE             shift, and go to state 33
-    MINUS            shift, and go to state 34
-    HASHTAG          shift, and go to state 35
-    LEFTPARENTHESES  shift, and go to state 10
-    LEFTBRACES       shift, and go to state 36
-    DOTDOTDOT        shift, and go to state 37
-    INTEGER          shift, and go to state 38
-    DECIMAL          shift, and go to state 39
-    POWEROF          shift, and go to state 40
-    HEXADECIMAL      shift, and go to state 41
-    STRING           shift, and go to state 42
-    NAME             shift, and go to state 11
-
-    var               go to state 43
-    exp               go to state 184
-    exp_layer         go to state 45
-    Number            go to state 46
-    Name              go to state 21
-    String            go to state 47
-    prefixexp         go to state 48
-    functioncall      go to state 49
-    function          go to state 50
-    tableconstructor  go to state 51
-    unop              go to state 52
-
-
-State 173
-
-   18 stat: IF exp THEN block end .
-
-    $default  reduce using rule 18 (stat)
-
-
-State 174
-
-   20 stat: IF exp THEN block elseif_layer . end
-   21     | IF exp THEN block elseif_layer . ELSE block end
-   30 elseif_layer: elseif_layer . ELSEIF exp THEN block
-
-    ELSE    shift, and go to state 185
-    ELSEIF  shift, and go to state 186
-    end     shift, and go to state 187
-
-
-State 175
-
-   16 stat: WHILE exp DO block end .
-
-    $default  reduce using rule 16 (stat)
-
-
-State 176
-
-   24 stat: FOR namelist IN explist DO block . end
-
-    end  shift, and go to state 188
-
-
-State 177
-
-   22 stat: FOR Name EQUAL exp COMMA exp . DO block end
-   23     | FOR Name EQUAL exp COMMA exp . COMMA exp DO block end
-   56 exp: exp . binop exp_trail
-
-    AND             shift, and go to state 94
-    DO              shift, and go to state 189
-    OR              shift, and go to state 95
-    PLUS            shift, and go to state 97
-    MINUS           shift, and go to state 98
-    MULTIPLY        shift, and go to state 99
-    DEVIDE          shift, and go to state 100
-    PERCENT         shift, and go to state 101
-    CARET           shift, and go to state 102
-    EQUALTO         shift, and go to state 103
-    TILDEEQUAL      shift, and go to state 104
-    LESSOREQUAL     shift, and go to state 105
-    GREATEROREQUAL  shift, and go to state 106
-    LESSTHAN        shift, and go to state 107
-    GREATERTHAN     shift, and go to state 108
-    COMMA           shift, and go to state 190
-    DOTDOT          shift, and go to state 109
-
-    binop  go to state 110
-
-
-State 178
-
-   84 funcbody: LEFTPARENTHESES RIGHTPARENTHESES block end .
-
-    $default  reduce using rule 84 (funcbody)
-
-
 State 179
 
-   87 parlist: namelist COMMA DOTDOTDOT .
+  112 field: LEFTBRACKET exp RIGHTBRACKET . EQUAL exp
 
-    $default  reduce using rule 87 (parlist)
+    EQUAL  shift, and go to state 193
 
 
 State 180
 
-   85 funcbody: LEFTPARENTHESES parlist RIGHTPARENTHESES block . end
+   55 exp: exp . PLUS term
+   56    | exp . MINUS term
+  113 field: Name EQUAL exp .
 
-    end  shift, and go to state 191
+    PLUS   shift, and go to state 98
+    MINUS  shift, and go to state 99
+
+    $default  reduce using rule 113 (field)
 
 
 State 181
 
-   97 field: LEFTBRACKET exp RIGHTBRACKET EQUAL . exp
+  109 fieldlist: field fieldlist_layer fieldsep .
+  111 fieldlist_layer: fieldlist_layer fieldsep . field
 
     FALSE            shift, and go to state 29
     FUNCTION         shift, and go to state 30
@@ -2886,6 +3055,7 @@ State 181
     HASHTAG          shift, and go to state 35
     LEFTPARENTHESES  shift, and go to state 10
     LEFTBRACES       shift, and go to state 36
+    LEFTBRACKET      shift, and go to state 92
     DOTDOTDOT        shift, and go to state 37
     INTEGER          shift, and go to state 38
     DECIMAL          shift, and go to state 39
@@ -2894,61 +3064,32 @@ State 181
     STRING           shift, and go to state 42
     NAME             shift, and go to state 11
 
+    $default  reduce using rule 109 (fieldlist)
+
     var               go to state 43
-    exp               go to state 192
-    exp_layer         go to state 45
-    Number            go to state 46
-    Name              go to state 21
-    String            go to state 47
-    prefixexp         go to state 48
-    functioncall      go to state 49
-    function          go to state 50
-    tableconstructor  go to state 51
-    unop              go to state 52
+    exp               go to state 93
+    term              go to state 45
+    exp_layer         go to state 46
+    Number            go to state 47
+    Name              go to state 94
+    String            go to state 48
+    prefixexp         go to state 49
+    functioncall      go to state 50
+    function          go to state 51
+    tableconstructor  go to state 52
+    field             go to state 194
 
 
 State 182
 
-   96 fieldlist_layer: fieldlist_layer fieldsep field .
+  110 fieldlist_layer: fieldsep field .
 
-    $default  reduce using rule 96 (fieldlist_layer)
+    $default  reduce using rule 110 (fieldlist_layer)
 
 
 State 183
 
-   19 stat: IF exp THEN block ELSE block . end
-
-    end  shift, and go to state 193
-
-
-State 184
-
-   29 elseif_layer: ELSEIF exp . THEN block
-   56 exp: exp . binop exp_trail
-
-    AND             shift, and go to state 94
-    OR              shift, and go to state 95
-    THEN            shift, and go to state 194
-    PLUS            shift, and go to state 97
-    MINUS           shift, and go to state 98
-    MULTIPLY        shift, and go to state 99
-    DEVIDE          shift, and go to state 100
-    PERCENT         shift, and go to state 101
-    CARET           shift, and go to state 102
-    EQUALTO         shift, and go to state 103
-    TILDEEQUAL      shift, and go to state 104
-    LESSOREQUAL     shift, and go to state 105
-    GREATEROREQUAL  shift, and go to state 106
-    LESSTHAN        shift, and go to state 107
-    GREATERTHAN     shift, and go to state 108
-    DOTDOT          shift, and go to state 109
-
-    binop  go to state 110
-
-
-State 185
-
-   21 stat: IF exp THEN block elseif_layer ELSE . block end
+   19 stat: IF exp THEN block ELSE . block end
 
     BREAK            shift, and go to state 1
     DO               shift, and go to state 2
@@ -2977,7 +3118,197 @@ State 185
     functioncall    go to state 23
 
 
+State 184
+
+   29 elseif_layer: ELSEIF . exp THEN block
+
+    FALSE            shift, and go to state 29
+    FUNCTION         shift, and go to state 30
+    NIL              shift, and go to state 31
+    NOT              shift, and go to state 32
+    TRUE             shift, and go to state 33
+    MINUS            shift, and go to state 34
+    HASHTAG          shift, and go to state 35
+    LEFTPARENTHESES  shift, and go to state 10
+    LEFTBRACES       shift, and go to state 36
+    DOTDOTDOT        shift, and go to state 37
+    INTEGER          shift, and go to state 38
+    DECIMAL          shift, and go to state 39
+    POWEROF          shift, and go to state 40
+    HEXADECIMAL      shift, and go to state 41
+    STRING           shift, and go to state 42
+    NAME             shift, and go to state 11
+
+    var               go to state 43
+    exp               go to state 196
+    term              go to state 45
+    exp_layer         go to state 46
+    Number            go to state 47
+    Name              go to state 21
+    String            go to state 48
+    prefixexp         go to state 49
+    functioncall      go to state 50
+    function          go to state 51
+    tableconstructor  go to state 52
+
+
+State 185
+
+   18 stat: IF exp THEN block end .
+
+    $default  reduce using rule 18 (stat)
+
+
 State 186
+
+   20 stat: IF exp THEN block elseif_layer . end
+   21     | IF exp THEN block elseif_layer . ELSE block end
+   30 elseif_layer: elseif_layer . ELSEIF exp THEN block
+
+    ELSE    shift, and go to state 197
+    ELSEIF  shift, and go to state 198
+    end     shift, and go to state 199
+
+
+State 187
+
+   16 stat: WHILE exp DO block end .
+
+    $default  reduce using rule 16 (stat)
+
+
+State 188
+
+   24 stat: FOR namelist IN explist DO block . end
+
+    end  shift, and go to state 200
+
+
+State 189
+
+   22 stat: FOR Name EQUAL exp COMMA exp . DO block end
+   23     | FOR Name EQUAL exp COMMA exp . COMMA exp DO block end
+   55 exp: exp . PLUS term
+   56    | exp . MINUS term
+
+    DO     shift, and go to state 201
+    PLUS   shift, and go to state 98
+    MINUS  shift, and go to state 99
+    COMMA  shift, and go to state 202
+
+
+State 190
+
+   99 funcbody: LEFTPARENTHESES RIGHTPARENTHESES block end .
+
+    $default  reduce using rule 99 (funcbody)
+
+
+State 191
+
+  102 parlist: namelist COMMA DOTDOTDOT .
+
+    $default  reduce using rule 102 (parlist)
+
+
+State 192
+
+  100 funcbody: LEFTPARENTHESES parlist RIGHTPARENTHESES block . end
+
+    end  shift, and go to state 203
+
+
+State 193
+
+  112 field: LEFTBRACKET exp RIGHTBRACKET EQUAL . exp
+
+    FALSE            shift, and go to state 29
+    FUNCTION         shift, and go to state 30
+    NIL              shift, and go to state 31
+    NOT              shift, and go to state 32
+    TRUE             shift, and go to state 33
+    MINUS            shift, and go to state 34
+    HASHTAG          shift, and go to state 35
+    LEFTPARENTHESES  shift, and go to state 10
+    LEFTBRACES       shift, and go to state 36
+    DOTDOTDOT        shift, and go to state 37
+    INTEGER          shift, and go to state 38
+    DECIMAL          shift, and go to state 39
+    POWEROF          shift, and go to state 40
+    HEXADECIMAL      shift, and go to state 41
+    STRING           shift, and go to state 42
+    NAME             shift, and go to state 11
+
+    var               go to state 43
+    exp               go to state 204
+    term              go to state 45
+    exp_layer         go to state 46
+    Number            go to state 47
+    Name              go to state 21
+    String            go to state 48
+    prefixexp         go to state 49
+    functioncall      go to state 50
+    function          go to state 51
+    tableconstructor  go to state 52
+
+
+State 194
+
+  111 fieldlist_layer: fieldlist_layer fieldsep field .
+
+    $default  reduce using rule 111 (fieldlist_layer)
+
+
+State 195
+
+   19 stat: IF exp THEN block ELSE block . end
+
+    end  shift, and go to state 205
+
+
+State 196
+
+   29 elseif_layer: ELSEIF exp . THEN block
+   55 exp: exp . PLUS term
+   56    | exp . MINUS term
+
+    THEN   shift, and go to state 206
+    PLUS   shift, and go to state 98
+    MINUS  shift, and go to state 99
+
+
+State 197
+
+   21 stat: IF exp THEN block elseif_layer ELSE . block end
+
+    BREAK            shift, and go to state 1
+    DO               shift, and go to state 2
+    FOR              shift, and go to state 3
+    FUNCTION         shift, and go to state 4
+    IF               shift, and go to state 5
+    LOCAL            shift, and go to state 6
+    REPEAT           shift, and go to state 7
+    RETURN           shift, and go to state 8
+    WHILE            shift, and go to state 9
+    LEFTPARENTHESES  shift, and go to state 10
+    NAME             shift, and go to state 11
+
+    $default  reduce using rule 3 (chunk)
+
+    block           go to state 207
+    chunk           go to state 14
+    chunk_layer     go to state 15
+    laststat_layer  go to state 16
+    stat            go to state 17
+    laststat        go to state 18
+    varlist         go to state 19
+    var             go to state 20
+    Name            go to state 21
+    prefixexp       go to state 22
+    functioncall    go to state 23
+
+
+State 198
 
    30 elseif_layer: elseif_layer ELSEIF . exp THEN block
 
@@ -2999,33 +3330,33 @@ State 186
     NAME             shift, and go to state 11
 
     var               go to state 43
-    exp               go to state 196
-    exp_layer         go to state 45
-    Number            go to state 46
+    exp               go to state 208
+    term              go to state 45
+    exp_layer         go to state 46
+    Number            go to state 47
     Name              go to state 21
-    String            go to state 47
-    prefixexp         go to state 48
-    functioncall      go to state 49
-    function          go to state 50
-    tableconstructor  go to state 51
-    unop              go to state 52
+    String            go to state 48
+    prefixexp         go to state 49
+    functioncall      go to state 50
+    function          go to state 51
+    tableconstructor  go to state 52
 
 
-State 187
+State 199
 
    20 stat: IF exp THEN block elseif_layer end .
 
     $default  reduce using rule 20 (stat)
 
 
-State 188
+State 200
 
    24 stat: FOR namelist IN explist DO block end .
 
     $default  reduce using rule 24 (stat)
 
 
-State 189
+State 201
 
    22 stat: FOR Name EQUAL exp COMMA exp DO . block end
 
@@ -3043,7 +3374,7 @@ State 189
 
     $default  reduce using rule 3 (chunk)
 
-    block           go to state 197
+    block           go to state 209
     chunk           go to state 14
     chunk_layer     go to state 15
     laststat_layer  go to state 16
@@ -3056,7 +3387,7 @@ State 189
     functioncall    go to state 23
 
 
-State 190
+State 202
 
    23 stat: FOR Name EQUAL exp COMMA exp COMMA . exp DO block end
 
@@ -3078,59 +3409,45 @@ State 190
     NAME             shift, and go to state 11
 
     var               go to state 43
-    exp               go to state 198
-    exp_layer         go to state 45
-    Number            go to state 46
+    exp               go to state 210
+    term              go to state 45
+    exp_layer         go to state 46
+    Number            go to state 47
     Name              go to state 21
-    String            go to state 47
-    prefixexp         go to state 48
-    functioncall      go to state 49
-    function          go to state 50
-    tableconstructor  go to state 51
-    unop              go to state 52
+    String            go to state 48
+    prefixexp         go to state 49
+    functioncall      go to state 50
+    function          go to state 51
+    tableconstructor  go to state 52
 
 
-State 191
+State 203
 
-   85 funcbody: LEFTPARENTHESES parlist RIGHTPARENTHESES block end .
+  100 funcbody: LEFTPARENTHESES parlist RIGHTPARENTHESES block end .
 
-    $default  reduce using rule 85 (funcbody)
-
-
-State 192
-
-   56 exp: exp . binop exp_trail
-   97 field: LEFTBRACKET exp RIGHTBRACKET EQUAL exp .
-
-    AND             shift, and go to state 94
-    OR              shift, and go to state 95
-    PLUS            shift, and go to state 97
-    MINUS           shift, and go to state 98
-    MULTIPLY        shift, and go to state 99
-    DEVIDE          shift, and go to state 100
-    PERCENT         shift, and go to state 101
-    CARET           shift, and go to state 102
-    EQUALTO         shift, and go to state 103
-    TILDEEQUAL      shift, and go to state 104
-    LESSOREQUAL     shift, and go to state 105
-    GREATEROREQUAL  shift, and go to state 106
-    LESSTHAN        shift, and go to state 107
-    GREATERTHAN     shift, and go to state 108
-    DOTDOT          shift, and go to state 109
-
-    $default  reduce using rule 97 (field)
-
-    binop  go to state 110
+    $default  reduce using rule 100 (funcbody)
 
 
-State 193
+State 204
+
+   55 exp: exp . PLUS term
+   56    | exp . MINUS term
+  112 field: LEFTBRACKET exp RIGHTBRACKET EQUAL exp .
+
+    PLUS   shift, and go to state 98
+    MINUS  shift, and go to state 99
+
+    $default  reduce using rule 112 (field)
+
+
+State 205
 
    19 stat: IF exp THEN block ELSE block end .
 
     $default  reduce using rule 19 (stat)
 
 
-State 194
+State 206
 
    29 elseif_layer: ELSEIF exp THEN . block
 
@@ -3148,7 +3465,7 @@ State 194
 
     $default  reduce using rule 3 (chunk)
 
-    block           go to state 199
+    block           go to state 211
     chunk           go to state 14
     chunk_layer     go to state 15
     laststat_layer  go to state 16
@@ -3161,85 +3478,57 @@ State 194
     functioncall    go to state 23
 
 
-State 195
+State 207
 
    21 stat: IF exp THEN block elseif_layer ELSE block . end
 
-    end  shift, and go to state 200
+    end  shift, and go to state 212
 
 
-State 196
+State 208
 
    30 elseif_layer: elseif_layer ELSEIF exp . THEN block
-   56 exp: exp . binop exp_trail
+   55 exp: exp . PLUS term
+   56    | exp . MINUS term
 
-    AND             shift, and go to state 94
-    OR              shift, and go to state 95
-    THEN            shift, and go to state 201
-    PLUS            shift, and go to state 97
-    MINUS           shift, and go to state 98
-    MULTIPLY        shift, and go to state 99
-    DEVIDE          shift, and go to state 100
-    PERCENT         shift, and go to state 101
-    CARET           shift, and go to state 102
-    EQUALTO         shift, and go to state 103
-    TILDEEQUAL      shift, and go to state 104
-    LESSOREQUAL     shift, and go to state 105
-    GREATEROREQUAL  shift, and go to state 106
-    LESSTHAN        shift, and go to state 107
-    GREATERTHAN     shift, and go to state 108
-    DOTDOT          shift, and go to state 109
-
-    binop  go to state 110
+    THEN   shift, and go to state 213
+    PLUS   shift, and go to state 98
+    MINUS  shift, and go to state 99
 
 
-State 197
+State 209
 
    22 stat: FOR Name EQUAL exp COMMA exp DO block . end
 
-    end  shift, and go to state 202
+    end  shift, and go to state 214
 
 
-State 198
+State 210
 
    23 stat: FOR Name EQUAL exp COMMA exp COMMA exp . DO block end
-   56 exp: exp . binop exp_trail
+   55 exp: exp . PLUS term
+   56    | exp . MINUS term
 
-    AND             shift, and go to state 94
-    DO              shift, and go to state 203
-    OR              shift, and go to state 95
-    PLUS            shift, and go to state 97
-    MINUS           shift, and go to state 98
-    MULTIPLY        shift, and go to state 99
-    DEVIDE          shift, and go to state 100
-    PERCENT         shift, and go to state 101
-    CARET           shift, and go to state 102
-    EQUALTO         shift, and go to state 103
-    TILDEEQUAL      shift, and go to state 104
-    LESSOREQUAL     shift, and go to state 105
-    GREATEROREQUAL  shift, and go to state 106
-    LESSTHAN        shift, and go to state 107
-    GREATERTHAN     shift, and go to state 108
-    DOTDOT          shift, and go to state 109
-
-    binop  go to state 110
+    DO     shift, and go to state 215
+    PLUS   shift, and go to state 98
+    MINUS  shift, and go to state 99
 
 
-State 199
+State 211
 
    29 elseif_layer: ELSEIF exp THEN block .
 
     $default  reduce using rule 29 (elseif_layer)
 
 
-State 200
+State 212
 
    21 stat: IF exp THEN block elseif_layer ELSE block end .
 
     $default  reduce using rule 21 (stat)
 
 
-State 201
+State 213
 
    30 elseif_layer: elseif_layer ELSEIF exp THEN . block
 
@@ -3257,7 +3546,7 @@ State 201
 
     $default  reduce using rule 3 (chunk)
 
-    block           go to state 204
+    block           go to state 216
     chunk           go to state 14
     chunk_layer     go to state 15
     laststat_layer  go to state 16
@@ -3270,14 +3559,14 @@ State 201
     functioncall    go to state 23
 
 
-State 202
+State 214
 
    22 stat: FOR Name EQUAL exp COMMA exp DO block end .
 
     $default  reduce using rule 22 (stat)
 
 
-State 203
+State 215
 
    23 stat: FOR Name EQUAL exp COMMA exp COMMA exp DO . block end
 
@@ -3295,7 +3584,7 @@ State 203
 
     $default  reduce using rule 3 (chunk)
 
-    block           go to state 205
+    block           go to state 217
     chunk           go to state 14
     chunk_layer     go to state 15
     laststat_layer  go to state 16
@@ -3308,21 +3597,21 @@ State 203
     functioncall    go to state 23
 
 
-State 204
+State 216
 
    30 elseif_layer: elseif_layer ELSEIF exp THEN block .
 
     $default  reduce using rule 30 (elseif_layer)
 
 
-State 205
+State 217
 
    23 stat: FOR Name EQUAL exp COMMA exp COMMA exp DO block . end
 
-    end  shift, and go to state 206
+    end  shift, and go to state 218
 
 
-State 206
+State 218
 
    23 stat: FOR Name EQUAL exp COMMA exp COMMA exp DO block end .
 
