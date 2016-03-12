@@ -1,7 +1,9 @@
 #include <iostream>
 #include "binary.tab.hh"   //  Not really sure what this does
+#include "symboltable.h"
 
 extern Node root;
+SymbolTable symbols;
 
 void yy::parser::error(std::string const &err) {
   std::cout << "Error: " << err << std::endl;

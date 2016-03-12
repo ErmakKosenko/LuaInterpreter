@@ -146,7 +146,7 @@ laststat_layer : laststat               { $$ = $1; }
                ;
 
 
-stat : varlist EQUAL explist  								{ $$ = Node("statement", ""); $$.children.push_back($1); $$.children.push_back(Node("equal","=")); $$.children.push_back($3); }
+stat : varlist EQUAL explist  								{ $$ = Node("statement", ""); $$.children.push_back($1); $$.children.push_back(Node("binop","=")); $$.children.push_back($3); }
      | functioncall           								{ $$ = Node("statement",""); $$.children.push_back($1);}
      | DO block end           								{ $$ = Node("statement",""); $$.children.push_back(Node("do","do")); $$.children.push_back($2); $$.children.push_back(Node("end","end"));}
      | WHILE exp DO block end 								{ $$ = Node("statement",""); $$.children.push_back(Node("while","while")); $$.children.push_back($2); $$.children.push_back(Node("do","do")); $$.children.push_back($4); $$.children.push_back(Node("end","end")); }
@@ -232,6 +232,7 @@ exp : exp PLUS term 		{ $$ = Node("exp",""); $$.children.push_back($1); $$.child
 term : term MULTIPLY exp_layer			{ $$ = Node("term",""); $$.children.push_back($1); $$.children.push_back(Node("binop",$2)); $$.children.push_back($3);}
  	 | term DEVIDE exp_layer			{ $$ = Node("term",""); $$.children.push_back($1); $$.children.push_back(Node("binop",$2)); $$.children.push_back($3); }
 	 | term PERCENT exp_layer 			{ $$ = Node("term",""); $$.children.push_back($1); $$.children.push_back(Node("binop",$2)); $$.children.push_back($3);}
+	 | term CARET exp_layer 			{ $$ = Node("term",""); $$.children.push_back($1); $$.children.push_back(Node("binop",$2)); $$.children.push_back($3);}
 	 | term DOTDOT exp_layer 			{ $$ = Node("term",""); $$.children.push_back($1); $$.children.push_back(Node("binop",$2)); $$.children.push_back($3);}
 	 | term LESSTHAN exp_layer 			{ $$ = Node("term",""); $$.children.push_back($1); $$.children.push_back(Node("binop",$2)); $$.children.push_back($3);}
 	 | term LESSOREQUAL exp_layer 		{ $$ = Node("term",""); $$.children.push_back($1); $$.children.push_back(Node("binop",$2)); $$.children.push_back($3);}
