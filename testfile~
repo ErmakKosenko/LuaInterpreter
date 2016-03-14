@@ -1,7 +1,24 @@
-x = 7
-y = (10+x)*2
-z = y - x
+x=10
+x=x*10/5/x
 print(x)
-print(y)
-print(z)
+print "Enter a number: "
+n = io.read("*hej")
+print "x-n = "
+x=x-n
+
+
+print "enter a number:"
+n = io.read("*number")
+factorial = 1
+x=1
+print(n)
+
+for i = 2,n,2 do
+	print(x) 
+	x=x+1
+end
+io.write("factorial of \\n")
+io.write(n)
+io.write(" is ")
+print(x)
 

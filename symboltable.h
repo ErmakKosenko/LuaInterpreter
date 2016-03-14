@@ -40,7 +40,10 @@ class SymbolTable {
     }
 
     std::string updateValue(std::string name, std::string newValue) {
-        values.at(table[name]-1) = newValue;
+        int offset = table[name];
+        values[offset-1] = newValue;
+
+        return "";
     }
 
 };

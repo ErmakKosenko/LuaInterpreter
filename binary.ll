@@ -62,7 +62,7 @@
 0x[0-9a-fA-F]+                                       { return yy::parser::make_HEXADECIMAL(yytext); }
 
 (_[0-9a-zA-Z_]+|[a-zA-Z]+([0-9a-zA-Z_]+)?)           { return yy::parser::make_NAME(yytext); }
-(\"([a-zA-Z0-9 .,:;\-!#¤%&/()*^\0\'\"\\a\\b\\f\\n\\r\\t\\v\\])+\"|\'([a-zA-Z0-9 .,:;\-!#¤%&/()*^\0\'\"\a\b\f\n\r\t\v\\])+\')                                    { return yy::parser::make_STRING(yytext); }
+(\"([a-zA-Z0-9 .,:;+|=\-!#¤%&/()*^\0\'\"\\a\\b\\f\\n\\r\\t\\v\\])+\"|\'([a-zA-Z0-9 .,:;\-!#¤%&/()*^\0\'\"\a\b\f\n\r\t\v\\])+\')                                    { return yy::parser::make_STRING(yytext); }
 <<EOF>>                                                return yy::parser::make_END();
 
 %%

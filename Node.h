@@ -5,6 +5,7 @@
 #include <map>
 #include "symboltable.h"
 #include <fstream>
+#include <iostream>
 
 struct Container {
 	std::vector<std::string> values;
@@ -74,11 +75,6 @@ class Node {
 			std::string explistReturn = "";
 			if (children.front().tag == "functioncall") {
 				information = children.front().evaluateFunctioncall();
-				if (information.values[0] == "print" || information.values[0] == "io.write") {
-					std::cout << "_______PROGRAM OUTPUT________" << std::endl  << std::endl;
-					std::cout << information.values[1];
-				}
-				std::cout << std::endl;
 			} else if (children.front().tag == "varlist") {
 				returnVarlist = children.front().evaluateVarlist();
 				// if binop...
@@ -89,6 +85,49 @@ class Node {
 						explistReturn = children.front().evaluateExplist();
 						for (std::string var : returnVarlist) {
 							symbols.insert(var, explistReturn);
+						}
+					}
+				}
+			} else if (children.front().tag == "for") {
+				children.pop_front();
+				if (children.front().tag == "identifier") {
+					std::string firstIdentifier = children.front().value;
+					children.pop_front();
+					if (children.front().tag == "equal") {
+						children.pop_front();
+						if (children.front().tag == "term") {
+							std::string returnValue = children.front().evaluateTerm();
+							symbols.insert(firstIdentifier, returnValue);
+							children.pop_front();
+							if (children.front().tag == "comma") {
+								children.pop_front();
+								if (children.front().tag == "term") {
+									std::string loopValue = children.front().evaluateTerm();
+									int lessThan = std::stoi(loopValue);
+									children.pop_front();
+									if (children.front().tag == "do") {
+										children.pop_front();
+										for (int ident = std::stoi(symbols.getValue(firstIdentifier)) ; ident <= lessThan; symbols.updateValue(firstIdentifier, std::to_string(++ident))) {
+											children.front().interpret();
+										}
+									} else if (children.front().tag == "comma") {
+										children.pop_front();
+										if (children.front().tag == "term") {
+											std::string inc = children.front().evaluateTerm();
+											int increment = std::stoi(inc);
+											children.pop_front();
+											if(children.front().tag == "do") {
+												children.pop_front();
+												for (int ident = std::stoi(symbols.getValue(firstIdentifier)) ; ident <= lessThan; symbols.updateValue(firstIdentifier, std::to_string(ident))) {
+													children.front().interpret();
+													ident += increment;
+												}
+											}
+										}
+
+									}
+								}
+							}
 						}
 					}
 				}
@@ -140,6 +179,18 @@ class Node {
 					identifier += e.value;
 				}
 			}
+
+			if (prefixexp == "io.read") {
+				std::string indata = "";
+				std::cin >> indata;
+				information.values.push_back(indata);
+			}
+			if (prefixexp == "print" || prefixexp == "io.write") {
+				std::cout << args;
+			}
+
+
+
 			information.values.push_back(prefixexp);
 			information.values.push_back(args);
 			information.values.push_back(identifier);
@@ -153,15 +204,20 @@ class Node {
 			std::string prefixexp = "";
 			for (Node e : children) {
 				if (e.tag == "var") {		// Retrieves the value of the idenfier if its a symbol otherwise it assumes its a functionname
-					if (e.children.front().tag == "identifier") {
-						prefixexp = symbols.getValue(e.children.front().value);
-						if (prefixexp == "not a symbol") {
-							prefixexp = e.children.front().value;
+					if (e.children.size() == 1) {
+						if (e.children.front().tag == "identifier") {
+							prefixexp = symbols.getValue(e.children.front().value);
+							if (prefixexp == "not a symbol") {
+								prefixexp = e.children.front().value;
+							}
 						}
+					} else {
+						prefixexp += e.evaluateVar();
 					}
 				} else if (e.tag == "functioncall") {
+					prefixexp = "10";
 					functionInformation = e.evaluateFunctioncall();
-					//prefixexp += functionInformation.values[1];
+					prefixexp = functionInformation.values[0];
 				} else if (e.tag == "leftparentheses") {
 					//prefixexp += e.value;
 				} else if (e.tag == "exp") {
@@ -211,12 +267,18 @@ class Node {
 					explist += e.value;
 				} else if (e.tag == "term") {
 					newToken = e.evaluateTerm();
-					val1 = std::stoi(newToken);
-					if (explist != "") {
-						val2 = std::stoi(explist);
-						val1 += val2;
+					std::string substring = newToken.substr(0,6);
+					if (substring != "string") {
+						val1 = std::stoi(newToken);
+						if (explist != "") {
+							val2 = std::stoi(explist);
+							val1 += val2;
+						}
+						explist = std::to_string(val1);
+					} else {
+						size_t newTokenSize = newToken.size();
+						explist = newToken.substr(6,newTokenSize-5);
 					}
-					explist = std::to_string(val1);
 				}
 			}
 			return explist;
@@ -289,8 +351,8 @@ class Node {
 			// Here the support for NIL,FALSE,TRUE and so on should be.
 			if (children.size() == 1 && (children.front().tag == "integer")){
 				return children.front().value;
-			} else if (children.size() == 1 && (children.front().tag == "identifier")) {
-				//return perhaps add "string" to return value then remove it if it is there or do integer operations as before
+			} else if (children.size() == 1 && (children.front().tag == "string")) {
+				return "string"+children.front().value;
 			}
 			else {
 				for (Node e : children) {
@@ -369,7 +431,6 @@ class Node {
 					operatorList.pop_front();
 					currentValue = retrivedValue % std::stoi(currentToken);
 				} else if (currentToken == "caret") {
-					std::cout << "IN CARET";
 					int oldValue = retrivedValue;
 					currentValue = oldValue;
 					currentToken = operatorList.front();
