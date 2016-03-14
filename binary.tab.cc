@@ -833,13 +833,13 @@ namespace yy {
 
   case 21:
 #line 156 "binary.yy" // lalr1.cc:847
-    { yylhs.value.as< Node > () = Node("statement",""); yylhs.value.as< Node > ().children.push_back(Node("if","if")); yylhs.value.as< Node > ().children.push_back(yystack_[4].value.as< Node > ()); yylhs.value.as< Node > ().children.push_back(Node("then","then")); yylhs.value.as< Node > ().children.push_back(yystack_[2].value.as< Node > ()); yylhs.value.as< Node > ().children.push_back(Node("elseif","elseif")); for (Node e : yystack_[1].value.as< Node > ().children){ yylhs.value.as< Node > ().children.push_back(e); } yylhs.value.as< Node > ().children.push_back(Node("end","end")); }
+    { yylhs.value.as< Node > () = Node("statement",""); yylhs.value.as< Node > ().children.push_back(Node("if","if")); yylhs.value.as< Node > ().children.push_back(yystack_[4].value.as< Node > ()); yylhs.value.as< Node > ().children.push_back(Node("then","then")); yylhs.value.as< Node > ().children.push_back(yystack_[2].value.as< Node > ()); yylhs.value.as< Node > ().children.push_back(Node("elseif","elseif")); yylhs.value.as< Node > ().children.push_back(yystack_[1].value.as< Node > ()); yylhs.value.as< Node > ().children.push_back(Node("end","end")); }
 #line 838 "binary.tab.cc" // lalr1.cc:847
     break;
 
   case 22:
 #line 157 "binary.yy" // lalr1.cc:847
-    { yylhs.value.as< Node > () = Node("statement",""); yylhs.value.as< Node > ().children.push_back(Node("if","if")); yylhs.value.as< Node > ().children.push_back(yystack_[6].value.as< Node > ()); yylhs.value.as< Node > ().children.push_back(Node("then","then")); yylhs.value.as< Node > ().children.push_back(yystack_[4].value.as< Node > ()); yylhs.value.as< Node > ().children.push_back(Node("elseif","elseif")); for (Node e : yystack_[3].value.as< Node > ().children){ yylhs.value.as< Node > ().children.push_back(e); } yylhs.value.as< Node > ().children.push_back(Node("else","else")); yylhs.value.as< Node > ().children.push_back(yystack_[1].value.as< Node > ()); yylhs.value.as< Node > ().children.push_back(Node("end","end")); }
+    { yylhs.value.as< Node > () = Node("statement",""); yylhs.value.as< Node > ().children.push_back(Node("if","if")); yylhs.value.as< Node > ().children.push_back(yystack_[6].value.as< Node > ()); yylhs.value.as< Node > ().children.push_back(Node("then","then")); yylhs.value.as< Node > ().children.push_back(yystack_[4].value.as< Node > ()); yylhs.value.as< Node > ().children.push_back(Node("elseif","elseif")); yylhs.value.as< Node > ().children.push_back(yystack_[3].value.as< Node > ()); yylhs.value.as< Node > ().children.push_back(Node("else","else")); yylhs.value.as< Node > ().children.push_back(yystack_[1].value.as< Node > ()); yylhs.value.as< Node > ().children.push_back(Node("end","end")); }
 #line 844 "binary.tab.cc" // lalr1.cc:847
     break;
 
@@ -965,7 +965,7 @@ namespace yy {
 
   case 43:
 #line 189 "binary.yy" // lalr1.cc:847
-    { yylhs.value.as< Node > () = Node("comma",","); yylhs.value.as< Node > ().children.push_back(yystack_[0].value.as< Node > ()); }
+    { yylhs.value.as< Node > () = Node("comma",","); yylhs.value.as< Node > ().children.push_back(Node("comma",",")); yylhs.value.as< Node > ().children.push_back(yystack_[0].value.as< Node > ()); }
 #line 970 "binary.tab.cc" // lalr1.cc:847
     break;
 
@@ -1037,7 +1037,7 @@ namespace yy {
 
   case 55:
 #line 211 "binary.yy" // lalr1.cc:847
-    { yylhs.value.as< Node > () = yystack_[2].value.as< Node > (); yylhs.value.as< Node > ().children.push_back(yystack_[2].value.as< Node > ()); yylhs.value.as< Node > ().children.push_back(Node("comma",",")); }
+    { yylhs.value.as< Node > () = yystack_[2].value.as< Node > (); yylhs.value.as< Node > ().children.push_back(yystack_[1].value.as< Node > ()); yylhs.value.as< Node > ().children.push_back(Node("comma",",")); }
 #line 1042 "binary.tab.cc" // lalr1.cc:847
     break;
 

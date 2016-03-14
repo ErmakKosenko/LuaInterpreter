@@ -4,12 +4,14 @@
 #include <stack>
 #include <map>
 #include "symboltable.h"
+#include <fstream>
 
 struct Container {
 	std::vector<std::string> values;
 };
 
 extern SymbolTable symbols;
+extern std::ofstream outFile;
 
 class Node {
 	public:
@@ -19,23 +21,15 @@ class Node {
 		Node(std::string t, std::string v) : tag(t), value(v) {}
 		Node() { tag="uninitialised"; value="uninitialised";	}  // Bison needs this.
 
-		void dump(int depth=0) {
-            std::cout << children.size();
-			for(int i=0; i<depth; i++)
-				std::cout << "  ";
-			std::cout << tag << ":" << value << std::endl;
-			for(auto i=children.begin(); i!=children.end(); i++)
-				(*i).dump(depth+1);
-		}
 
 		void dotFormat(int depth = 0) {
 			std::list<std::string> pointer;
-			std::cout << "digraph { " << std::endl;
-			std::cout << tag + "0"  << " [label=\""+tag+"\"];" << std::endl;
+			outFile << "digraph { " << std::endl;
+			outFile << tag + "0"  << " [label=\""+tag+"\"];" << std::endl;
 			for (Node e : children)
 				//std::cout << tag + "0 -> " << e.tag +"1;" << std::endl;
 			printChild(0,1);
-			std::cout << std::endl <<  "}";
+			outFile << std::endl <<  "}";
 		}
 
 		int printChild(int parent, int level) {
@@ -43,16 +37,16 @@ class Node {
 			for (auto i=children.begin(); i!=children.end(); i++) {
 				level++;
 				if (!i->children.empty()) {
-					std::cout << i->tag + std::to_string(level) << " [label=\""+i->tag+"\"];" << std::endl;
-					std::cout << tag + std::to_string(parent) << " -> " << i->tag + std::to_string(level) << ";" << std::endl;
+					outFile << i->tag + std::to_string(level) << " [label=\""+i->tag+"\"];" << std::endl;
+					outFile << tag + std::to_string(parent) << " -> " << i->tag + std::to_string(level) << ";" << std::endl;
 				} else {
 					if (i->value!="") {
-					std::cout << i->tag + std::to_string(level) << " [label=\""+i->value+"\"];" << std::endl;
-					std::cout << tag + std::to_string(parent) << " -> " << i->tag + std::to_string(level) << ";" << std::endl;
+					outFile << i->tag + std::to_string(level) << " [label=\""+i->value+"\"];" << std::endl;
+					outFile << tag + std::to_string(parent) << " -> " << i->tag + std::to_string(level) << ";" << std::endl;
 					}
 					else {
-						std::cout << i->tag + std::to_string(level) << " [label=\""+i->tag+"\"];" << std::endl;
-						std::cout << tag + std::to_string(parent) << " -> " << i->tag + std::to_string(level) << ";" << std::endl;
+						outFile << i->tag + std::to_string(level) << " [label=\""+i->tag+"\"];" << std::endl;
+						outFile << tag + std::to_string(parent) << " -> " << i->tag + std::to_string(level) << ";" << std::endl;
 					}
 				}
 				if (!i->children.empty()) {
@@ -70,7 +64,6 @@ class Node {
 					e.interpret();
 				} else if (e.tag == "statement") {
 					e.evaluateStatement();
-					std::cout << "x = " << symbols.getValue("x") << " y = " << symbols.getValue("y") << " z = " << symbols.getValue("z") << std::endl;
 				}
 			}
 		}
@@ -82,7 +75,7 @@ class Node {
 			if (children.front().tag == "functioncall") {
 				information = children.front().evaluateFunctioncall();
 				if (information.values[0] == "print" || information.values[0] == "io.write") {
-					std::cout << std::endl << std::endl << "_______PROGRAM OUTPUT________" << std::endl;
+					std::cout << "_______PROGRAM OUTPUT________" << std::endl  << std::endl;
 					std::cout << information.values[1];
 				}
 				std::cout << std::endl;
@@ -99,7 +92,6 @@ class Node {
 						}
 					}
 				}
-				//std::cout << "x = " << symbols.getValue("x") << " p = " << symbols.getValue("p") << std::endl;
 			}
 		}
 
@@ -160,7 +152,7 @@ class Node {
 			Container functionInformation;
 			std::string prefixexp = "";
 			for (Node e : children) {
-				if (e.tag == "var") {		// Retrieves the value of the idenfier if its a symbol otherwise it assumes its a functionname 
+				if (e.tag == "var") {		// Retrieves the value of the idenfier if its a symbol otherwise it assumes its a functionname
 					if (e.children.front().tag == "identifier") {
 						prefixexp = symbols.getValue(e.children.front().value);
 						if (prefixexp == "not a symbol") {
@@ -295,9 +287,12 @@ class Node {
 			int currentValue, retrivedValue, tokenOperation;
 
 			// Here the support for NIL,FALSE,TRUE and so on should be.
-			if (children.size() == 1 && children.front().tag == "integer") {
+			if (children.size() == 1 && (children.front().tag == "integer")){
 				return children.front().value;
-			} else {
+			} else if (children.size() == 1 && (children.front().tag == "identifier")) {
+				//return perhaps add "string" to return value then remove it if it is there or do integer operations as before
+			}
+			else {
 				for (Node e : children) {
 					if (e.tag == "term") {
 						retvalue = e.evaluateTerm();
@@ -331,6 +326,8 @@ class Node {
 						operatorList.push_back("and");
 					} else if (e.tag == "binop" && e.value == "or") {
 						operatorList.push_back("or");
+					} else if (e.tag == "unop" && e.value == "-") {
+						operatorList.push_back("-");
 					}
 				}
 
@@ -340,9 +337,10 @@ class Node {
 			operatorList.pop_front();
 
 			if (currentToken == "-") {
+				currentToken = operatorList.front();
+				operatorList.pop_front();
 				int oldValue = std::stoi(currentToken);
 				oldValue = oldValue - 2*oldValue;
-				operatorList.pop_front();
 				operatorList.push_front(std::to_string(oldValue));
 			} else if (currentToken == "not") {
 				std::cout << "NOT IMPLEMENTED!";
