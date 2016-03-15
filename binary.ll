@@ -54,6 +54,7 @@
 ".."                            { return yy::parser::make_DOTDOT(yytext); }
 "..."                           { return yy::parser::make_DOTDOTDOT(yytext); }
 \n                              ;
+[ ]+                             ;
 
 
 ([0-9]+)                                             { return yy::parser::make_INTEGER(yytext); }

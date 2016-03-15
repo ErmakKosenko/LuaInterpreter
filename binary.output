@@ -35,8 +35,6 @@ State 23 conflicts: 1 reduce/reduce
 State 49 conflicts: 1 shift/reduce
 State 55 conflicts: 1 shift/reduce
 State 81 conflicts: 1 shift/reduce
-State 88 conflicts: 2 shift/reduce
-State 90 conflicts: 2 shift/reduce
 
 
 Grammar
@@ -1635,11 +1633,6 @@ State 88
    56    | exp . MINUS term
    59    | NOT exp .
 
-    PLUS   shift, and go to state 98
-    MINUS  shift, and go to state 99
-
-    PLUS      [reduce using rule 59 (exp)]
-    MINUS     [reduce using rule 59 (exp)]
     $default  reduce using rule 59 (exp)
 
 
@@ -1658,11 +1651,6 @@ State 90
    56    | exp . MINUS term
    60    | HASHTAG exp .
 
-    PLUS   shift, and go to state 98
-    MINUS  shift, and go to state 99
-
-    PLUS      [reduce using rule 60 (exp)]
-    MINUS     [reduce using rule 60 (exp)]
     $default  reduce using rule 60 (exp)
 
 

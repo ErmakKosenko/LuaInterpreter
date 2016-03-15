@@ -29,10 +29,8 @@ int main(int argc, char **argv) {
         root.dotFormat();
         outFile.close();
         system ("dot -Tpdf source.dot -otree.pdf");
+        std::cout << std::endl << "________PROGRAM OUTPUT_________" << std::endl;
         root.interpret();
-        std::string apa;
-        std::cin.sync();
-        getline(std::cin, apa);
         //  DO SHIT
     }
     return 0;

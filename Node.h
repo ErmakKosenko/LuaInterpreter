@@ -124,13 +124,76 @@ class Node {
 												}
 											}
 										}
-
 									}
 								}
 							}
 						}
 					}
 				}
+			} else if (children.front().tag == "if") {
+				std::string boolean;
+				children.pop_front();
+				if (children.front().tag == "term") {
+					boolean = children.front().evaluateTerm();
+					children.pop_front();
+					children.pop_front();
+					if (boolean == "false") {
+						children.pop_front();
+						while (children.front().tag == "elseif") {
+							children.pop_front();
+							if (children.front().tag == "term") {
+								boolean = children.front().evaluateTerm();
+								children.pop_front();
+								children.pop_front();
+								if (boolean == "false") {
+									children.pop_front();
+									std::cout << children.front().tag;
+								} else if (boolean == "true") {
+									if (children.front().tag == "block") {
+										children.front().interpret();
+									}
+									while (children.front().tag != "end") {
+										children.pop_front();
+									}
+								}
+							}
+						}
+						if (children.front().tag == "else") {
+								children.pop_front();
+								children.front().interpret();
+						}
+					} else if (boolean == "true") {
+						if (children.front().tag == "block") {
+							children.front().interpret();
+						}
+						while (children.front().tag != "end") {
+							children.pop_front();
+						}
+					} else {
+						std::cout << "ERROR IN RETURN VALUE IF-STATEMENT; NEITHER TRUE OR FALSE";
+					}
+				}
+			} else if (children.front().tag == "do") {
+				children.pop_front();
+				if (children.front().tag == "block") {
+					children.front().interpret();
+				}
+
+			} else if (children.front().tag == "while") {
+				std::string boolean;
+				children.pop_front();
+				children.pop_back();
+				if (children.front().tag == "term") {
+					while (children.front().evaluateTerm() == "true") {
+						children.back().interpret();
+					}
+				}
+			} else if (children.front().tag == "repeat") {
+				children.pop_front();
+				std::cout << children.back().evaluateTerm();
+				do {
+					children.front().interpret();
+				} while (children.back().evaluateTerm() == "false");
 			}
 		}
 
@@ -383,6 +446,8 @@ class Node {
 					} else if (e.tag == "binop" && e.value == ">=") {
 						operatorList.push_back("greaterorequal");
 					} else if (e.tag == "binop" && e.value == "==") {
+						operatorList.push_back("equalto");
+					} else if (e.tag == "binop" && e.value == "~=") {
 						operatorList.push_back("tildeequal");
 					} else if (e.tag == "binop" && e.value == "and") {
 						operatorList.push_back("and");
@@ -441,15 +506,45 @@ class Node {
 				} else if (currentToken == "dotdot") {
 					std::cout << currentToken << " NOT IMPLEMENTED IN evaluateTerm()";
 				} else if (currentToken == "lessthan") {
-					std::cout << currentToken << " NOT IMPLEMENTED IN evaluateTerm()";
+					currentToken = operatorList.front();
+					operatorList.pop_front();
+					if (retrivedValue < std::stoi(currentToken)) {
+						return "true";
+					} else {
+						return "false";
+					}
 				} else if (currentToken == "lessorequal") {
-					std::cout << currentToken << " NOT IMPLEMENTED IN evaluateTerm()";
+					currentToken = operatorList.front();
+					operatorList.pop_front();
+					if (retrivedValue <= std::stoi(currentToken)) {
+						return "true";
+					} else {
+						return "false";
+					}
 				} else if (currentToken == "greaterthan") {
-					std::cout << currentToken << " NOT IMPLEMENTED IN evaluateTerm()";
+					currentToken = operatorList.front();
+					operatorList.pop_front();
+					if (retrivedValue > std::stoi(currentToken)) {
+						return "true";
+					} else {
+						return "false";
+					}
 				} else if (currentToken == "greaterorequal") {
-					std::cout << currentToken << " NOT IMPLEMENTED IN evaluateTerm()";
+					currentToken = operatorList.front();
+					operatorList.pop_front();
+					if (retrivedValue >= std::stoi(currentToken)) {
+						return "true";
+					} else {
+						return "false";
+					}
 				} else if (currentToken == "equalto") {
-					std::cout << currentToken << " NOT IMPLEMENTED IN evaluateTerm()";
+					currentToken = operatorList.front();
+					operatorList.pop_front();
+					if (retrivedValue == std::stoi(currentToken)) {
+						return "true";
+					} else {
+						return "false";
+					}
 				} else if (currentToken == "and") {
 					std::cout << currentToken << " NOT IMPLEMENTED IN evaluateTerm()";
 				} else if (currentToken == "or") {

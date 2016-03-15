@@ -76,8 +76,11 @@
 %precedence THEN
 %precedence ELSE
 
+
+
+
 %left LESSTHAN GREATERTHAN EQUAL LESSOREQUAL GREATEROREQUAL
-%left PLUS MINUS
+%left PLUS MINUS HASHTAG NOT
 %left MULTIPLY DEVIDE
 
 
@@ -153,8 +156,8 @@ stat : varlist EQUAL explist  								{ $$ = Node("statement", ""); $$.children.
 	 | REPEAT block UNTIL exp 								{ $$ = Node("statement",""); $$.children.push_back(Node("repeat", "")); $$.children.push_back($2); $$.children.push_back(Node("until", "")); $$.children.push_back($4); }
 	 | IF exp THEN block end			    				{ $$ = Node("statement",""); $$.children.push_back(Node("if","if")); $$.children.push_back($2); $$.children.push_back(Node("then","then")); $$.children.push_back($4); $$.children.push_back(Node("end","end")); }
 	 | IF exp THEN block ELSE block end 	   				{ $$ = Node("statement",""); $$.children.push_back(Node("if","if")); $$.children.push_back($2); $$.children.push_back(Node("then","then")); $$.children.push_back($4); $$.children.push_back(Node("else","else")); $$.children.push_back($6); $$.children.push_back(Node("end","end")); }
-     | IF exp THEN block elseif_layer end    				{ $$ = Node("statement",""); $$.children.push_back(Node("if","if")); $$.children.push_back($2); $$.children.push_back(Node("then","then")); $$.children.push_back($4); $$.children.push_back(Node("elseif","elseif")); $$.children.push_back($5); $$.children.push_back(Node("end","end")); }
-	 | IF exp THEN block elseif_layer ELSE block end    	{ $$ = Node("statement",""); $$.children.push_back(Node("if","if")); $$.children.push_back($2); $$.children.push_back(Node("then","then")); $$.children.push_back($4); $$.children.push_back(Node("elseif","elseif")); $$.children.push_back($5); $$.children.push_back(Node("else","else")); $$.children.push_back($7); $$.children.push_back(Node("end","end")); }
+     | IF exp THEN block elseif_layer end    				{ $$ = Node("statement",""); $$.children.push_back(Node("if","if")); $$.children.push_back($2); $$.children.push_back(Node("then","then")); $$.children.push_back($4); $$.children.push_back(Node("elseif","elseif")); for(Node e : $5.children) {$$.children.push_back(e);} $$.children.push_back(Node("end","end")); }
+	 | IF exp THEN block elseif_layer ELSE block end    	{ $$ = Node("statement",""); $$.children.push_back(Node("if","if")); $$.children.push_back($2); $$.children.push_back(Node("then","then")); $$.children.push_back($4); $$.children.push_back(Node("elseif","elseif")); for(Node e : $5.children) {$$.children.push_back(e);} $$.children.push_back(Node("else","else")); $$.children.push_back($7); $$.children.push_back(Node("end","end")); }
      | FOR Name EQUAL exp COMMA exp DO block end 			{ $$ = Node("statement",""); $$.children.push_back(Node("for","for")); $$.children.push_back($2); $$.children.push_back(Node("equal","=")); $$.children.push_back($4); $$.children.push_back(Node("comma",",")); $$.children.push_back($6); $$.children.push_back(Node("do","do")); $$.children.push_back($8); $$.children.push_back(Node("end","end"));}
      | FOR Name EQUAL exp COMMA exp COMMA exp DO block end  { $$ = Node("statement",""); $$.children.push_back(Node("for","for")); $$.children.push_back($2); $$.children.push_back(Node("equal","=")); $$.children.push_back($4); $$.children.push_back(Node("comma",",")); $$.children.push_back($6); $$.children.push_back(Node("comma",",")); $$.children.push_back($8); $$.children.push_back(Node("do","do")); $$.children.push_back($10); $$.children.push_back(Node("end","end")); }
      | FOR namelist IN explist DO block end 				{ $$ = Node("statement",""); $$.children.push_back(Node("for","for")); $$.children.push_back($2); $$.children.push_back(Node("in","in")); $$.children.push_back($4); $$.children.push_back(Node("do","do")); $$.children.push_back($6); $$.children.push_back(Node("end","end"));}
