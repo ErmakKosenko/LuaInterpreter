@@ -6,6 +6,7 @@
 #include "symboltable.h"
 #include <fstream>
 #include <iostream>
+#include <sstream>
 
 struct Container {
 	std::vector<std::string> values;
@@ -71,20 +72,82 @@ class Node {
 
 		void evaluateStatement() {
 			Container information;
-			std::vector<std::string> returnVarlist;
-			std::string explistReturn = "";
+			std::list<std::string> returnVarlist;
+			std::string explistReturn = "", var = "", offset = "";
 			if (children.front().tag == "functioncall") {
 				information = children.front().evaluateFunctioncall();
 			} else if (children.front().tag == "varlist") {
-				returnVarlist = children.front().evaluateVarlist();
+				// IF L.H.S CONTAINTS [] then place that var in returnVarlist not the value
+				for (Node e : children.front().children) {
+					if (e.children.size() == 1 && e.tag == "var") {
+						returnVarlist.push_back(e.children.front().value);
+					} else if (e.tag == "var") {
+						for (Node g : e.children) {
+							if (g.tag == "prefixexp") {
+								std::string test = g.evaluatePrefixexp();
+								returnVarlist.push_back(test);
+							} else if (g.tag == "leftbracket") {
+								returnVarlist.push_back("leftbracket");
+							} else if (g.tag == "term") {
+								returnVarlist.push_back(g.evaluateTerm());
+							} else if (g.tag == "exp") {
+								returnVarlist.push_back(g.evaluateExp());
+							}
+							else if (g.tag == "rightbracket") {
+								returnVarlist.push_back("rightbracket");
+							}
+						}
+					}
+				}
+				//returnVarlist = children.front().evaluateVarlist();
 				// if binop...
 				children.pop_front();
 				if (children.front().tag == "binop" && children.front().value == "=") {
 					children.pop_front();
 					if (children.front().tag == "explist") {
+						std::string insertValue;
+						std::string oldInsert;
 						explistReturn = children.front().evaluateExplist();
-						for (std::string var : returnVarlist) {
-							symbols.insert(var, explistReturn);
+						if (explistReturn != "tables") {
+							std::istringstream explistStream(explistReturn);
+							while (!returnVarlist.empty()) {
+								var = returnVarlist.front();
+								returnVarlist.pop_front();
+
+								if (!returnVarlist.empty() && returnVarlist.front() == "leftbracket") {
+									returnVarlist.pop_front();
+									offset = returnVarlist.front();
+									returnVarlist.pop_front();
+									returnVarlist.pop_front();
+
+									if(!std::getline(explistStream, insertValue, ',')) {
+										insertValue = oldInsert;
+									}
+									symbols.insertInList(var, offset, insertValue);
+									oldInsert = insertValue;
+
+								} else {
+									if(!std::getline(explistStream, insertValue, ',')) {
+										insertValue = oldInsert;
+									}
+									symbols.insert(var, insertValue);
+									oldInsert = insertValue;
+								}
+							}
+
+							/*
+							for (std::string var : returnVarlist) {
+								if(!std::getline(explistStream, insertValue, ',')) {
+									insertValue = oldInsert;
+								}
+								symbols.insert(var, insertValue);
+								oldInsert = insertValue;
+							}
+							*/
+						} else if (explistReturn == "tables") {
+							for (std::string var : returnVarlist) {
+								symbols.assignList(var);
+							}
 						}
 					}
 				}
@@ -147,7 +210,6 @@ class Node {
 								children.pop_front();
 								if (boolean == "false") {
 									children.pop_front();
-									std::cout << children.front().tag;
 								} else if (boolean == "true") {
 									if (children.front().tag == "block") {
 										children.front().interpret();
@@ -190,10 +252,12 @@ class Node {
 				}
 			} else if (children.front().tag == "repeat") {
 				children.pop_front();
-				std::cout << children.back().evaluateTerm();
 				do {
 					children.front().interpret();
 				} while (children.back().evaluateTerm() == "false");
+			} else if (children.front().tag == "function") {
+				std::cout << "\nLacks support for function defenitions! \nExiting...\n";
+				exit(0);
 			}
 		}
 
@@ -202,6 +266,8 @@ class Node {
 			for (Node e : children) {
 				if (e.tag == "var") {
 					variableList.push_back(e.evaluateVar());
+				} else if (e.tag == "comma") {
+					//variableList.push_back("comma");
 				}
 			}
 			return variableList;
@@ -209,6 +275,8 @@ class Node {
 
 		std::string evaluateVar() {
 			std::string variable = "";
+			std::string offset = "";
+			std::string listValue = "";
 			for (Node e : children) {
 				if (e.tag == "identifier") {
 					variable += e.value;
@@ -216,12 +284,16 @@ class Node {
 					variable += e.evaluatePrefixexp();
 				} else if (e.tag == "leftbracket") {
 
-				} else if (e.tag == "exp") {
-
-				} else if (e.tag == "rightbracket") {
-
+				} else if (e.tag == "term") {
+					offset = e.evaluateTerm();
+					listValue = symbols.getListOffsetValue(variable, offset);
+					variable = listValue;
 				} else if (e.tag == "dot") {
 					variable += ".";
+				} else if (e.tag == "exp") {
+					offset = e.evaluateExp();
+					listValue = symbols.getListOffsetValue(variable, offset);
+					variable = listValue;
 				}
 			}
 			return variable;
@@ -248,11 +320,10 @@ class Node {
 				std::cin >> indata;
 				information.values.push_back(indata);
 			}
+
 			if (prefixexp == "print" || prefixexp == "io.write") {
 				std::cout << args;
 			}
-
-
 
 			information.values.push_back(prefixexp);
 			information.values.push_back(args);
@@ -331,16 +402,19 @@ class Node {
 				} else if (e.tag == "term") {
 					newToken = e.evaluateTerm();
 					std::string substring = newToken.substr(0,6);
-					if (substring != "string") {
+					if (substring != "string" && substring != "booles" && substring != "false" && substring != "true" && substring != "tables") {
 						val1 = std::stoi(newToken);
-						if (explist != "") {
-							val2 = std::stoi(explist);
-							val1 += val2;
-						}
-						explist = std::to_string(val1);
-					} else {
+						explist += std::to_string(val1);
+					} else if (substring == "string"){
 						size_t newTokenSize = newToken.size();
 						explist = newToken.substr(6,newTokenSize-5);
+					} else if (substring == "booles") {
+						size_t newTokenSize = newToken.size();
+						explist = newToken.substr(6,newTokenSize-5);
+					} else if (substring == "false" || substring == "true") {
+						explist = substring;
+					} else if (substring == "tables") {
+						explist = substring;
 					}
 				}
 			}
@@ -408,14 +482,19 @@ class Node {
 
 		std::string evaluateTerm() {
 			std::list<std::string> operatorList;
-			std::string retvalue = "", currentToken = "", lastOp = "";
+			std::string retvalue = "", currentToken = "", lastOp = "", boolean = "";
 			int currentValue, retrivedValue, tokenOperation;
 
 			// Here the support for NIL,FALSE,TRUE and so on should be.
 			if (children.size() == 1 && (children.front().tag == "integer")){
 				return children.front().value;
 			} else if (children.size() == 1 && (children.front().tag == "string")) {
-				return "string"+children.front().value;
+				return "string" + children.front().value;
+			} else if (children.size() == 1 && (children.front().tag == "true" || children.front().tag == "false")) {
+				return "booles" + children.front().value;
+			} else if (children.front().tag == "tableconstructor") {
+				children.front().evaluateTableconstructor();
+				return "tables";
 			}
 			else {
 				for (Node e : children) {
@@ -455,10 +534,18 @@ class Node {
 						operatorList.push_back("or");
 					} else if (e.tag == "unop" && e.value == "-") {
 						operatorList.push_back("-");
+					} else if (e.tag == "unop" && e.value == "#") {
+						operatorList.push_back("#");
+					} else if (e.tag == "true") {
+						operatorList.push_back("true");
+					} else if (e.tag == "false") {
+						operatorList.push_back("false");
 					}
 				}
 
 			}
+
+
 
 			currentToken = operatorList.front();
 			operatorList.pop_front();
@@ -539,8 +626,14 @@ class Node {
 					}
 				} else if (currentToken == "equalto") {
 					currentToken = operatorList.front();
-					operatorList.pop_front();
-					if (retrivedValue == std::stoi(currentToken)) {
+					//operatorList.pop_front();
+					if (boolean == "true" || boolean == "false" || currentToken == "true" || currentToken == "false") {
+						if (boolean == currentToken) {
+							return "true";
+						} else {
+							return "false";
+						}
+					} else if (retrivedValue == std::stoi(currentToken)) {
 						return "true";
 					} else {
 						return "false";
@@ -549,12 +642,59 @@ class Node {
 					std::cout << currentToken << " NOT IMPLEMENTED IN evaluateTerm()";
 				} else if (currentToken == "or") {
 					std::cout << currentToken << " NOT IMPLEMENTED IN evaluateTerm()";
+				} else if (currentToken == "#") {
+					std::string sizeOfList = "";
+					currentToken = operatorList.front();
+					operatorList.pop_front();
+					sizeOfList = symbols.getListSize(currentToken);
+					return sizeOfList;
 				} else {
-					if (currentToken != "")
+					if (currentToken != "false" && currentToken != "true") {
 						retrivedValue = std::stoi(currentToken);
+					} else {
+						boolean = currentToken;
+					}
 				}
 			}
 			return std::to_string(currentValue);
+		}
+
+		std::string evaluateTableconstructor() {
+			std::string temp;
+			for(Node e : children) {
+				if (e.tag == "fieldlist") {
+					e.evaluateFieldList();
+				}
+			}
+
+			return "";
+
+		}
+
+		std::string evaluateFieldList() {
+			std::vector<std::string> values;
+			values.push_back("0");
+			std::string temp;
+			for(Node e : children) {
+				if (e.tag == "field") {
+					temp = e.evaluateField();
+					values.push_back(temp);
+				} else if (e.tag == "comma") {
+					// DO NOTHING
+				}
+			}
+
+			symbols.insertList(values);
+			return "";
+
+		}
+
+		std::string evaluateField() {
+			std::string retValue = "Error in evaluateField";
+			if(children.size() == 1 && children.front().tag == "term") {
+				retValue = children.front().evaluateTerm();
+			}
+			return retValue;
 		}
 
 };
