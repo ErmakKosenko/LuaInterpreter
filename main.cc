@@ -25,13 +25,10 @@ int main(int argc, char **argv) {
     yy::parser parser;
     outFile.open("source.dot", std::ofstream::out);
     if (!parser.parse()) {
-        //root.dump();
         root.dotFormat();
         outFile.close();
         system ("dot -Tpdf source.dot -otree.pdf");
-        std::cout << std::endl << "________PROGRAM OUTPUT_________" << std::endl;
         root.interpret();
-        //  DO SHIT
     }
     return 0;
 }

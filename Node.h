@@ -134,16 +134,6 @@ class Node {
 									oldInsert = insertValue;
 								}
 							}
-
-							/*
-							for (std::string var : returnVarlist) {
-								if(!std::getline(explistStream, insertValue, ',')) {
-									insertValue = oldInsert;
-								}
-								symbols.insert(var, insertValue);
-								oldInsert = insertValue;
-							}
-							*/
 						} else if (explistReturn == "tables") {
 							for (std::string var : returnVarlist) {
 								symbols.assignList(var);
@@ -256,7 +246,7 @@ class Node {
 					children.front().interpret();
 				} while (children.back().evaluateTerm() == "false");
 			} else if (children.front().tag == "function") {
-				std::cout << "\nLacks support for function defenitions! \nExiting...\n";
+				std::cout << "\nFunction definitions not implemented! \nExiting...\n";
 				exit(0);
 			}
 		}
@@ -322,7 +312,7 @@ class Node {
 			}
 
 			if (prefixexp == "print" || prefixexp == "io.write") {
-				std::cout << args;
+				std::cout << args << " ";
 			}
 
 			information.values.push_back(prefixexp);

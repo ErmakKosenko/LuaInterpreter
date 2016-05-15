@@ -31,8 +31,11 @@ class SymbolTable {
     }
 
     std::string getValue(std::string variableName) {
-        int offset = table[variableName];
-        std::string temp = values[offset-1];
+        int offset = 0;
+        std::string temp = "";
+        offset = table[variableName];
+        if(offset != 0)
+            temp = values[offset-1];
 
         if (temp != "") {
             return temp;

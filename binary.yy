@@ -64,7 +64,6 @@
 %token <std::string> DOTDOT
 %token <std::string> DOTDOTDOT
 
-
 %token <std::string> INTEGER
 %token <std::string> DECIMAL
 %token <std::string> POWEROF
@@ -103,8 +102,6 @@
 %type <Node> explist_layer
 %type <Node> exp
 %type <Node> exp_layer
-%type <Node> exp_trail
-%type <Node> factor
 %type <Node> term
 %type <Node> Number
 %type <Node> Name
@@ -120,8 +117,6 @@
 %type <Node> fieldlist_layer
 %type <Node> field
 %type <Node> fieldsep
-%type <Node> binop
-%type <Node> unop
 
 %token END 0 "end of file"
 %%
@@ -214,16 +209,6 @@ explist_layer : exp COMMA				{ $$ = Node("explist_layer",""); $$.children.push_b
 			  | explist_layer exp COMMA { $$ = $1; $$.children.push_back($2); $$.children.push_back(Node("comma",",")); }
 			  ;
 
-/*
-exp : exp_layer				{ $$ = Node("exp",""); $$.children.push_back($1); }
- 	| exp binop exp_layer	{ $$ = Node("exp",""); for(Node e : $1.children){$$.children.push_back(e);} $$.children.push_back($2); $$.children.push_back($3); }
-	| unop exp				{ $$ = Node("exp",""); $$.children.push_back($1); $$.children.push_back($2); }
-	;
-
-exp_trail : exp_layer {$$ = $1;}
-		  ;
-*/
-
 exp : exp PLUS term 		{ $$ = Node("exp",""); $$.children.push_back($1); $$.children.push_back(Node("binop",$2)); $$.children.push_back($3); }
 	| exp MINUS term		{ $$ = Node("exp",""); $$.children.push_back($1); $$.children.push_back(Node("binop",$2)); $$.children.push_back($3);}
 	| term					{ $$ = $1; }
@@ -247,9 +232,6 @@ term : term MULTIPLY exp_layer			{ $$ = Node("term",""); $$.children.push_back($
 	 | term OR exp_layer 				{ $$ = Node("term",""); $$.children.push_back($1); $$.children.push_back(Node("binop",$2)); $$.children.push_back($3);}
 	 | exp_layer						{ $$ = Node("term",""); $$.children.push_back($1); }
 	 ;
-
-factor : exp_layer									{ $$ = Node("factor",""); $$.children.push_back($1); }
-	   ;
 
 exp_layer : NIL					{ $$ = Node("nil",$1);}
 	   	  | FALSE				{ $$ = Node("false",$1);}
@@ -324,25 +306,3 @@ field : LEFTBRACKET exp RIGHTBRACKET EQUAL exp 		{ $$ = Node("field",""); $$.chi
 fieldsep : COMMA		{ $$ = Node("Fieldsep", $1);}
 		 | SEMICOLON	{ $$ = Node("Fieldsep", $1);}
 		 ;
-//BYTA NAMN PÅ EQUALTO?
-binop : PLUS			{ $$ = Node("binop", $1);}
-	  | MINUS			{ $$ = Node("binop", $1);}
-	  | MULTIPLY		{ $$ = Node("binop", $1);}
-	  | DEVIDE			{ $$ = Node("binop", $1);}
-	  | CARET			{ $$ = Node("binop", $1);}
-	  | PERCENT			{ $$ = Node("binop", $1);}
-	  | DOTDOT			{ $$ = Node("binop", $1);}
-	  | LESSTHAN		{ $$ = Node("binop", $1);}
-	  | LESSOREQUAL		{ $$ = Node("binop", $1);}
-	  | GREATERTHAN		{ $$ = Node("binop", $1);}
-	  | GREATEROREQUAL	{ $$ = Node("binop", $1);}
-	  | EQUALTO			{ $$ = Node("binop", $1);}
-	  | TILDEEQUAL		{ $$ = Node("binop", $1);}
-	  | AND				{ $$ = Node("binop", $1);}
-	  | OR				{ $$ = Node("binop", $1);}
-	  ;
-
-unop : MINUS 	{ $$ = Node("unop", $1);}
-	 | NOT 		{ $$ = Node("unop", $1);}
-	 | HASHTAG	{ $$ = Node("unop", $1);}
-	 ;
