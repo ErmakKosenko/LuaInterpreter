@@ -2,6 +2,7 @@
 #include <fstream>
 #include "binary.tab.hh"   //  Not really sure what this does
 #include "symboltable.h"
+#include "Tree.h"
 
 extern Node root;
 extern FILE* yyin;
