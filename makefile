@@ -1,5 +1,5 @@
-parser: lex.yy.c binary.tab.o main.cc
-	g++ --std=c++11 -oparser binary.tab.o lex.yy.c main.cc -o int
+parser: lex.yy.c binary.tab.o main.cpp
+	g++ --std=c++11 -oparser binary.tab.o lex.yy.c main.cpp -o int
 binary.tab.o: binary.tab.cc
 	g++ --std=c++11 -c binary.tab.cc
 binary.tab.cc: binary.yy
@@ -7,4 +7,4 @@ binary.tab.cc: binary.yy
 lex.yy.c: binary.ll binary.tab.cc
 	flex binary.ll
 clean:
-	rm -f binary.tab.* lex.yy.c* int
+	rm -f binary.tab.* lex.yy.c* int stack.hh

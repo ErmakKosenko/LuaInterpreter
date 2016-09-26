@@ -5,12 +5,13 @@
 %code requires {
 	#include <string>
 	#include <iostream>
-  #include <list>
-  #include "Node.h"
+  	#include <list>
+  	#include "Node.h"
 }
 %code{
-  Node root;
-
+  	Node root;
+	int nameCounter = 0;
+	list<BBlock> Node::blocks(root.initBBlockList());
 	#define YY_DECL yy::parser::symbol_type yylex()
 	YY_DECL;
 }

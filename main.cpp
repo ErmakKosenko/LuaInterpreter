@@ -2,6 +2,7 @@
 #include <fstream>
 #include "binary.tab.hh"   //  Not really sure what this does
 #include "symboltable.h"
+#include "Node.h"
 
 extern Node root;
 extern FILE* yyin;
@@ -28,7 +29,7 @@ int main(int argc, char **argv) {
         root.dotFormat();
         outFile.close();
         system ("dot -Tpdf source.dot -otree.pdf");
-        root.interpret();
+        root.threeAddress();
     }
     return 0;
 }

@@ -1,27 +1,155 @@
+#pragma once
 
 #include <list>
 #include <vector>
+#include <queue>
 #include <stack>
 #include <map>
 #include "symboltable.h"
+#include "Tree.h"
 #include <fstream>
 #include <iostream>
 #include <sstream>
-
-struct Container {
-	std::vector<std::string> values;
-};
+#include <string>
+#include <set>
+#include <climits>
 
 extern SymbolTable symbols;
 extern std::ofstream outFile;
+extern int nameCounter;
+
+using namespace std;
+
+class ThreeAd
+{
+public:
+  string op;
+  string result, lhs, rhs;
+
+  ThreeAd(string out, string o, string l, string r)
+    :  result(out), op(o), lhs(l), rhs(r)      {}
+
+  void dump()
+  {
+    cout << result << " := " << lhs << " "
+         << op << " " << rhs << endl;
+  }
+
+};
+
+class BBlock
+{
+public:
+list<ThreeAd> instructions;
+BBlock *trueExit, *falseExit;
+
+  BBlock()
+    :  trueExit(NULL), falseExit(NULL)  {}
+
+  void dump()
+  {
+    cout << "BBlock @ " << this << endl;
+    for(auto i : instructions)
+      i.dump();
+    cout << "True: " << trueExit << endl;
+    cout << "False: " << falseExit << endl;
+  }
+};
+
+
+/* One style for expressing a simple parse-tree.
+
+   There are many better ways to do this that use inheritence and encode
+   node-type in a static class hierarchy. Instead I've smashed all the
+   node types together into a single class: the code is shorter and I
+   need everyone to read and understand it quickly for the lab.
+*/
+
+///////////////////////// Expressions /////////////////////////////////////
+
+class Expression      // Implicit union of binary operators, constants and variables.
+{
+public:
+class Expression *left, *right;
+char kind, op;
+int value;
+string name;
+
+  Expression(char k, Expression *l, Expression *r)
+    : kind(k), left(l), right(r)                {}
+
+  void dump(int depth=0)
+  {
+    for(int i=0; i<depth; i++)
+      cout << "  ";
+    switch(kind)
+    {
+      case 'N':  cout << op << endl;    break;
+      case 'V':  cout << name << endl;  break;
+      case 'C':  cout << value << endl; break;
+    }
+    if(left!=NULL)
+      left->dump(depth+1);
+    if(right!=NULL)
+      right->dump(depth+1);
+  }
+};
+
+///////////////////////// Statements /////////////////////////////////////
+
+class Statement
+{
+public:
+vector<Expression*> expressions;
+vector<Statement*> children;
+char kind;
+  Statement(char k)  : kind(k)  {}
+
+  void dump(int indent=0)
+  {
+    for(int i=0; i<indent; i++)
+      cout << "  ";
+    cout << "Statement(" << kind << ")" << endl ;
+    for( auto e: expressions )
+      e->dump(indent+1);
+    for( auto c: children )
+      c->dump(indent+1);
+
+  }
+};
+
+Expression *BinOp(char op, Expression *l, Expression *r);
+Expression *Variable(string name);
+Expression *Constant(int value);
+Expression *Equality(Expression *l, Expression *r);
+Statement *Assign(string target, Expression *val);
+Statement *If(Expression *condition, Statement *trueSt, Statement *falseSt);
+Statement *Seq(initializer_list<Statement*> ss);
+string newName();
+void namePass(Expression *tree, map<Expression*,string> &nameMap);
+void emitPass(Expression *tree, map<Expression*,string> &nameMap, BBlock *out);
+string convert(Expression *in, BBlock *out);
+void convertAssign(Statement *in, BBlock *out);
+void convertComparitor(Expression *in, BBlock *out);
+void convertStatement(Statement *in, BBlock **current);
+void convertIf(Statement *in, BBlock **current);
+void convertSeq(Statement *in, BBlock **current);
+void dumpCFG(BBlock *start);
 
 class Node {
 	public:
 		std::string test="test";
 		std::string tag, value;
 		std::list<Node> children;
+
+		static list<BBlock> blocks;
+
 		Node(std::string t, std::string v) : tag(t), value(v) {}
-		Node() { tag="uninitialised"; value="uninitialised";	}  // Bison needs this.
+		// Bison needs default constructor.
+		Node() {
+			tag="uninitialised";
+			value="uninitialised";
+		}
 
 
 		void dotFormat(int depth = 0) {
@@ -39,16 +167,22 @@ class Node {
 			for (auto i=children.begin(); i!=children.end(); i++) {
 				level++;
 				if (!i->children.empty()) {
-					outFile << i->tag + std::to_string(level) << " [label=\""+i->tag+"\"];" << std::endl;
-					outFile << tag + std::to_string(parent) << " -> " << i->tag + std::to_string(level) << ";" << std::endl;
+					outFile << i->tag + std::to_string(level) <<
+					" [label=\""+i->tag+"\"];" << std::endl;
+					outFile << tag + std::to_string(parent) << " -> " <<
+					i->tag + std::to_string(level) << ";" << std::endl;
 				} else {
 					if (i->value!="") {
-					outFile << i->tag + std::to_string(level) << " [label=\""+i->value+"\"];" << std::endl;
-					outFile << tag + std::to_string(parent) << " -> " << i->tag + std::to_string(level) << ";" << std::endl;
+					outFile << i->tag + std::to_string(level) <<
+					" [label=\""+i->value+"\"];" << std::endl;
+					outFile << tag + std::to_string(parent) << " -> " <<
+					i->tag + std::to_string(level) << ";" << std::endl;
 					}
 					else {
-						outFile << i->tag + std::to_string(level) << " [label=\""+i->tag+"\"];" << std::endl;
-						outFile << tag + std::to_string(parent) << " -> " << i->tag + std::to_string(level) << ";" << std::endl;
+						outFile << i->tag + std::to_string(level) <<
+						" [label=\""+i->tag+"\"];" << std::endl;
+						outFile << tag + std::to_string(parent) << " -> " <<
+						i->tag + std::to_string(level) << ";" << std::endl;
 					}
 				}
 				if (!i->children.empty()) {
@@ -58,633 +192,243 @@ class Node {
 			return level;
 		}
 
-		void interpret() {
-			for (Node e : children) {
-				if (e.tag == "block") {
-					e.interpret();
-				} else if (e.tag == "statementchunk") {
-					e.interpret();
-				} else if (e.tag == "statement") {
-					e.evaluateStatement();
+		void threeAddress () {
+			bool firstBlock = true;
+			for (auto i : children) {
+				cout << i.tag << " " << i.value << endl;;
+				// If first block use root block
+				if (i.tag == "block" && firstBlock) {
+					i.statementChunk();
+					firstBlock = false;
+				} else if (i.tag == "statementchunk") {
+					i.statementChunk();
+				}
+			}
+			cout << endl << endl;
+			dumpCFG(&blocks.front());
+		}
+
+		void block () {
+			for (auto i : children) {
+				cout << i.tag << " " << i.value << endl;
+				if (i.tag == "statementchunk") {
+					i.statementChunk();
 				}
 			}
 		}
 
-		void evaluateStatement() {
-			Container information;
-			std::list<std::string> returnVarlist;
-			std::string explistReturn = "", var = "", offset = "";
-			if (children.front().tag == "functioncall") {
-				information = children.front().evaluateFunctioncall();
-			} else if (children.front().tag == "varlist") {
-				// IF L.H.S CONTAINTS [] then place that var in returnVarlist not the value
-				for (Node e : children.front().children) {
-					if (e.children.size() == 1 && e.tag == "var") {
-						returnVarlist.push_back(e.children.front().value);
-					} else if (e.tag == "var") {
-						for (Node g : e.children) {
-							if (g.tag == "prefixexp") {
-								std::string test = g.evaluatePrefixexp();
-								returnVarlist.push_back(test);
-							} else if (g.tag == "leftbracket") {
-								returnVarlist.push_back("leftbracket");
-							} else if (g.tag == "term") {
-								returnVarlist.push_back(g.evaluateTerm());
-							} else if (g.tag == "exp") {
-								returnVarlist.push_back(g.evaluateExp());
-							}
-							else if (g.tag == "rightbracket") {
-								returnVarlist.push_back("rightbracket");
-							}
-						}
-					}
+		void statementChunk () {
+			for (auto i : children) {
+				cout << i.tag << " " << i.value << endl;
+				if (i.tag == "statement") {
+					i.statement();
+				} else if (i.tag == "statementchunk") {
+					i.statementChunk();
 				}
-				//returnVarlist = children.front().evaluateVarlist();
-				// if binop...
-				children.pop_front();
-				if (children.front().tag == "binop" && children.front().value == "=") {
-					children.pop_front();
-					if (children.front().tag == "explist") {
-						std::string insertValue;
-						std::string oldInsert;
-						explistReturn = children.front().evaluateExplist();
-						if (explistReturn != "tables") {
-							std::istringstream explistStream(explistReturn);
-							while (!returnVarlist.empty()) {
-								var = returnVarlist.front();
-								returnVarlist.pop_front();
+			}
+		}
 
-								if (!returnVarlist.empty() && returnVarlist.front() == "leftbracket") {
-									returnVarlist.pop_front();
-									offset = returnVarlist.front();
-									returnVarlist.pop_front();
-									returnVarlist.pop_front();
-
-									if(!std::getline(explistStream, insertValue, ',')) {
-										insertValue = oldInsert;
-									}
-									symbols.insertInList(var, offset, insertValue);
-									oldInsert = insertValue;
-
-								} else {
-									if(!std::getline(explistStream, insertValue, ',')) {
-										insertValue = oldInsert;
-									}
-									symbols.insert(var, insertValue);
-									oldInsert = insertValue;
-								}
-							}
-						} else if (explistReturn == "tables") {
-							for (std::string var : returnVarlist) {
-								symbols.assignList(var);
-							}
-						}
-					}
+		void statement () {
+			for (auto i : children) {
+				cout << i.tag << " " << i.value << endl;
+				if (i.tag == "functioncall") {
+					i.functioncall();
 				}
-			} else if (children.front().tag == "for") {
-				children.pop_front();
-				if (children.front().tag == "identifier") {
-					std::string firstIdentifier = children.front().value;
-					children.pop_front();
-					if (children.front().tag == "equal") {
-						children.pop_front();
-						if (children.front().tag == "term") {
-							std::string returnValue = children.front().evaluateTerm();
-							symbols.insert(firstIdentifier, returnValue);
-							children.pop_front();
-							if (children.front().tag == "comma") {
-								children.pop_front();
-								if (children.front().tag == "term") {
-									std::string loopValue = children.front().evaluateTerm();
-									int lessThan = std::stoi(loopValue);
-									children.pop_front();
-									if (children.front().tag == "do") {
-										children.pop_front();
-										for (int ident = std::stoi(symbols.getValue(firstIdentifier)) ; ident <= lessThan; symbols.updateValue(firstIdentifier, std::to_string(++ident))) {
-											children.front().interpret();
-										}
-									} else if (children.front().tag == "comma") {
-										children.pop_front();
-										if (children.front().tag == "term") {
-											std::string inc = children.front().evaluateTerm();
-											int increment = std::stoi(inc);
-											children.pop_front();
-											if(children.front().tag == "do") {
-												children.pop_front();
-												for (int ident = std::stoi(symbols.getValue(firstIdentifier)) ; ident <= lessThan; symbols.updateValue(firstIdentifier, std::to_string(ident))) {
-													children.front().interpret();
-													ident += increment;
-												}
-											}
-										}
-									}
-								}
-							}
-						}
-					}
+			}
+		}
+
+		void functioncall () {
+			list<Node> waiting;
+			for (auto i : children) {
+				cout << i.tag << " " << i.value << endl;
+				if (i.tag == "prefixexp") {
+					//i.prefixexp();
+					waiting.push_back(i);
+				} else if (i.tag == "args") {
+					i.args();
 				}
-			} else if (children.front().tag == "if") {
-				std::string boolean;
-				children.pop_front();
-				if (children.front().tag == "term") {
-					boolean = children.front().evaluateTerm();
-					children.pop_front();
-					children.pop_front();
-					if (boolean == "false") {
-						children.pop_front();
-						while (children.front().tag == "elseif") {
-							children.pop_front();
-							if (children.front().tag == "term") {
-								boolean = children.front().evaluateTerm();
-								children.pop_front();
-								children.pop_front();
-								if (boolean == "false") {
-									children.pop_front();
-								} else if (boolean == "true") {
-									if (children.front().tag == "block") {
-										children.front().interpret();
-									}
-									while (children.front().tag != "end") {
-										children.pop_front();
-									}
-								}
-							}
-						}
-						if (children.front().tag == "else") {
-								children.pop_front();
-								children.front().interpret();
-						}
-					} else if (boolean == "true") {
-						if (children.front().tag == "block") {
-							children.front().interpret();
-						}
-						while (children.front().tag != "end") {
-							children.pop_front();
-						}
+			}
+		}
+
+		string prefixexp () {
+			string varName = "";
+			string returnValue = "";
+			for (auto i : children) {
+				if (i.tag == "var") {
+					varName = i.var();
+					if (varName == "") {
+						cout << "\nError in prefixexp; var return string \"\"";
 					} else {
-						std::cout << "ERROR IN RETURN VALUE IF-STATEMENT; NEITHER TRUE OR FALSE";
+						returnValue = varName;
 					}
+				} else if (i.tag == "exp") {
+					i.exp();
 				}
-			} else if (children.front().tag == "do") {
-				children.pop_front();
-				if (children.front().tag == "block") {
-					children.front().interpret();
-				}
+			}
+			return returnValue;
+		}
 
-			} else if (children.front().tag == "while") {
-				std::string boolean;
-				children.pop_front();
-				children.pop_back();
-				if (children.front().tag == "term") {
-					while (children.front().evaluateTerm() == "true") {
-						children.back().interpret();
+		string var () {
+			string name = "";
+			for (auto i : children) {
+				if(i.tag == "print") {
+					name = i.value;
+				}
+			}
+			return name;
+		}
+
+		void args () {
+			for (auto i : children) {
+				if (i.tag == "explist") {
+					i.explist();
+				}
+			}
+		}
+
+		void explist () {
+			Node firstChild;
+			queue<Node> evaluateExp;
+			for (auto i : children) {
+				if (i.tag == "exp") {
+					// Bottom first
+					i.exp();
+				}
+			}
+		}
+
+		void exp () {
+			string termValue = "";
+			bool term = true, termsHasValue = true, termHasTerm = false;
+			string op = "";
+			list<string> values;
+			for (auto i : children) {
+				cout << i.tag << " " << i.value << endl;
+				if (i.tag == "term") {
+					if (i.termHasTerm()) {
+						termHasTerm = true;
 					}
-				}
-			} else if (children.front().tag == "repeat") {
-				children.pop_front();
-				do {
-					children.front().interpret();
-				} while (children.back().evaluateTerm() == "false");
-			} else if (children.front().tag == "function") {
-				std::cout << "\nFunction definitions not implemented! \nExiting...\n";
-				exit(0);
-			}
-		}
-
-		std::vector<std::string> evaluateVarlist() {
-			std::vector<std::string> variableList;
-			for (Node e : children) {
-				if (e.tag == "var") {
-					variableList.push_back(e.evaluateVar());
-				} else if (e.tag == "comma") {
-					//variableList.push_back("comma");
-				}
-			}
-			return variableList;
-		}
-
-		std::string evaluateVar() {
-			std::string variable = "";
-			std::string offset = "";
-			std::string listValue = "";
-			for (Node e : children) {
-				if (e.tag == "identifier") {
-					variable += e.value;
-				} else if (e.tag == "prefixexp") {
-					variable += e.evaluatePrefixexp();
-				} else if (e.tag == "leftbracket") {
-
-				} else if (e.tag == "term") {
-					offset = e.evaluateTerm();
-					listValue = symbols.getListOffsetValue(variable, offset);
-					variable = listValue;
-				} else if (e.tag == "dot") {
-					variable += ".";
-				} else if (e.tag == "exp") {
-					offset = e.evaluateExp();
-					listValue = symbols.getListOffsetValue(variable, offset);
-					variable = listValue;
-				}
-			}
-			return variable;
-		}
-
-		Container evaluateFunctioncall() {
-			std::string prefixexp, args, identifier;
-			prefixexp = args = identifier = "";
-			Container information;
-			for(Node e : children) {
-				if (e.tag == "prefixexp") {
-					prefixexp += e.evaluatePrefixexp();
-				} else if (e.tag == "args") {
-					args += e.evaluateArg();
-				} else if (e.tag == "colon") {
-					args += e.value;
-				} else if (e.tag == "identifier") {
-					identifier += e.value;
-				}
-			}
-
-			if (prefixexp == "io.read") {
-				std::string indata = "";
-				std::cin >> indata;
-				information.values.push_back(indata);
-			}
-
-			if (prefixexp == "print" || prefixexp == "io.write") {
-				std::cout << args << " ";
-			}
-
-			information.values.push_back(prefixexp);
-			information.values.push_back(args);
-			information.values.push_back(identifier);
-
-
-			return information;
-		}
-
-		std::string evaluatePrefixexp() {
-			Container functionInformation;
-			std::string prefixexp = "";
-			for (Node e : children) {
-				if (e.tag == "var") {		// Retrieves the value of the idenfier if its a symbol otherwise it assumes its a functionname
-					if (e.children.size() == 1) {
-						if (e.children.front().tag == "identifier") {
-							prefixexp = symbols.getValue(e.children.front().value);
-							if (prefixexp == "not a symbol") {
-								prefixexp = e.children.front().value;
-							}
-						}
+					termValue = i.term();
+					values.push_back(termValue);
+					if (termValue == "") {
+						termsHasValue = false;
 					} else {
-						prefixexp += e.evaluateVar();
+						values.push_back(termValue);
 					}
-				} else if (e.tag == "functioncall") {
-					prefixexp = "10";
-					functionInformation = e.evaluateFunctioncall();
-					prefixexp = functionInformation.values[0];
-				} else if (e.tag == "leftparentheses") {
-					//prefixexp += e.value;
-				} else if (e.tag == "exp") {
-					prefixexp += e.evaluateExp();
-				} else if (e.tag == "rightparentheses") {
-					//prefixexp += e.value;
-				} else if (e.tag == "term") {
-					prefixexp += e.evaluateTerm();
-				}
-			}
-			return prefixexp;
-		}
-
-
-		std::string evaluateArg() {
-			std::string args = "";
-			for (Node e : children) {
-				if (e.tag == "string") {
-					args += e.value;
-				} else if (e.tag == "tableconstructor") {
-
-				} else if (e.tag == "leftparentheses") {
-
-				} else if (e.tag == "rightparentheses") {
-
-				} else if (e.tag == "explist") {
-					args += e.evaluateExplist();
-				}
-			}
-			return args;
-		}
-
-		std::string evaluateExplist(){
-			std::string explist = "";
-			std::string newToken = "";
-			int val1, val2;
-			for (Node e : children) {
-				if (e.tag == "exp") {
-					newToken = e.evaluateExp();
-					val1 = std::stoi(newToken);
-					if (explist != "") {
-						val2 = std::stoi(explist);
-						val1 += val2;
-					}
-					explist = std::to_string(val1);
-				} else if (e.tag == "comma") {
-					explist += e.value;
-				} else if (e.tag == "term") {
-					newToken = e.evaluateTerm();
-					std::string substring = newToken.substr(0,6);
-					if (substring != "string" && substring != "booles" && substring != "false" && substring != "true" && substring != "tables") {
-						val1 = std::stoi(newToken);
-						explist += std::to_string(val1);
-					} else if (substring == "string"){
-						size_t newTokenSize = newToken.size();
-						explist = newToken.substr(6,newTokenSize-5);
-					} else if (substring == "booles") {
-						size_t newTokenSize = newToken.size();
-						explist = newToken.substr(6,newTokenSize-5);
-					} else if (substring == "false" || substring == "true") {
-						explist = substring;
-					} else if (substring == "tables") {
-						explist = substring;
-					}
-				}
-			}
-			return explist;
-		}
-
-		std::string evaluateExp() {
-			std::list<std::string> operatorList;
-			std::string retvalue = "", currentToken = "", lastOp = "";
-			int currentValue, retrivedValue, tokenOperation;
-
-			for (Node e : children) {
-				if (e.tag == "term") {
-					retvalue = e.evaluateTerm();
-					operatorList.push_back(retvalue);
-				} else if (e.tag == "exp") {
-					retvalue = e.evaluateExp();
-					operatorList.push_front(retvalue);
-				} else if (e.tag == "binop" && e.value == "+") {
-					operatorList.push_back("plus");
-				} else if ((e.tag == "binop" || e.tag == "unop") && e.value == "-") {
-					operatorList.push_back("minus");
-				} else if (e.tag == "unop" && e.value == "not") {
-					operatorList.push_back("not");
-				} else if (e.tag == "unop" && e.value == "hashtag") {
-					operatorList.push_back("hashtag");
-				}
-			}
-			currentToken = operatorList.front();
-			operatorList.pop_front();
-
-			if (currentToken == "-") {
-				int oldValue = std::stoi(currentToken);
-				oldValue = oldValue - 2*oldValue;
-				operatorList.pop_front();
-				operatorList.push_front(std::to_string(oldValue));
-			} else if (currentToken == "not") {
-				std::cout << "NOT IMPLEMENTED!";
-			} else if (currentToken == "hashtag") {
-				std::cout << "NOT IMPLEMENTED!";
-			} else {
-				operatorList.push_front(currentToken);
-			}
-			currentValue = 0;
-
-			while (!operatorList.empty()) {
-				currentToken = operatorList.front();
-				operatorList.pop_front();
-				if (currentToken == "minus") {
-					lastOp = "minus";
-					currentToken = operatorList.front();
-					operatorList.pop_front();
-					currentValue = retrivedValue - std::stoi(currentToken);
-				} else if (currentToken == "plus") {
-					currentToken = operatorList.front();
-					operatorList.pop_front();
-					currentValue = retrivedValue + std::stoi(currentToken);
+				} else if (i.tag == "binop") {
+					op = i.value;
 				} else {
-					if (currentToken != "")
-						retrivedValue = std::stoi(currentToken);
+					term = false;
 				}
 			}
-			return std::to_string(currentValue);
+			cout << "Termvalue: " << term << "termsHasValue: " << termsHasValue << endl;
+			if (term && termsHasValue && !termHasTerm) {
+				string temp1, temp2;
+				temp1 = values.front(); values.pop_front();
+				temp2 = values.front(); values.pop_front();
+				ThreeAd temp(newName(), op, temp1, temp2);
+				Node::blocks.back().instructions.push_back(temp);
+			} else if (term && termsHasValue && termHasTerm) {
+				string temp1, temp2;
+				temp1 = values.front(); values.pop_front();
+				ThreeAd temp(newName(), op, temp1, lastUsedName());
+				Node::blocks.back().instructions.push_back(temp);
+			}
+
+		}
+		//ThreeAd(string out, string o, string l, string r)
+		bool termHasTerm () {
+			bool hasTerm = false;
+			for (auto i : children) {
+			// Assume if a term has a prefixexp it only contains an expression
+				if (i.tag == "term" || i.tag == "prefixexp") {
+					return true;
+				}
+			}
+			return false;
 		}
 
-		std::string evaluateTerm() {
-			std::list<std::string> operatorList;
-			std::string retvalue = "", currentToken = "", lastOp = "", boolean = "";
-			int currentValue, retrivedValue, tokenOperation;
+		string term () {
+			string returnValue = "", op = "";
+			bool hasPrefixexp = false, hasInteger = false, hasBinOp = false,
+			hasTerm = false, prefixexpFirstChild = true;
+			int index = 0;
 
-			// Here the support for NIL,FALSE,TRUE and so on should be.
-			if (children.size() == 1 && (children.front().tag == "integer")){
-				return children.front().value;
-			} else if (children.size() == 1 && (children.front().tag == "string")) {
-				return "string" + children.front().value;
-			} else if (children.size() == 1 && (children.front().tag == "true" || children.front().tag == "false")) {
-				return "booles" + children.front().value;
-			} else if (children.front().tag == "tableconstructor") {
-				children.front().evaluateTableconstructor();
-				return "tables";
-			}
-			else {
-				for (Node e : children) {
-					if (e.tag == "term") {
-						retvalue = e.evaluateTerm();
-						operatorList.push_back(retvalue);
-					} else if (e.tag == "prefixexp"){
-						retvalue = e.evaluatePrefixexp();
-						operatorList.push_back(retvalue);
-					} else if (e.tag == "integer") {
-						operatorList.push_back(e.value);
-					} else if (e.tag == "binop" && e.value == "*") {
-						operatorList.push_back("multiply");
-					} else if (e.tag == "binop" && e.value == "/") {
-						operatorList.push_back("devide");
-					} else if (e.tag == "binop" && e.value == "%") {
-						operatorList.push_back("percent");
-					} else if (e.tag == "binop" && e.value == "^") {
-						operatorList.push_back("caret");
-					} else if (e.tag == "binop" && e.value == "..") {
-						operatorList.push_back("dotdot");
-					} else if (e.tag == "binop" && e.value == "<") {
-						operatorList.push_back("lessthan");
-					} else if (e.tag == "binop" && e.value == "<=") {
-						operatorList.push_back("lessorequal");
-					} else if (e.tag == "binop" && e.value == ">") {
-						operatorList.push_back("greaterthan");
-					} else if (e.tag == "binop" && e.value == ">=") {
-						operatorList.push_back("greaterorequal");
-					} else if (e.tag == "binop" && e.value == "==") {
-						operatorList.push_back("equalto");
-					} else if (e.tag == "binop" && e.value == "~=") {
-						operatorList.push_back("tildeequal");
-					} else if (e.tag == "binop" && e.value == "and") {
-						operatorList.push_back("and");
-					} else if (e.tag == "binop" && e.value == "or") {
-						operatorList.push_back("or");
-					} else if (e.tag == "unop" && e.value == "-") {
-						operatorList.push_back("-");
-					} else if (e.tag == "unop" && e.value == "#") {
-						operatorList.push_back("#");
-					} else if (e.tag == "true") {
-						operatorList.push_back("true");
-					} else if (e.tag == "false") {
-						operatorList.push_back("false");
+			for (auto i : children) {
+				cout << i.tag << " " << i.value << endl;
+				if (i.tag == "integer") {
+					returnValue = i.value;
+					hasInteger = true;
+				} else if (i.tag == "term"){
+					returnValue = i.term();
+					hasTerm = true;
+				} else if (i.tag ==  "prefixexp") {
+					i.prefixexp();
+					returnValue = "prefix";
+					hasPrefixexp = true;
+					if (index > 0) {
+						prefixexpFirstChild = false;
 					}
+				} else if (i.tag == "binop") {
+					op = i.value;
+					hasBinOp = true;
 				}
-
+				index++;
 			}
-
-
-
-			currentToken = operatorList.front();
-			operatorList.pop_front();
-
-			if (currentToken == "-") {
-				currentToken = operatorList.front();
-				operatorList.pop_front();
-				int oldValue = std::stoi(currentToken);
-				oldValue = oldValue - 2*oldValue;
-				operatorList.push_front(std::to_string(oldValue));
-			} else if (currentToken == "not") {
-				std::cout << "NOT IMPLEMENTED!";
-			} else if (currentToken == "hashtag") {
-				std::cout << "NOT IMPLEMENTED!";
-			} else {
-				operatorList.push_front(currentToken);
-			}
-			currentValue = 0;
-			if (operatorList.size() == 1) {
-				return operatorList.front();
-			}
-			while (!operatorList.empty()) {
-				currentToken = operatorList.front();
-				operatorList.pop_front();
-				if (currentToken == "multiply") {
-					currentToken = operatorList.front();
-					operatorList.pop_front();
-					currentValue = retrivedValue * std::stoi(currentToken);
-				} else if (currentToken == "devide") {
-					currentToken = operatorList.front();
-					operatorList.pop_front();
-					currentValue = retrivedValue / std::stoi(currentToken);
-				} else if (currentToken == "percent") {
-					currentToken = operatorList.front();
-					operatorList.pop_front();
-					currentValue = retrivedValue % std::stoi(currentToken);
-				} else if (currentToken == "caret") {
-					int oldValue = retrivedValue;
-					currentValue = oldValue;
-					currentToken = operatorList.front();
-					operatorList.pop_front();
-					for (int i = 0; i < std::stoi(currentToken)-1; i++) {
-						currentValue = currentValue * oldValue;
-					}
-				} else if (currentToken == "dotdot") {
-					std::cout << currentToken << " NOT IMPLEMENTED IN evaluateTerm()";
-				} else if (currentToken == "lessthan") {
-					currentToken = operatorList.front();
-					operatorList.pop_front();
-					if (retrivedValue < std::stoi(currentToken)) {
-						return "true";
-					} else {
-						return "false";
-					}
-				} else if (currentToken == "lessorequal") {
-					currentToken = operatorList.front();
-					operatorList.pop_front();
-					if (retrivedValue <= std::stoi(currentToken)) {
-						return "true";
-					} else {
-						return "false";
-					}
-				} else if (currentToken == "greaterthan") {
-					currentToken = operatorList.front();
-					operatorList.pop_front();
-					if (retrivedValue > std::stoi(currentToken)) {
-						return "true";
-					} else {
-						return "false";
-					}
-				} else if (currentToken == "greaterorequal") {
-					currentToken = operatorList.front();
-					operatorList.pop_front();
-					if (retrivedValue >= std::stoi(currentToken)) {
-						return "true";
-					} else {
-						return "false";
-					}
-				} else if (currentToken == "equalto") {
-					currentToken = operatorList.front();
-					//operatorList.pop_front();
-					if (boolean == "true" || boolean == "false" || currentToken == "true" || currentToken == "false") {
-						if (boolean == currentToken) {
-							return "true";
-						} else {
-							return "false";
-						}
-					} else if (retrivedValue == std::stoi(currentToken)) {
-						return "true";
-					} else {
-						return "false";
-					}
-				} else if (currentToken == "and") {
-					std::cout << currentToken << " NOT IMPLEMENTED IN evaluateTerm()";
-				} else if (currentToken == "or") {
-					std::cout << currentToken << " NOT IMPLEMENTED IN evaluateTerm()";
-				} else if (currentToken == "#") {
-					std::string sizeOfList = "";
-					currentToken = operatorList.front();
-					operatorList.pop_front();
-					sizeOfList = symbols.getListSize(currentToken);
-					return sizeOfList;
+			cout << "CHECK VALUES: " <<  hasPrefixexp <<  hasBinOp << hasInteger;
+			if ((hasPrefixexp || hasTerm) && hasBinOp && hasInteger) {
+				if (prefixexpFirstChild) {
+					ThreeAd temp(newName(), op, lastUsedName(), returnValue);
+					Node::blocks.back().instructions.push_back(temp);
 				} else {
-					if (currentToken != "false" && currentToken != "true") {
-						retrivedValue = std::stoi(currentToken);
-					} else {
-						boolean = currentToken;
-					}
-				}
-			}
-			return std::to_string(currentValue);
-		}
-
-		std::string evaluateTableconstructor() {
-			std::string temp;
-			for(Node e : children) {
-				if (e.tag == "fieldlist") {
-					e.evaluateFieldList();
+					ThreeAd temp(newName(), op, returnValue, lastUsedName());
+					Node::blocks.back().instructions.push_back(temp);
 				}
 			}
 
-			return "";
-
+			return returnValue;
 		}
 
-		std::string evaluateFieldList() {
-			std::vector<std::string> values;
-			values.push_back("0");
-			std::string temp;
-			for(Node e : children) {
-				if (e.tag == "field") {
-					temp = e.evaluateField();
-					values.push_back(temp);
-				} else if (e.tag == "comma") {
-					// DO NOTHING
-				}
-			}
-
-			symbols.insertList(values);
-			return "";
-
+		string newName()
+		{
+			stringstream result;
+		  	result << "_t" << nameCounter++;
+		  	return result.str();
 		}
 
-		std::string evaluateField() {
-			std::string retValue = "Error in evaluateField";
-			if(children.size() == 1 && children.front().tag == "term") {
-				retValue = children.front().evaluateTerm();
-			}
-			return retValue;
+		string lastUsedName() {
+			stringstream result;
+			result << "_t" << (nameCounter-1);
+			return result.str();
+		}
+
+		// Iterate through the BBlock nodes in the CFG and dump each one
+		// exactly once. This is provided as an example of marking nodes
+		// in a graph and implementing traversals.
+		void dumpCFG(BBlock *start)
+		{
+		set<BBlock *> done, todo;
+		  todo.insert(start);
+		  while(todo.size()>0)
+		  {
+		    // Pop an arbitrary element from todo set
+		    auto first = todo.begin();
+		    BBlock *next = *first;
+		    todo.erase(first);
+
+		    next->dump();
+		    done.insert(next);
+		    if(next->trueExit!=NULL && done.find(next->trueExit)==done.end())
+		      todo.insert(next->trueExit);
+		    if(next->falseExit!=NULL && done.find(next->falseExit)==done.end())
+		      todo.insert(next->falseExit);
+		  }
+		}
+
+		list<BBlock> initBBlockList() {
+			list<BBlock> tmp;
+			tmp.push_back(BBlock());
+			return tmp;
 		}
 
 };
