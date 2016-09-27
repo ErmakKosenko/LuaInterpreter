@@ -239,14 +239,18 @@ class Node {
 
 		void functioncall () {
 			list<Node> waiting;
+			string prefixexpValue = "";
 			for (auto i : children) {
 				cout << i.tag << " " << i.value << endl;
 				if (i.tag == "prefixexp") {
-					//i.prefixexp();
-					waiting.push_back(i);
+					prefixexpValue = i.prefixexp();
 				} else if (i.tag == "args") {
 					i.args();
 				}
+			}
+			if (prefixexpValue == "print") {
+				ThreeAd temp(newName(), "print", "", lastUsedName());
+				Node::blocks.back().instructions.push_back(temp);
 			}
 		}
 
@@ -271,7 +275,7 @@ class Node {
 		string var () {
 			string name = "";
 			for (auto i : children) {
-				if(i.tag == "print") {
+				if(i.tag == "identifier") {
 					name = i.value;
 				}
 			}
