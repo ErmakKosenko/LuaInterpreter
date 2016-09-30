@@ -28,7 +28,6 @@ int main(int argc, char **argv) {
     if (!parser.parse()) {
         root.threeAddress();
         outFile.close();
-        system ("dot -Tpdf source.dot -otree.pdf");
     }
     return 0;
 }
