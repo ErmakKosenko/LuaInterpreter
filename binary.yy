@@ -11,6 +11,7 @@
 %code{
   	Node root;
 	int nameCounter = 0;
+	int lableCounter = 0;
 	list<BBlock> Node::blocks(root.initBBlockList());
 	#define YY_DECL yy::parser::symbol_type yylex()
 	YY_DECL;

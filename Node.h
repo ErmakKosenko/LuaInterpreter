@@ -17,8 +17,11 @@
 extern SymbolTable symbols;
 extern std::ofstream outFile;
 extern int nameCounter;
+extern int lableCounter;
 
 using namespace std;
+
+
 
 class ThreeAd
 {
@@ -29,11 +32,27 @@ public:
   ThreeAd(string out, string o, string l, string r)
     :  result(out), op(o), lhs(l), rhs(r)      {}
 
+  void reUse(string out, string o, string l, string r) {
+	   	result = out;
+ 	   	op = o;
+		lhs = l;
+		rhs = r;
+  }
+
   void dump()
   {
     cout << result << " := " << lhs << " "
          << op << " " << rhs << endl;
   }
+
+	string dumpInstructionDot() {
+		if (op == "<" || op == ">") {
+			op = "\\" + op;
+		}
+		stringstream temp;
+		temp << result << " := " << lhs << " " << op << " " << rhs;
+		return temp.str();
+	}
 
 };
 
@@ -46,14 +65,51 @@ BBlock *trueExit, *falseExit;
   BBlock()
     :  trueExit(NULL), falseExit(NULL)  {}
 
-  void dump()
-  {
-    cout << "BBlock @ " << this << endl;
-    for(auto i : instructions)
-      i.dump();
-    cout << "True: " << trueExit << endl;
-    cout << "False: " << falseExit << endl;
-  }
+	void dump()
+	{
+		cout << "BBlock @ " << this << endl;
+	    for(auto &i : instructions)
+	      i.dump();
+	    //cout << "True: " << trueExit << endl;
+	    //cout << "False: " << falseExit << endl;
+	}
+
+	void dumpBlockDot () {
+		int counter = 1;
+		outFile << "BBlock" << this;
+		outFile << " [label = \"{<f0> BBlock" << this;
+		for (auto i : instructions) {
+			outFile << "|<f" << counter++ << "> " << i.dumpInstructionDot() << "  \\n ";
+		}
+		outFile << "}\"];" << endl << endl;
+
+		if (trueExit == falseExit && trueExit != NULL) {
+			outFile << "BBlock" << this << " -> " << "BBlock" << trueExit << endl;
+		} else if (trueExit != NULL && falseExit != NULL) {
+			outFile << "BBlock" << this << " -> " << "BBlock" << trueExit << endl;
+			outFile << "BBlock" << this << " -> " << "BBlock" << falseExit << endl;
+		}
+
+		outFile.flush();
+	}
+
+	void changeIFZMemoryAddress (string newAddress) {
+	  	for (auto &i : instructions) {
+			if(i.result == "IFZ") {
+				i.rhs = newAddress;
+				return;
+			}
+		}
+	}
+
+	void changeIFMemoryAddress (string newAddress) {
+	  	for (auto &i : instructions) {
+			if(i.result == "IF") {
+				i.rhs = newAddress;
+				return;
+			}
+		}
+	}
 };
 
 
@@ -152,6 +208,7 @@ class Node {
 		}
 
 
+		/*
 		void dotFormat(int depth = 0) {
 			std::list<std::string> pointer;
 			outFile << "digraph { " << std::endl;
@@ -159,6 +216,18 @@ class Node {
 			for (Node e : children)
 				//std::cout << tag + "0 -> " << e.tag +"1;" << std::endl;
 			printChild(0,1);
+			outFile << std::endl <<  "}";
+		}
+		*/
+
+		void dotFormat (int depth = 0) {
+			outFile << "digraph { " << endl;
+			outFile << "node[shape=record]" << endl;
+			//outFile << tag + "0" <<" [lable=\""+tag+"\"];" << endl;
+			int counter = 0;
+			for (auto &i : blocks) {
+				i.dumpBlockDot();
+			}
 			outFile << std::endl <<  "}";
 		}
 
@@ -195,7 +264,6 @@ class Node {
 		void threeAddress () {
 			bool firstBlock = true;
 			for (auto i : children) {
-				cout << i.tag << " " << i.value << endl;;
 				// If first block use root block
 				if (i.tag == "block" && firstBlock) {
 					i.statementChunk();
@@ -204,13 +272,11 @@ class Node {
 					i.statementChunk();
 				}
 			}
-			cout << endl << endl;
-			dumpCFG(&blocks.front());
+			this->dotFormat();
 		}
 
 		void block () {
 			for (auto i : children) {
-				cout << i.tag << " " << i.value << endl;
 				if (i.tag == "statementchunk") {
 					i.statementChunk();
 				}
@@ -219,7 +285,6 @@ class Node {
 
 		void statementChunk () {
 			for (auto i : children) {
-				cout << i.tag << " " << i.value << endl;
 				if (i.tag == "statement") {
 					i.statement();
 				} else if (i.tag == "statementchunk") {
@@ -229,29 +294,167 @@ class Node {
 		}
 
 		void statement () {
+			string variableName = "", binop = "", explist = "";
 			for (auto i : children) {
-				cout << i.tag << " " << i.value << endl;
 				if (i.tag == "functioncall") {
 					i.functioncall();
+				} else if (i.tag == "varlist") {
+					variableName = i.varlist();
+				} else if (i.tag == "binop") {
+					binop = i.value;
+				} else if (i.tag == "explist") {
+					explist = i.explist();
+				} else if (i.tag == "for") {
+					// Create new block and lable it
+					this->forLoop();
+				} else if (i.tag == "if") {
+					this->ifStatement();
+				}
+			}
+			if (binop == "=" && variableName != "") {
+				if (explist == "ThreeAddrCreated" || explist == "read") {
+					ThreeAd temp(variableName, "", lastUsedName(), "");
+					Node::blocks.back().instructions.push_back(temp);
+				} else if (explist != "") {
+					ThreeAd temp(variableName, "", explist, "");
+					Node::blocks.back().instructions.push_back(temp);
 				}
 			}
 		}
 
-		void functioncall () {
-			list<Node> waiting;
-			string prefixexpValue = "";
+		void ifStatement () {
+			//children.pop_front();
 			for (auto i : children) {
-				cout << i.tag << " " << i.value << endl;
+				if (i.tag == "term") {
+					i.term();
+				}
+			}
+			ThreeAd temp("IF", "GOTO", lastUsedName(), "TO BE CHANGED");
+			Node::blocks.back().instructions.push_back(temp);
+
+			temp.reUse(newLable(), "", "", "");
+			Node::blocks.back().instructions.push_back(temp);
+
+			BBlock *previousBlock = &blocks.back();
+			Node::blocks.push_back(BBlock());
+
+			for(auto i : children) {
+				if (i.tag == "block") {
+					i.block();
+				}
+			}
+
+			stringstream changeMemoryAddress;
+			changeMemoryAddress << &blocks.back();
+			string newAddress = changeMemoryAddress.str();
+			previousBlock->changeIFMemoryAddress(newAddress);
+
+			temp.reUse("GOTO", lastUsedLable(), "", "");
+			Node::blocks.back().instructions.push_back(temp);
+
+		}
+
+		string forLoop () {
+			string identifier = "";
+			string binop = "";
+			list<string> termValues;
+
+			for (auto i : children) {
+				if (i.tag == "identifier") {
+					identifier = i.value;
+				} else if (i.tag == "binop") {
+					binop = i.value;
+				} else if (i.tag == "term") {
+					termValues.push_back(i.term());
+				}
+			}
+
+			ThreeAd temp(identifier, "", termValues.front(), "");
+			Node::blocks.back().instructions.push_back(temp);
+			termValues.pop_front();
+
+			BBlock *previousBlock = &blocks.back();
+			blocks.push_back(BBlock());
+			previousBlock->trueExit = &blocks.back();
+			previousBlock->falseExit = &blocks.back();
+			// Handle for loop then create new block
+
+ 			temp.reUse(newName(), "<", identifier, termValues.front());
+			Node::blocks.back().instructions.push_back(temp);
+
+			temp.reUse("IFZ", "GOTO", lastUsedName(), "TO BE CHANGED");
+			Node::blocks.back().instructions.push_back(temp);
+
+			previousBlock = &blocks.back();
+			for (auto i : children) {
+				if (i.tag == "block") {
+					i.block();
+				}
+			}
+
+			temp.reUse(newName(), "+", identifier, "1");
+			previousBlock->instructions.push_back(temp);
+
+			temp.reUse(identifier, "", lastUsedName(), "");
+			previousBlock->instructions.push_back(temp);
+
+
+
+			stringstream test545;
+			test545 << previousBlock;
+			string ttest2 = test545.str();
+			temp.reUse("GOTO", ttest2, "", "");
+			previousBlock->instructions.push_back(temp);
+
+			// Swap blocks to correct
+			Node::blocks.push_back(BBlock());
+			previousBlock->trueExit = previousBlock;
+			previousBlock->falseExit = &blocks.back();
+
+			stringstream changeMemoryAddress;
+			changeMemoryAddress << &blocks.back();
+			string newAddress = changeMemoryAddress.str();
+			previousBlock->changeIFZMemoryAddress(newAddress);
+			return "";
+		}
+
+		string varlist () {
+			string variableName = "";
+			for (auto i : children) {
+				if (i.tag == "var") {
+					variableName = i.var();
+				}
+			}
+			return variableName;
+		}
+
+		string functioncall () {
+			list<Node> waiting;
+			string prefixexpValue = "", args = "";
+			string returnValue = "";
+			for (auto i : children) {
 				if (i.tag == "prefixexp") {
 					prefixexpValue = i.prefixexp();
 				} else if (i.tag == "args") {
-					i.args();
+					args = i.args();
 				}
 			}
-			if (prefixexpValue == "print") {
+			// if args contain "ThreeAddrCreated" it will use the last used name
+			if (prefixexpValue == "print" && (args == "" || args == "ThreeAddrCreated")) {
 				ThreeAd temp(newName(), "print", "", lastUsedName());
 				Node::blocks.back().instructions.push_back(temp);
+			} else if (prefixexpValue == "print" && args != "") {
+				ThreeAd temp(newName(), "print", "", args);
+				Node::blocks.back().instructions.push_back(temp);
+			} else if (prefixexpValue == "io.write" && args != "") {
+				ThreeAd temp(newName(), "io.write", "", args);
+				Node::blocks.back().instructions.push_back(temp);
+			} else if (prefixexpValue == "io.read" && args != "") {
+				ThreeAd temp(newName(), "io.read", "", args);
+				Node::blocks.back().instructions.push_back(temp);
+				returnValue = "read";
 			}
+			return returnValue;
 		}
 
 		string prefixexp () {
@@ -267,6 +470,8 @@ class Node {
 					}
 				} else if (i.tag == "exp") {
 					i.exp();
+				} else if (i.tag == "functioncall") {
+					returnValue = i.functioncall();
 				}
 			}
 			return returnValue;
@@ -276,44 +481,61 @@ class Node {
 			string name = "";
 			for (auto i : children) {
 				if(i.tag == "identifier") {
-					name = i.value;
+					name += i.value;
+				} else if (i.tag == "prefixexp") {
+					name += i.prefixexp();
+				} else if (i.tag == "dot") {
+					name += ".";
 				}
 			}
 			return name;
 		}
 
-		void args () {
+		string args () {
+			string returnValue = "";
 			for (auto i : children) {
 				if (i.tag == "explist") {
-					i.explist();
+					returnValue = i.explist();
+				} else if (i.tag == "string") {
+					returnValue = i.value;
 				}
 			}
+			return returnValue;
 		}
 
-		void explist () {
+		string explist () {
 			Node firstChild;
 			queue<Node> evaluateExp;
+			string returnValue = "";
 			for (auto i : children) {
 				if (i.tag == "exp") {
 					// Bottom first
-					i.exp();
+					returnValue = i.exp();
+				} else if (i.tag == "term") {
+					if (i.termHasBinop()) {
+						i.term();
+						returnValue = "ThreeAddrCreated";
+					} else {
+						returnValue = i.term();
+					}
+
 				}
 			}
+			return returnValue;
 		}
 
-		void exp () {
+		string exp () {
 			string termValue = "";
 			bool term = true, termsHasValue = true, termHasTerm = false;
 			string op = "";
 			list<string> values;
+			string createdThreeAdressCode = "noThreeAddr";
 			for (auto i : children) {
-				cout << i.tag << " " << i.value << endl;
 				if (i.tag == "term") {
 					if (i.termHasTerm()) {
 						termHasTerm = true;
 					}
 					termValue = i.term();
-					values.push_back(termValue);
 					if (termValue == "") {
 						termsHasValue = false;
 					} else {
@@ -325,31 +547,42 @@ class Node {
 					term = false;
 				}
 			}
-			cout << "Termvalue: " << term << "termsHasValue: " << termsHasValue << endl;
 			if (term && termsHasValue && !termHasTerm) {
 				string temp1, temp2;
 				temp1 = values.front(); values.pop_front();
 				temp2 = values.front(); values.pop_front();
 				ThreeAd temp(newName(), op, temp1, temp2);
 				Node::blocks.back().instructions.push_back(temp);
+				createdThreeAdressCode = "ThreeAddrCreated";
 			} else if (term && termsHasValue && termHasTerm) {
 				string temp1, temp2;
 				temp1 = values.front(); values.pop_front();
 				ThreeAd temp(newName(), op, temp1, lastUsedName());
 				Node::blocks.back().instructions.push_back(temp);
+				createdThreeAdressCode = "ThreeAddrCreated";
 			}
-
+			return createdThreeAdressCode;
 		}
 		//ThreeAd(string out, string o, string l, string r)
 		bool termHasTerm () {
 			bool hasTerm = false;
 			for (auto i : children) {
 			// Assume if a term has a prefixexp it only contains an expression
-				if (i.tag == "term" || i.tag == "prefixexp") {
+				if (i.tag == "term") {
 					return true;
 				}
 			}
 			return false;
+		}
+
+		bool termHasBinop () {
+			bool hasBinOp = false;
+			for (auto i : children) {
+				if (i.tag == "binop") {
+					hasBinOp = true;
+				}
+			}
+			return hasBinOp;
 		}
 
 		string term () {
@@ -357,18 +590,18 @@ class Node {
 			bool hasPrefixexp = false, hasInteger = false, hasBinOp = false,
 			hasTerm = false, prefixexpFirstChild = true;
 			int index = 0;
-
+			list<string> returnValues;
 			for (auto i : children) {
-				cout << i.tag << " " << i.value << endl;
 				if (i.tag == "integer") {
 					returnValue = i.value;
 					hasInteger = true;
 				} else if (i.tag == "term"){
 					returnValue = i.term();
+					returnValues.push_back(returnValue);
 					hasTerm = true;
 				} else if (i.tag ==  "prefixexp") {
-					i.prefixexp();
-					returnValue = "prefix";
+					returnValue = i.prefixexp();
+					returnValues.push_back(returnValue);
 					hasPrefixexp = true;
 					if (index > 0) {
 						prefixexpFirstChild = false;
@@ -376,10 +609,11 @@ class Node {
 				} else if (i.tag == "binop") {
 					op = i.value;
 					hasBinOp = true;
+				} else if (i.tag == "string") {
+					returnValue = i.value;
 				}
 				index++;
 			}
-			cout << "CHECK VALUES: " <<  hasPrefixexp <<  hasBinOp << hasInteger;
 			if ((hasPrefixexp || hasTerm) && hasBinOp && hasInteger) {
 				if (prefixexpFirstChild) {
 					ThreeAd temp(newName(), op, lastUsedName(), returnValue);
@@ -388,6 +622,11 @@ class Node {
 					ThreeAd temp(newName(), op, returnValue, lastUsedName());
 					Node::blocks.back().instructions.push_back(temp);
 				}
+			} else if (returnValues.size() == 2 && hasBinOp) {
+				string temp1 = returnValues.front(); returnValues.pop_front();
+				string temp2 = returnValues.front(); returnValues.pop_front();
+				ThreeAd temp(newName(), op, temp1, temp2);
+				Node::blocks.back().instructions.push_back(temp);
 			}
 
 			return returnValue;
@@ -400,9 +639,22 @@ class Node {
 		  	return result.str();
 		}
 
+		string newLable()
+		{
+		  stringstream result;
+		  result << "_L" << lableCounter++;
+		  return result.str();
+		}
+
 		string lastUsedName() {
 			stringstream result;
 			result << "_t" << (nameCounter-1);
+			return result.str();
+		}
+
+		string lastUsedLable() {
+			stringstream result;
+			result << "_L" << (lableCounter-1);
 			return result.str();
 		}
 

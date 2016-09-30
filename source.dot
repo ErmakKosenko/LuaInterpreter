@@ -1,66 +1,15 @@
 digraph { 
-start0 [label="start"];
-block2 [label="block"];
-start0 -> block2;
-statementchunk3 [label="statementchunk"];
-block2 -> statementchunk3;
-statement4 [label="statement"];
-statementchunk3 -> statement4;
-functioncall5 [label="functioncall"];
-statement4 -> functioncall5;
-prefixexp6 [label="prefixexp"];
-functioncall5 -> prefixexp6;
-var7 [label="var"];
-prefixexp6 -> var7;
-identifier8 [label="print"];
-var7 -> identifier8;
-args9 [label="args"];
-functioncall5 -> args9;
-leftparentheses10 [label="("];
-args9 -> leftparentheses10;
-explist11 [label="explist"];
-args9 -> explist11;
-exp12 [label="exp"];
-explist11 -> exp12;
-term13 [label="term"];
-exp12 -> term13;
-integer14 [label="13"];
-term13 -> integer14;
-binop15 [label="+"];
-exp12 -> binop15;
-term16 [label="term"];
-exp12 -> term16;
-term17 [label="term"];
-term16 -> term17;
-term18 [label="term"];
-term17 -> term18;
-prefixexp19 [label="prefixexp"];
-term18 -> prefixexp19;
-leftparentheses20 [label="("];
-prefixexp19 -> leftparentheses20;
-exp21 [label="exp"];
-prefixexp19 -> exp21;
-term22 [label="term"];
-exp21 -> term22;
-integer23 [label="22"];
-term22 -> integer23;
-binop24 [label="-"];
-exp21 -> binop24;
-term25 [label="term"];
-exp21 -> term25;
-integer26 [label="11"];
-term25 -> integer26;
-rightparentheses27 [label=")"];
-prefixexp19 -> rightparentheses27;
-binop28 [label="/"];
-term17 -> binop28;
-integer29 [label="1"];
-term17 -> integer29;
-binop30 [label="*"];
-term16 -> binop30;
-integer31 [label="44"];
-term16 -> integer31;
-rightparentheses32 [label=")"];
-args9 -> rightparentheses32;
+node[shape=record]
+BBlock0x91fc30 [label = "{<f0> BBlock0x91fc30|<f1> _t0 :=  print enter a number:  \n |<f2> _t1 :=  io.read *number  \n |<f3> n := _t1    \n |<f4> i := 2    \n }"];
+
+BBlock0x91fc30 -> BBlock0x936320
+BBlock0x936320 [label = "{<f0> BBlock0x936320|<f1> _t2 := i \< n  \n |<f2> IFZ := _t2 GOTO 0x941640  \n |<f3> _t3 := n % i  \n |<f4> _t4 := _t3 == 0  \n |<f5> IF := _t4 GOTO 0x93daf0  \n |<f6> _L0 :=     \n |<f7> _t8 := i + 1  \n |<f8> i := _t8    \n |<f9> GOTO :=  0x936320   \n }"];
+
+BBlock0x936320 -> BBlock0x936320
+BBlock0x936320 -> BBlock0x941640
+BBlock0x93daf0 [label = "{<f0> BBlock0x93daf0|<f1> _t5 :=  io.write i  \n |<f2> _t6 :=  io.write  is a factor of   \n |<f3> _t7 :=  print n  \n |<f4> GOTO :=  _L0   \n }"];
+
+BBlock0x941640 [label = "{<f0> BBlock0x941640}"];
+
 
 }

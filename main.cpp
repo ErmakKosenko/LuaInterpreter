@@ -26,10 +26,9 @@ int main(int argc, char **argv) {
     yy::parser parser;
     outFile.open("source.dot", std::ofstream::out);
     if (!parser.parse()) {
-        root.dotFormat();
+        root.threeAddress();
         outFile.close();
         system ("dot -Tpdf source.dot -otree.pdf");
-        root.threeAddress();
     }
     return 0;
 }
