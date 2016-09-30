@@ -1,15 +1,13 @@
 digraph { 
 node[shape=record]
-BBlock0x91fc30 [label = "{<f0> BBlock0x91fc30|<f1> _t0 :=  print enter a number:  \n |<f2> _t1 :=  io.read *number  \n |<f3> n := _t1    \n |<f4> i := 2    \n }"];
+BBlock0x1031c30 [label = "{<f0> BBlock0x1031c30|<f1> n := 1    \n }"];
 
-BBlock0x91fc30 -> BBlock0x936320
-BBlock0x936320 [label = "{<f0> BBlock0x936320|<f1> _t2 := i \< n  \n |<f2> IFZ := _t2 GOTO 0x941640  \n |<f3> _t3 := n % i  \n |<f4> _t4 := _t3 == 0  \n |<f5> IF := _t4 GOTO 0x93daf0  \n |<f6> _L0 :=     \n |<f7> _t8 := i + 1  \n |<f8> i := _t8    \n |<f9> GOTO :=  0x936320   \n }"];
+BBlock0x1031c30 -> BBlock0x104c320
+BBlock0x104c320 [label = "{<f0> BBlock0x104c320|<f1> _t0 := n \< 16  \n |<f2> IFZ := _t0 GOTO 0x104f090  \n |<f3> _t1 :=  io.write ,   \n |<f4> _t2 := n + 1  \n |<f5> n := _t2    \n |<f6> GOTO :=  0x104c320   \n }"];
 
-BBlock0x936320 -> BBlock0x936320
-BBlock0x936320 -> BBlock0x941640
-BBlock0x93daf0 [label = "{<f0> BBlock0x93daf0|<f1> _t5 :=  io.write i  \n |<f2> _t6 :=  io.write  is a factor of   \n |<f3> _t7 :=  print n  \n |<f4> GOTO :=  _L0   \n }"];
-
-BBlock0x941640 [label = "{<f0> BBlock0x941640}"];
+BBlock0x104c320 -> BBlock0x104c320
+BBlock0x104c320 -> BBlock0x104f090
+BBlock0x104f090 [label = "{<f0> BBlock0x104f090|<f1> _t3 :=  io.write ...\n  \n }"];
 
 
 }

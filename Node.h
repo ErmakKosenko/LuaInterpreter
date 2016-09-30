@@ -88,7 +88,11 @@ BBlock *trueExit, *falseExit;
 		} else if (trueExit != NULL && falseExit != NULL) {
 			outFile << "BBlock" << this << " -> " << "BBlock" << trueExit << endl;
 			outFile << "BBlock" << this << " -> " << "BBlock" << falseExit << endl;
-		}
+		} else if (falseExit != NULL) {
+            outFile << "BBlock" << this << " -> " << "BBlock" << falseExit << endl;
+        } else if (trueExit != NULL) {
+            outFile << "BBlock" << this << " -> " << "BBlock" << trueExit << endl;
+        }
 
 		outFile.flush();
 	}
@@ -110,6 +114,15 @@ BBlock *trueExit, *falseExit;
 			}
 		}
 	}
+
+    void changeGOTOMemoryAddress (string newAddress) {
+        for (auto &i : instructions) {
+            if(i.result == "GOTO") {
+                i.rhs = newAddress;
+                return;
+            }
+        }
+    }
 };
 
 
@@ -275,25 +288,25 @@ class Node {
 			this->dotFormat();
 		}
 
-		void block () {
+		void block (Node *block = nullptr) {
 			for (auto i : children) {
 				if (i.tag == "statementchunk") {
-					i.statementChunk();
+					i.statementChunk(block);
 				}
 			}
 		}
 
-		void statementChunk () {
+		void statementChunk (Node *block = NULL) {
 			for (auto i : children) {
 				if (i.tag == "statement") {
-					i.statement();
+					i.statement(block);
 				} else if (i.tag == "statementchunk") {
-					i.statementChunk();
+					i.statementChunk(block);
 				}
 			}
 		}
 
-		void statement () {
+		void statement (Node *block = NULL) {
 			string variableName = "", binop = "", explist = "";
 			for (auto i : children) {
 				if (i.tag == "functioncall") {
@@ -308,7 +321,7 @@ class Node {
 					// Create new block and lable it
 					this->forLoop();
 				} else if (i.tag == "if") {
-					this->ifStatement();
+					this->ifStatement(block);
 				}
 			}
 			if (binop == "=" && variableName != "") {
@@ -322,35 +335,59 @@ class Node {
 			}
 		}
 
-		void ifStatement () {
+		void ifStatement (Node *block = NULL) {
 			//children.pop_front();
+
+            cout << endl << "Block: " << block << endl;
+
 			for (auto i : children) {
 				if (i.tag == "term") {
 					i.term();
 				}
 			}
-			ThreeAd temp("IF", "GOTO", lastUsedName(), "TO BE CHANGED");
+            ThreeAd temp("IF", "GOTO", lastUsedName(), "TO BE CHANGED");
+            Node::blocks.back().instructions.push_back(temp);
+
+			temp.reUse("GOTO", "", lastUsedName(), "TO BE CHANGED");
 			Node::blocks.back().instructions.push_back(temp);
 
-			temp.reUse(newLable(), "", "", "");
-			Node::blocks.back().instructions.push_back(temp);
 
 			BBlock *previousBlock = &blocks.back();
 			Node::blocks.push_back(BBlock());
 
+            stringstream changeMemoryAddress;
+            changeMemoryAddress << &blocks.back();
+            string newAddress = changeMemoryAddress.str();
+            previousBlock->changeIFMemoryAddress(newAddress);
+
+            previousBlock->trueExit = &blocks.back();
+
 			for(auto i : children) {
 				if (i.tag == "block") {
-					i.block();
+				        i.block();
 				}
 			}
 
-			stringstream changeMemoryAddress;
-			changeMemoryAddress << &blocks.back();
-			string newAddress = changeMemoryAddress.str();
-			previousBlock->changeIFMemoryAddress(newAddress);
+            temp.reUse("GOTO", "", lastUsedName(), "TO BE CHANGED");
+            Node::blocks.back().instructions.push_back(temp);
+            BBlock *gotoBlock = &blocks.back();
 
-			temp.reUse("GOTO", lastUsedLable(), "", "");
-			Node::blocks.back().instructions.push_back(temp);
+            Node::blocks.push_back(BBlock());
+            previousBlock->falseExit = &blocks.back();
+            gotoBlock->trueExit = &blocks.back();
+
+            changeMemoryAddress.str("");
+            changeMemoryAddress << &blocks.back();
+            newAddress = changeMemoryAddress.str();
+            gotoBlock->changeGOTOMemoryAddress(newAddress);
+
+            stringstream changeGOTOAddress;
+            changeGOTOAddress << &blocks.back();
+            newAddress = changeGOTOAddress.str();
+            previousBlock->changeGOTOMemoryAddress(newAddress);
+
+            //DO THE INCREMENT THAT NEEDS TO BE DONE FOR FOOR LOOP
+
 
 		}
 
@@ -358,6 +395,8 @@ class Node {
 			string identifier = "";
 			string binop = "";
 			list<string> termValues;
+            bool hasIf = false;
+            list<ThreeAd> forInstructions;
 
 			for (auto i : children) {
 				if (i.tag == "identifier") {
@@ -386,37 +425,87 @@ class Node {
 			Node::blocks.back().instructions.push_back(temp);
 
 			previousBlock = &blocks.back();
-			for (auto i : children) {
+            Node *forBlock;
+			for (auto &i : children) {
 				if (i.tag == "block") {
-					i.block();
+                    cout << "Does block have if statement: " << i.blockHasIf();
+                    if (hasIf = i.blockHasIf()) {
+                        temp.reUse("GOTO", "", "", "TO BE CHANGED");
+                        Node::blocks.back().instructions.push_back(temp);
+                        BBlock *ifBlock = &blocks.back();
+                        blocks.push_back(BBlock());
+                        stringstream changeGOTOAddress;
+                        changeGOTOAddress << &blocks.back();
+                        string newAddress = changeGOTOAddress.str();
+                        previousBlock->changeGOTOMemoryAddress(newAddress);
+                        previousBlock->trueExit =  &blocks.back();
+
+                        i.block();
+                    } else {
+                        i.block();
+                    }
 				}
 			}
 
-			temp.reUse(newName(), "+", identifier, "1");
-			previousBlock->instructions.push_back(temp);
-
-			temp.reUse(identifier, "", lastUsedName(), "");
-			previousBlock->instructions.push_back(temp);
 
 
+            if (!hasIf) {
+                temp.reUse(newName(), "+", identifier, "1");
+                previousBlock->instructions.push_back(temp);
 
-			stringstream test545;
-			test545 << previousBlock;
-			string ttest2 = test545.str();
-			temp.reUse("GOTO", ttest2, "", "");
-			previousBlock->instructions.push_back(temp);
+                temp.reUse(identifier, "", lastUsedName(), "");
+                previousBlock->instructions.push_back(temp);
 
-			// Swap blocks to correct
-			Node::blocks.push_back(BBlock());
-			previousBlock->trueExit = previousBlock;
-			previousBlock->falseExit = &blocks.back();
+                stringstream test545;
+                test545 << previousBlock;
+                string ttest2 = test545.str();
+                temp.reUse("GOTO", ttest2, "", "");
+                previousBlock->instructions.push_back(temp);
 
-			stringstream changeMemoryAddress;
-			changeMemoryAddress << &blocks.back();
-			string newAddress = changeMemoryAddress.str();
-			previousBlock->changeIFZMemoryAddress(newAddress);
-			return "";
+                // Swap blocks to correct
+                Node::blocks.push_back(BBlock());
+                previousBlock->trueExit = previousBlock;
+            } else {
+                temp.reUse(newName(), "+", identifier, "1");
+                blocks.back().instructions.push_back(temp);
+
+                temp.reUse(identifier, "", lastUsedName(), "");
+                blocks.back().instructions.push_back(temp);
+
+                temp.reUse("GOTO", "", "", "TO BE CHANGED");
+                Node::blocks.back().instructions.push_back(temp);
+
+                stringstream changeGOTOAddress;
+                changeGOTOAddress << previousBlock;
+                string newAddress = changeGOTOAddress.str();
+                blocks.back().changeGOTOMemoryAddress(newAddress);
+
+                blocks.back().trueExit = previousBlock;
+
+                Node::blocks.push_back(BBlock());
+            }
+
+            previousBlock->falseExit = &blocks.back();
+
+            stringstream changeMemoryAddress;
+            changeMemoryAddress << &blocks.back();
+            string newAddress = changeMemoryAddress.str();
+            previousBlock->changeIFZMemoryAddress(newAddress);
+            return "";
 		}
+
+        bool blockHasIf () {
+            bool hasIf = false;
+            for (auto i : children) {
+                if (i.tag != "if") {
+                    hasIf = i.blockHasIf();
+                }
+                if (hasIf || i.tag == "if"){
+                    return true;
+                }
+            }
+            return hasIf;
+        }
 
 		string varlist () {
 			string variableName = "";
