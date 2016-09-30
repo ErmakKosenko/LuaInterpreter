@@ -24,7 +24,7 @@ int main(int argc, char **argv) {
     yyin = inFile;
 
     yy::parser parser;
-    outFile.open("source.dot", std::ofstream::out);
+    outFile.open("tree.dot", std::ofstream::out);
     if (!parser.parse()) {
         root.threeAddress();
         outFile.close();
