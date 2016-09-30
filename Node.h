@@ -6,7 +6,6 @@
 #include <stack>
 #include <map>
 #include "symboltable.h"
-#include "Tree.h"
 #include <fstream>
 #include <iostream>
 #include <sstream>
@@ -336,10 +335,6 @@ class Node {
 		}
 
 		void ifStatement (Node *block = NULL) {
-			//children.pop_front();
-
-            cout << endl << "Block: " << block << endl;
-
 			for (auto i : children) {
 				if (i.tag == "term") {
 					i.term();
@@ -428,7 +423,6 @@ class Node {
             Node *forBlock;
 			for (auto &i : children) {
 				if (i.tag == "block") {
-                    cout << "Does block have if statement: " << i.blockHasIf();
                     if (hasIf = i.blockHasIf()) {
                         temp.reUse("GOTO", "", "", "TO BE CHANGED");
                         Node::blocks.back().instructions.push_back(temp);
