@@ -45,7 +45,7 @@ public:
   }
 
 	string dumpInstructionDot() {
-		if (op == "<" || op == ">") {
+		if (op == "<" || op == ">" || op == "<=" || op == ">=") {
 			op = "\\" + op;
 		}
 		stringstream temp;
@@ -413,7 +413,7 @@ class Node {
 			previousBlock->falseExit = &blocks.back();
 			// Handle for loop then create new block
 
- 			temp.reUse(newName(), "<", identifier, termValues.front());
+ 			temp.reUse(newName(), "<=", identifier, termValues.front());
 			Node::blocks.back().instructions.push_back(temp);
 
 			temp.reUse("IFZ", "GOTO", lastUsedName(), "TO BE CHANGED");

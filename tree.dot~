@@ -1,0 +1,13 @@
+digraph { 
+node[shape=record]
+BBlock0xf9ac30 [label = "{<f0> BBlock0xf9ac30|<f1> x := 1    \n |<f2> i := 2    \n }"];
+
+BBlock0xf9ac30 -> BBlock0xfa6760
+BBlock0xfa6760 [label = "{<f0> BBlock0xfa6760|<f1> _t0 := i \<\= n  \n |<f2> IFZ := _t0 GOTO 0xfa8b60  \n |<f3> _t1 := x * i  \n |<f4> x := _t1    \n |<f5> _t2 := i + 1  \n |<f6> i := _t2    \n |<f7> GOTO :=  0xfa6760   \n }"];
+
+BBlock0xfa6760 -> BBlock0xfa6760
+BBlock0xfa6760 -> BBlock0xfa8b60
+BBlock0xfa8b60 [label = "{<f0> BBlock0xfa8b60}"];
+
+
+}
