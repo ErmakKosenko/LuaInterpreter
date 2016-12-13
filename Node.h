@@ -20,8 +20,6 @@ extern int lableCounter;
 
 using namespace std;
 
-
-
 class ThreeAd
 {
   public:
