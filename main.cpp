@@ -27,6 +27,7 @@ int main(int argc, char **argv) {
     outFile.open("tree.dot", std::ofstream::out);
     if (!parser.parse()) {
         root.threeAddress();
+	root.assembly();
         outFile.close();
     }
     return 0;
