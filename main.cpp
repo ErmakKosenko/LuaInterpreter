@@ -1,13 +1,15 @@
 #include <iostream>
 #include <fstream>
-#include "binary.tab.hh"   //  Not really sure what this does
-#include "symboltable.h"
+#include "binary.tab.hh" 
 #include "Node.h"
+#include <vector>
 
 extern Node root;
 extern FILE* yyin;
-SymbolTable symbols;
 std::ofstream outFile;
+std::ofstream ass;
+vector<string> variables;
+int printNumber = 0;
 
 void yy::parser::error(std::string const &err) {
   std::cout << "Error: " << err << std::endl;
@@ -25,6 +27,7 @@ int main(int argc, char **argv) {
 
     yy::parser parser;
     outFile.open("tree.dot", std::ofstream::out);
+    ass.open("target.cc", std::ofstream::out);
     if (!parser.parse()) {
         root.threeAddress();
 	root.assembly();

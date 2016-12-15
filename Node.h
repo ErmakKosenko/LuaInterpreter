@@ -5,20 +5,22 @@
 #include <queue>
 #include <stack>
 #include <map>
-#include "symboltable.h"
 #include <fstream>
 #include <iostream>
 #include <sstream>
 #include <string>
 #include <set>
 #include <climits>
+#include <algorithm>
+using namespace std;
 
-extern SymbolTable symbols;
+extern std::ofstream ass;
 extern std::ofstream outFile;
 extern int nameCounter;
 extern int lableCounter;
+extern vector<string> variables;
+extern int printNumber;
 
-using namespace std;
 
 class ThreeAd
 {
@@ -52,10 +54,29 @@ class ThreeAd
 		}
 
 		void dumpVariable() {
-			if (op != "print")	
-				cout << "\t\t\"" << result << ": .quad 0;\"" << endl;
-			else {
-				//cout << "\t\t\"" << result << ": .string FIX" << endl;	
+			
+			if (op != "print" && op != "io.write" && op != "GOTO" && result != "GOTO") {
+				if (find(variables.begin(), variables.end(), result) == variables.end()) {	
+					ass << "\t\t\"" << result << ": .quad 0;\"" << endl;
+					variables.push_back(result);
+				}		
+			}
+			else if (op == "print" || op == "io.write") {
+				bool variableExist = false;
+				for (auto i : variables) {
+					if (i == rhs)
+						variableExist = true;
+				}
+				//Variable exist and should print number
+				if (variableExist) {
+					//Do nothing
+				} else if (op == "print"){
+					//No variable exist and rhs is a string
+					ass << "\t\t\"s" << printNumber++ << ": .string \\\"" << rhs << "\\n\\\";\"" << endl;		
+				} else {
+					ass << "\t\t\"s" << printNumber++ << ": .string \\\"" << rhs << "\\\";\"" << endl;
+				}
+					
 			}			
 		}
 
@@ -68,85 +89,150 @@ class ThreeAd
 			if (op == "-") {
 				//Is variable
 				if (!*r && !*l) {
-					cout << "\t\t\"movq $" << lhs << ", %r8;\"" << endl;
-					cout << "\t\t\"movq $" << rhs << ", %r9;\"" << endl;
+					ass << "\t\t\"movq $" << lhs << ", %r8;\"" << endl;
+					ass << "\t\t\"movq $" << rhs << ", %r9;\"" << endl;
 				} else if (*r && !*l) {
-					cout << "\t\t\"movq  $"<< lhs << ", %r8;\"" << endl;
-					cout << "\t\t\"movq " << rhs << ", %r9;\"" << endl;
+					ass << "\t\t\"movq  $"<< lhs << ", %r8;\"" << endl;
+					ass << "\t\t\"movq " << rhs << ", %r9;\"" << endl;
 				} else if (*l && !*r) {
-					cout << "\t\t\"movq " << lhs << ", %r8;\"" << endl;
-					cout << "\t\t\"movq $"<< rhs << ", %r9;\"" << endl;
+					ass << "\t\t\"movq " << lhs << ", %r8;\"" << endl;
+					ass << "\t\t\"movq $"<< rhs << ", %r9;\"" << endl;
 				} else {
-					cout << "\t\t\"movq " << lhs << ", %r8;\"" << endl;
-					cout << "\t\t\"movq "<< rhs << ", %r9;\"" << endl;
+					ass << "\t\t\"movq " << lhs << ", %r8;\"" << endl;
+					ass << "\t\t\"movq "<< rhs << ", %r9;\"" << endl;
 				}
-				cout << "\t\t\"subq " << "%r9" << ", %r8;\"" << endl;
-				cout << "\t\t\"movq " << "%r8, " << result << ";\"" << endl;
+				ass << "\t\t\"subq " << "%r9" << ", %r8;\"" << endl;
+				ass << "\t\t\"movq " << "%r8, " << result << ";\"" << endl;
 			} else if (op == "+") {
 				//Is variable
 				if (!*r && !*l) {
-					cout << "\t\t\"movq $" << lhs << ", %r8;\"" << endl;
-					cout << "\t\t\"movq $" << rhs << ", %r9;\"" << endl;
+					ass << "\t\t\"movq $" << lhs << ", %r8;\"" << endl;
+					ass << "\t\t\"movq $" << rhs << ", %r9;\"" << endl;
 				} else if (*r && !*l) {
-					cout << "\t\t\"movq $" << lhs << ", %r8;\"" << endl;
-					cout << "\t\t\"movq " << rhs << ", %r9;\"" << endl;
+					ass << "\t\t\"movq $" << lhs << ", %r8;\"" << endl;
+					ass << "\t\t\"movq " << rhs << ", %r9;\"" << endl;
 				} else if (*l && !*r){
-					cout << "\t\t\"movq " << lhs << ", %r8;\"" << endl;
-					cout << "\t\t\"movq $"<< rhs << ", %r9;\"" << endl;
+					ass << "\t\t\"movq " << lhs << ", %r8;\"" << endl;
+					ass << "\t\t\"movq $"<< rhs << ", %r9;\"" << endl;
 				} else {
-					cout << "\t\t\"movq " << lhs << ", %r8;\"" << endl;
-					cout << "\t\t\"movq "<< rhs << ", %r9;\"" << endl;
+					ass << "\t\t\"movq " << lhs << ", %r8;\"" << endl;
+					ass << "\t\t\"movq "<< rhs << ", %r9;\"" << endl;
 				}
-				cout << "\t\t\"addq " << "%r9" << ", %r8;\"" << endl;
-				cout << "\t\t\"movq " << "%r8, " << result << ";\"" << endl;
-			} else if (op == "/") {
+				ass << "\t\t\"addq " << "%r9" << ", %r8;\"" << endl;
+				ass << "\t\t\"movq " << "%r8, " << result << ";\"" << endl;
+			} else if (op == "/" || op == "%") {
 				if (!*r && !*l) {
-					cout << "\t\t\"movq $" << lhs << ", %rax;\"" << endl;
-					cout << "\t\t\"movq $" << rhs << ", %rbx;\"" << endl;
+					ass << "\t\t\"movq $" << lhs << ", %rax;\"" << endl;
+					ass << "\t\t\"movq $" << rhs << ", %rbx;\"" << endl;
 				} else if (*r && !*l) {
-					cout << "\t\t\"movq $" << lhs << ", %rax;\"" << endl;
-					cout << "\t\t\"movq " << rhs << ", %rbx;\"" << endl;
+					ass << "\t\t\"movq $" << lhs << ", %rax;\"" << endl;
+					ass << "\t\t\"movq " << rhs << ", %rbx;\"" << endl;
 				} else if (*l && !*r){
-					cout << "\t\t\"movq " << lhs << ", %rax;\"" << endl;
-					cout << "\t\t\"movq $" << rhs << ", %rbx;\"" << endl;
+					ass << "\t\t\"movq " << lhs << ", %rax;\"" << endl;
+					ass << "\t\t\"movq $" << rhs << ", %rbx;\"" << endl;
 				} else {
-					cout << "\t\t\"movq " << lhs << ", %rax;\"" << endl;
-					cout << "\t\t\"movq " << rhs << ", %rbx;\"" << endl;
+					ass << "\t\t\"movq " << lhs << ", %rax;\"" << endl;
+					ass << "\t\t\"movq " << rhs << ", %rbx;\"" << endl;
 				}	
-				cout << "\t\t\"xorq " << "%rdx, %rdx;\"" << endl;
-				cout << "\t\t\"divq " << "%rbx ;\"" << endl;
-				cout << "\t\t\"movq " << "%rax, " << result << ";\"" << endl;
+				ass << "\t\t\"xorq " << "%rdx, %rdx;\"" << endl;
+				ass << "\t\t\"divq " << "%rbx ;\"" << endl;
+				if (op == "/")
+					ass << "\t\t\"movq " << "%rax, " << result << ";\"" << endl;
+				else if (op == "%")
+					ass << "\t\t\"movq " << "%rdx, " << result << ";\"" << endl;
 			} else if (op == "*") {
 				if (!*r && !*l) {
-					cout << "\t\t\"movq $" << lhs << ", %rax;\"" << endl;
-					cout << "\t\t\"movq $" << rhs << ", %rbx;\"" << endl;
+					ass << "\t\t\"movq $" << lhs << ", %rax;\"" << endl;
+					ass << "\t\t\"movq $" << rhs << ", %rbx;\"" << endl;
 
 				} else if (*r && !*l) {
-					cout << "\t\t\"movq $" << lhs << ", %rax;\"" << endl;
-					cout << "\t\t\"movq " << rhs << ", %rbx;\"" << endl;
+					ass << "\t\t\"movq $" << lhs << ", %rax;\"" << endl;
+					ass << "\t\t\"movq " << rhs << ", %rbx;\"" << endl;
 				} else if (*l && !*r){
-					cout << "\t\t\"movq " << lhs << ", %rax;\"" << endl;
-					cout << "\t\t\"movq $" << rhs << ", %rbx;\"" << endl;
+					ass << "\t\t\"movq " << lhs << ", %rax;\"" << endl;
+					ass << "\t\t\"movq $" << rhs << ", %rbx;\"" << endl;
 				} else {
-					cout << "\t\t\"movq " << lhs << ", %rax;\"" << endl;
-					cout << "\t\t\"movq " << rhs << ", %rbx;\"" << endl;
+					ass << "\t\t\"movq " << lhs << ", %rax;\"" << endl;
+					ass << "\t\t\"movq " << rhs << ", %rbx;\"" << endl;
 				}
-				cout << "\t\t\"mulq " << "%rbx ;\"" << endl;
-				cout << "\t\t\"movq " << "%rax, " << result << ";\"" << endl;	
-			} else if (op == "") {
-				if (!*l) 
-					cout << "\t\t\"movq $" << lhs << ", " << "%r8" << ";\"" << endl;
-				else
-					cout << "\t\t\"movq " << lhs << ", " << "%r8" << ";\"" << endl;	
-				cout << "\t\t\"movq " << "%r8, " << result << ";\"" << endl; 
-			} else if (op == "print") {
-				cout << "\t\t\"pushq %rbx;\"" << endl;
-				cout << "\t\t\"leaq  format(%rip), %rdi;\"" << endl;
-				cout << "\t\t\"mov " << rhs << ", %esi;\"" << endl;
-				cout << "\t\t\"xor   %eax, %eax;\"" << endl;
-				cout << "\t\t\"call  printf;\"" << endl;
-				cout << "\t\t\"popq  %rbx;\"" << endl;
-			}
+				ass << "\t\t\"mulq " << "%rbx ;\"" << endl;
+				ass << "\t\t\"movq " << "%rax, " << result << ";\"" << endl;	
+			} else if (op == "<=") {
+				if (!*r && !*l) {
+					ass << "\t\t\"movq $" << lhs << ", %r8;\"" << endl;
+					ass << "\t\t\"movq $" << rhs << ", %r9;\"" << endl;
+				} else if (*r && !*l) {
+					ass << "\t\t\"movq $" << lhs << ", %r8;\"" << endl;
+					ass << "\t\t\"movq " << rhs << ", %r9;\"" << endl;
+				} else if (*l && !*r){
+					ass << "\t\t\"movq " << lhs << ", %r8;\"" << endl;
+					ass << "\t\t\"movq $" << rhs << ", %r9;\"" << endl;
+				} else {
+					ass << "\t\t\"movq " << lhs << ", %r8;\"" << endl;
+					ass << "\t\t\"movq " << rhs << ", %r9;\"" << endl;
+				}
+				ass << "\t\t\"cmpq %r9, %r8;\"" << endl;
+				ass << "\t\t\"jg BBlock";
+			} else if (op == "==") {
+				if (!*r && !*l) {
+					ass << "\t\t\"movq $" << lhs << ", %r8;\"" << endl;
+					ass << "\t\t\"movq $" << rhs << ", %r9;\"" << endl;
+				} else if (*r && !*l) {
+					ass << "\t\t\"movq $" << lhs << ", %r8;\"" << endl;
+					ass << "\t\t\"movq " << rhs << ", %r9;\"" << endl;
+				} else if (*l && !*r){
+					ass << "\t\t\"movq " << lhs << ", %r8;\"" << endl;
+					ass << "\t\t\"movq $" << rhs << ", %r9;\"" << endl;
+				} else {
+					ass << "\t\t\"movq " << lhs << ", %r8;\"" << endl;
+					ass << "\t\t\"movq " << rhs << ", %r9;\"" << endl;
+				}
+				ass << "\t\t\"cmpq %r9, %r8;\"" << endl;
+				ass << "\t\t\"je BBlock";
+			} else if (op == "GOTO") { //Get adress to jump and append to jg
+				ass << rhs << ";\"" << endl;
+			} else if (op == "") { //operator "" is assignment only but GOTO also has same op value...
+				if (!*l && result != "GOTO") {
+					ass << "\t\t\"movq $" << lhs << ", " << "%r8" << ";\"" << endl;
+					ass << "\t\t\"movq " << "%r8, " << result << ";\"" << endl;
+				} else if (result != "GOTO") {
+					ass << "\t\t\"movq " << lhs << ", " << "%r8" << ";\"" << endl;	
+					ass << "\t\t\"movq " << "%r8, " << result << ";\"" << endl;
+				} else if (result == "GOTO") {	
+					ass << "\t\t\"jmp BBlock" << rhs << ";\"" << endl;
+				}
+			} else if (op == "print" || op == "io.write") {
+				bool variableExist = false;	
+				for (auto i : variables) {
+                                        if (i == rhs)
+                                                variableExist = true;
+                                }
+				if (variableExist) {
+					ass << "\t\t\"pushq %rbx;\"" << endl;
+					if (op == "print")
+						ass << "\t\t\"leaq  formatNL(%rip), %rdi;\"" << endl;
+					else
+						ass << "\t\t\"leaq  format(%rip), %rdi;\"" << endl;
+					ass << "\t\t\"mov " << rhs << ", %esi;\"" << endl;
+					ass << "\t\t\"xor   %eax, %eax;\"" << endl;
+					ass << "\t\t\"call  printf;\"" << endl;
+					ass << "\t\t\"popq  %rbx;\"" << endl;
+				} else {
+					ass << "\t\t\"pushq %rbx;\"" << endl;
+                                        ass << "\t\t\"leaq  s" << printNumber++ <<  "(%rip), %rdi;\"" << endl;
+                                        ass << "\t\t\"xor   %eax, %eax;\"" << endl;
+                                        ass << "\t\t\"call  printf;\"" << endl;
+                                        ass << "\t\t\"popq  %rbx;\"" << endl;
+				}
+			} else if (op == "io.read") {
+				ass << "\t\t\"xorq %rax, %rax;\"" << endl;
+				ass << "\t\t\"subq $8, %rsp;\"" << endl;
+				ass << "\t\t\"movq $0, %rax;\"" << endl;	
+				ass << "\t\t\"movq $" << result << ", %rsi;\"" << endl;
+				ass << "\t\t\"movq $format, %rdi;\"" << endl;
+				ass << "\t\t\"call scanf;\"" << endl;
+				ass << "\t\t\"addq $8, %rsp;\"" << endl;
+			} 
 		}
 };
 
@@ -166,7 +252,7 @@ class BBlock
 		}
 
 		void blockAssembly() {
-			cout << "\t\t\"BBlock" << this << ":" << ";\"" << endl;
+			ass << "\t\t\"BBlock" << this << ":" << ";\"" << endl;
 			for (auto &i : instructions) {
 				i.addrAssembly();
 			}
@@ -232,85 +318,7 @@ class BBlock
 		}
 };
 
-
-/* One style for expressing a simple parse-tree.
-
-   There are many better ways to do this that use inheritence and encode
-   node-type in a static class hierarchy. Instead I've smashed all the
-   node types together into a single class: the code is shorter and I
-   need everyone to read and understand it quickly for the lab.
- */
-
-///////////////////////// Expressions /////////////////////////////////////
-
-class Expression      // Implicit union of binary operators, constants and variables.
-{
-	public:
-		class Expression *left, *right;
-		char kind, op;
-		int value;
-		string name;
-
-		Expression(char k, Expression *l, Expression *r)
-			: kind(k), left(l), right(r)                {}
-
-		void dump(int depth=0)
-		{
-			for(int i=0; i<depth; i++)
-				cout << "  ";
-			switch(kind)
-			{
-				case 'N':  cout << op << endl;    break;
-				case 'V':  cout << name << endl;  break;
-				case 'C':  cout << value << endl; break;
-			}
-			if(left!=NULL)
-				left->dump(depth+1);
-			if(right!=NULL)
-				right->dump(depth+1);
-		}
-};
-
-///////////////////////// Statements /////////////////////////////////////
-
-class Statement
-{
-	public:
-		vector<Expression*> expressions;
-		vector<Statement*> children;
-		char kind;
-		Statement(char k)  : kind(k)  {}
-
-		void dump(int indent=0)
-		{
-			for(int i=0; i<indent; i++)
-				cout << "  ";
-			cout << "Statement(" << kind << ")" << endl ;
-			for( auto e: expressions )
-				e->dump(indent+1);
-			for( auto c: children )
-				c->dump(indent+1);
-
-		}
-};
-
-Expression *BinOp(char op, Expression *l, Expression *r);
-Expression *Variable(string name);
-Expression *Constant(int value);
-Expression *Equality(Expression *l, Expression *r);
-Statement *Assign(string target, Expression *val);
-Statement *If(Expression *condition, Statement *trueSt, Statement *falseSt);
-Statement *Seq(initializer_list<Statement*> ss);
 string newName();
-void namePass(Expression *tree, map<Expression*,string> &nameMap);
-void emitPass(Expression *tree, map<Expression*,string> &nameMap, BBlock *out);
-string convert(Expression *in, BBlock *out);
-void convertAssign(Statement *in, BBlock *out);
-void convertComparitor(Expression *in, BBlock *out);
-void convertStatement(Statement *in, BBlock **current);
-void convertIf(Statement *in, BBlock **current);
-void convertSeq(Statement *in, BBlock **current);
-void dumpCFG(BBlock *start);
 
 class Node {
 	public:
@@ -328,25 +336,27 @@ class Node {
 		}
 
 		void assembly() {
-			cout << "#include <stdio.h>" << endl;
-			cout << "int main() {" << endl;
+			ass << "#include <stdio.h>" << endl;
+			ass << "int main() {" << endl;
 
 
 
-			cout << "\tasm volatile(" << endl;
-			cout << "\t\t\".section .data;\"" << endl;	
-			cout << "\t\t\"format: .string \\\"%d\\\";\"" << endl;
+			ass << "\tasm volatile(" << endl;
+			ass << "\t\t\".section .data;\"" << endl;	
+			ass << "\t\t\"format: .string \\\"%d\\\";\"" << endl;
+			ass << "\t\t\"formatNL: .string \\\"%d\\n\\\";\"" << endl;
 			//Output variables
 			for (auto &i : blocks) {
 				i.variableDump();
 			}
-
-			cout << "\t\t\".section .text;\"" << endl;
+			//reset printnumber variable
+			printNumber = 0;
+			ass << "\t\t\".section .text;\"" << endl;
 			for (auto &i : blocks) {
 				i.blockAssembly();
 			}
-			cout << "\t);" << endl;
-			cout << "}";			   
+			ass << "\t);" << endl;
+			ass << "}";			   
 		}
 
 
@@ -602,7 +612,7 @@ class Node {
 			conditionalBlock->falseExit = &blocks.back();
 
 			changeMemoryAddress.str("");
-			changeMemoryAddress << conditionalBlock;
+			changeMemoryAddress << previousBlock;
 			temp.reUse("GOTO", "", "", changeMemoryAddress.str());
 			conditionalBlock->instructions.push_back(temp);
 
